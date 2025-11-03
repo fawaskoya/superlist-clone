@@ -1,5 +1,5 @@
 {
-  "appName": "KBN Superlist",
+  "appName": "TaskFlow",
   "auth": {
     "login": "Login",
     "register": "Create account",
@@ -94,7 +94,7 @@
     "taskAssigned": "You were assigned to {{title}}"
   },
   "landing": {
-    "title": "KBN Superlist",
+    "title": "TaskFlow",
     "nav": {
       "home": "Home",
       "features": "Features",
@@ -145,11 +145,11 @@
     },
     "cta": {
       "title": "Ready to get started?",
-      "subtitle": "Join thousands of users organizing their work with KBN Superlist.",
+      "subtitle": "Join thousands of users organizing their work with TaskFlow.",
       "button": "Create your account"
     },
     "footer": {
-      "copyright": "© 2024 KBN Superlist. All rights reserved.",
+      "copyright": "© 2024 TaskFlow. All rights reserved.",
       "product": {
         "title": "Product",
         "features": "Features",

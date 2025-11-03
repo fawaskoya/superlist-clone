@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await prisma.task.createMany({
         data: [
           {
-            title: 'Welcome to KBN Superlist!',
+            title: 'Welcome to TaskFlow!',
             description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
             listId: inboxList.id,
             createdById: user.id,

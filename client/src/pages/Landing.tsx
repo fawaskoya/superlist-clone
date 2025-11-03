@@ -243,7 +243,7 @@ export default function Landing() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl -z-10" />
                 <img 
                   src={heroImage} 
-                  alt="KBN Superlist Hero" 
+                  alt="TaskFlow Hero" 
                   className="w-full h-auto rounded-2xl shadow-2xl"
                   data-testid="img-hero"
                 />

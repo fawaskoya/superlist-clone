@@ -1,8 +1,8 @@
-# KBN Superlist
+# TaskFlow
 
 ## Overview
 
-KBN Superlist is a production-ready, comprehensive task management and collaboration platform. It allows users to organize work across multiple bilingual, RTL-supported workspaces, create task lists, manage tasks with subtasks and comments, and leverage AI for enhanced productivity. The project aims to deliver a modern, intuitive user experience inspired by leading productivity tools.
+TaskFlow is a production-ready, comprehensive task management and collaboration platform. It allows users to organize work across multiple bilingual, RTL-supported workspaces, create task lists, manage tasks with subtasks and comments, and leverage AI for enhanced productivity. The project aims to deliver a modern, intuitive user experience inspired by leading productivity tools.
 
 ## User Preferences
 
@@ -15,7 +15,7 @@ KBN Superlist is a production-ready, comprehensive task management and collabora
 
 ## System Architecture
 
-KBN Superlist is built with a modern web application architecture, featuring a React + TypeScript frontend and a Node.js + Express.js backend.
+TaskFlow is built with a modern web application architecture, featuring a React + TypeScript frontend and a Node.js + Express.js backend.
 
 ### UI/UX Decisions
 - **Design System**: Clean, Superlist-inspired design utilizing Tailwind CSS for styling and Shadcn UI components for a consistent look and feel.

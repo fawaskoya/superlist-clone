@@ -1,5 +1,5 @@
 {
-  "appName": "قائمة KBN الفائقة",
+  "appName": "تاسك فلو",
   "auth": {
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
@@ -94,7 +94,7 @@
     "taskAssigned": "تم تعيينك إلى {{title}}"
   },
   "landing": {
-    "title": "KBN Superlist",
+    "title": "تاسك فلو",
     "nav": {
       "home": "الرئيسية",
       "features": "الميزات",
@@ -145,11 +145,11 @@
     },
     "cta": {
       "title": "هل أنت مستعد للبدء؟",
-      "subtitle": "انضم إلى آلاف المستخدمين الذين ينظمون عملهم مع KBN Superlist.",
+      "subtitle": "انضم إلى آلاف المستخدمين الذين ينظمون عملهم مع تاسك فلو.",
       "button": "أنشئ حسابك"
     },
     "footer": {
-      "copyright": "© 2024 KBN Superlist. جميع الحقوق محفوظة.",
+      "copyright": "© 2024 تاسك فلو. جميع الحقوق محفوظة.",
       "product": {
         "title": "المنتج",
         "features": "الميزات",

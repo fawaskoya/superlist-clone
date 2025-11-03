@@ -51,3 +51,46 @@ KBN Superlist is built with a modern web application architecture, featuring a R
 - **Routing**: Wouter
 - **Form Management**: React Hook Form, Zod
 - **Drag and Drop**: @dnd-kit
+
+## Recent Changes
+
+**2024-11-03 - Navigation Headers for Auth Pages**
+- ✅ **Login/Register Navigation** - Added navigation headers to auth pages
+  - Created consistent header with brand logo linking to homepage
+  - Users can now easily return to homepage from login/register pages
+  - Header includes ThemeToggle and LanguageSwitcher
+  - Layout: `border-b bg-card/50 backdrop-blur-sm` with container
+  - Logo uses semantic Link component (not button) for accessibility
+  - Supports right-click → open in new tab behavior
+  - Consistent h-16 height with landing page navbar
+  - Fully responsive with proper RTL support
+
+**2024-11-03 - Dark Mode Implementation (Complete)**
+- ✅ **ThemeProvider Context** - Global theme management system
+  - Created ThemeContext at `client/src/contexts/ThemeContext.tsx`
+  - Manages theme state with localStorage persistence ('light' or 'dark')
+  - Adds/removes 'dark' class on document.documentElement
+  - Provides theme, toggleTheme, and setTheme methods to all components
+  
+- ✅ **ThemeToggle Component** - Intuitive theme switcher UI
+  - Created reusable component at `client/src/components/ThemeToggle.tsx`
+  - Shows Moon icon in light mode, Sun icon in dark mode
+  - Uses Shadcn Button with ghost variant and icon size
+  - data-testid: "button-theme-toggle" for testing
+  
+- ✅ **App-Wide Integration** - Theme toggle available everywhere
+  - Landing page: Theme toggle in navbar (both desktop and mobile)
+  - Authenticated app: Theme toggle in Navbar (next to NotificationBell)
+  - Login/Register pages: Theme toggle in navigation header
+  - All pages support seamless theme switching with persistence
+
+**Previously Completed Features:**
+- Professional landing page with hero image, features showcase, and comprehensive footer
+- Complete bilingual support (English/Arabic) with RTL layout
+- Real-time collaboration with WebSocket infrastructure
+- Drag-and-drop task reordering with @dnd-kit
+- Advanced search and filtering functionality
+- Notifications system with real-time delivery
+- Multi-workspace support with roles and permissions
+- Complete task management with subtasks, comments, and tags
+- AI-powered features (task summarization, subtask generation, priority suggestions)

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { ArrowLeft, CheckSquare } from 'lucide-react';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -58,13 +59,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 flex items-center gap-2">
-        <ThemeToggle />
-        <LanguageSwitcher />
-      </div>
-      
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Navigation Header */}
+      <header className="border-b bg-card/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/">
+            <a className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors" data-testid="link-home">
+              <CheckSquare className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-lg">{t('appName')}</span>
+            </a>
+          </Link>
+          
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LanguageSwitcher />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-semibold">{t('appName')}</CardTitle>
           <CardDescription>{t('auth.login')}</CardDescription>
@@ -131,7 +146,8 @@ export default function LoginPage() {
             </button>
           </p>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

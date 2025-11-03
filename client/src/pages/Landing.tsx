@@ -164,11 +164,9 @@ export default function Landing() {
                 <a href="#pricing" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-pricing-mobile">
                   {t('landing.nav.pricing')}
                 </a>
-                <Link href="/login">
-                  <a className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-login-mobile">
-                    {t('landing.nav.login')}
-                  </a>
-                </Link>
+                <a href="/login" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-login-mobile">
+                  {t('landing.nav.login')}
+                </a>
               </div>
             </div>
           </div>

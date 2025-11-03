@@ -21,6 +21,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { TaskActivityTimeline } from './TaskActivityTimeline';
+import { MarkdownEditor } from './MarkdownEditor';
 import type { Task, TaskStatus, TaskPriority, TaskComment, InsertTask } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -304,14 +306,22 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
 
           <div className="space-y-2">
             <Label>{t('task.description')}</Label>
-            <Textarea
+            <MarkdownEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onBlur={() => handleUpdate('description', description)}
+              onChange={(value) => setDescription(value)}
               placeholder={t('task.description')}
-              className="min-h-32"
-              data-testid="textarea-task-description"
+              minHeight="min-h-32"
             />
+            <div className="mt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleUpdate('description', description)}
+                data-testid="button-save-description"
+              >
+                Save description
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -429,6 +439,13 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
             <Button onClick={handleAddComment} size="sm" className="w-full">
               {t('common.create')}
             </Button>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label>{t('activity.title')}</Label>
+            {task && <TaskActivityTimeline taskId={task.id} />}
           </div>
         </div>
       </SheetContent>

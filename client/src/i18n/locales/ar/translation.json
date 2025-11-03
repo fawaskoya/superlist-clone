@@ -93,6 +93,24 @@
     "noNotifications": "لا توجد إشعارات",
     "taskAssigned": "تم تعيينك إلى {{title}}"
   },
+  "activity": {
+    "title": "النشاط",
+    "noActivity": "لا يوجد نشاط بعد",
+    "TASK_CREATED": "أنشأ هذه المهمة",
+    "TASK_UPDATED": "حدث هذه المهمة",
+    "TASK_DELETED": "حذف هذه المهمة",
+    "TASK_ASSIGNED": "عين هذه المهمة إلى {{name}}",
+    "TASK_UNASSIGNED": "ألغى تعيين {{name}}",
+    "TASK_STATUS_CHANGED": "غير الحالة من {{oldValue}} إلى {{newValue}}",
+    "TASK_PRIORITY_CHANGED": "غير الأولوية من {{oldValue}} إلى {{newValue}}",
+    "TASK_DUE_DATE_CHANGED": "غير تاريخ الاستحقاق",
+    "TASK_MOVED": "نقل المهمة من {{oldValue}} إلى {{newValue}}",
+    "SUBTASK_ADDED": "أضاف مهمة فرعية",
+    "SUBTASK_REMOVED": "أزال مهمة فرعية",
+    "COMMENT_ADDED": "أضاف تعليقاً",
+    "TAG_ADDED": "أضاف الوسم {{name}}",
+    "TAG_REMOVED": "أزال الوسم {{name}}"
+  },
   "landing": {
     "title": "تاسك فلو",
     "nav": {

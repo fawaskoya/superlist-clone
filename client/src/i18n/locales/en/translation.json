@@ -93,6 +93,24 @@
     "noNotifications": "No notifications",
     "taskAssigned": "You were assigned to {{title}}"
   },
+  "activity": {
+    "title": "Activity",
+    "noActivity": "No activity yet",
+    "TASK_CREATED": "created this task",
+    "TASK_UPDATED": "updated this task",
+    "TASK_DELETED": "deleted this task",
+    "TASK_ASSIGNED": "assigned this task to {{name}}",
+    "TASK_UNASSIGNED": "unassigned {{name}}",
+    "TASK_STATUS_CHANGED": "changed status from {{oldValue}} to {{newValue}}",
+    "TASK_PRIORITY_CHANGED": "changed priority from {{oldValue}} to {{newValue}}",
+    "TASK_DUE_DATE_CHANGED": "changed due date",
+    "TASK_MOVED": "moved task from {{oldValue}} to {{newValue}}",
+    "SUBTASK_ADDED": "added subtask",
+    "SUBTASK_REMOVED": "removed subtask",
+    "COMMENT_ADDED": "added a comment",
+    "TAG_ADDED": "added tag {{name}}",
+    "TAG_REMOVED": "removed tag {{name}}"
+  },
   "landing": {
     "title": "TaskFlow",
     "nav": {

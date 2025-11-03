@@ -22,6 +22,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef(0);
+  const prevWorkspaceIdRef = useRef<string | null>(null);
 
   const connect = () => {
     if (!user) return;
@@ -150,27 +151,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Subscribe/unsubscribe to workspace changes
   useEffect(() => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+    if (!currentWorkspace || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       return;
     }
 
-    // Track previous workspace to unsubscribe
-    const prevWorkspaceRef = useRef<string | null>(null);
-    
-    return () => {
-      // Unsubscribe from previous workspace before subscribing to new one
-      if (prevWorkspaceRef.current && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        send({
-          type: 'unsubscribe',
-          payload: { workspaceId: prevWorkspaceRef.current }
-        });
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!currentWorkspace || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      return;
+    // Unsubscribe from previous workspace if exists
+    if (prevWorkspaceIdRef.current && prevWorkspaceIdRef.current !== currentWorkspace.id) {
+      send({
+        type: 'unsubscribe',
+        payload: { workspaceId: prevWorkspaceIdRef.current }
+      });
     }
 
     // Subscribe to new workspace
@@ -178,6 +168,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       type: 'subscribe',
       payload: { workspaceId: currentWorkspace.id }
     });
+
+    // Update previous workspace reference
+    prevWorkspaceIdRef.current = currentWorkspace.id;
 
     // Cleanup: unsubscribe when workspace changes or component unmounts
     return () => {

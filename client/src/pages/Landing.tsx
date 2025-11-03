@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Sparkles,
 } from 'lucide-react';
+import heroImage from '@assets/generated_images/Task_management_hero_image_47e8160b.png';
 
 export default function Landing() {
   const { t } = useTranslation();
@@ -83,7 +84,7 @@ export default function Landing() {
         {/* Navigation */}
         <nav className="border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
+            <div className="flex h-16 items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-lg blur-sm opacity-75" />
@@ -93,6 +94,23 @@ export default function Landing() {
                   {t('landing.title')}
                 </span>
               </div>
+              
+              {/* Desktop Navigation Links */}
+              <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
+                <a href="#home" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-home">
+                  {t('landing.nav.home')}
+                </a>
+                <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-features">
+                  {t('landing.nav.features')}
+                </a>
+                <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-about">
+                  {t('landing.nav.about')}
+                </a>
+                <a href="#pricing" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-pricing">
+                  {t('landing.nav.pricing')}
+                </a>
+              </div>
+              
               <div className="flex items-center gap-3">
                 <LanguageSwitcher />
                 <Link href="/login">
@@ -111,68 +129,84 @@ export default function Landing() {
         </nav>
 
         {/* Hero Section */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 md:pt-24 md:pb-20">
-          <div className="max-w-5xl mx-auto text-center space-y-10">
-            <div className="space-y-6">
-              <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium bg-primary/10 text-primary border-primary/20">
-                <Sparkles className="h-3.5 w-3.5 mr-1.5 inline" />
-                {t('landing.hero.features.ai')}
-              </Badge>
-              
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-                  {t('landing.hero.title')}
-                </span>
-              </h1>
-              
-              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                {t('landing.hero.subtitle')}
-              </p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link href="/register">
-                <Button 
-                  size="lg" 
-                  className="w-full sm:w-auto text-base h-12 px-8 bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/25" 
-                  data-testid="button-hero-signup"
-                >
-                  {t('landing.hero.cta')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto text-base h-12 px-8 border-2" 
-                  data-testid="button-hero-login"
-                >
-                  {t('landing.hero.login')}
-                </Button>
-              </Link>
-            </div>
+        <section id="home" className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 md:pt-20 md:pb-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Content */}
+              <div className="text-center lg:text-left space-y-8">
+                <div className="space-y-6">
+                  <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium bg-primary/10 text-primary border-primary/20">
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5 inline" />
+                    {t('landing.hero.features.ai')}
+                  </Badge>
+                  
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+                    <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
+                      {t('landing.hero.title')}
+                    </span>
+                  </h1>
+                  
+                  <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                    {t('landing.hero.subtitle')}
+                  </p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
+                  <Link href="/register">
+                    <Button 
+                      size="lg" 
+                      className="w-full sm:w-auto text-base h-12 px-8 bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/25" 
+                      data-testid="button-hero-signup"
+                    >
+                      {t('landing.hero.cta')}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="w-full sm:w-auto text-base h-12 px-8 border-2" 
+                      data-testid="button-hero-login"
+                    >
+                      {t('landing.hero.login')}
+                    </Button>
+                  </Link>
+                </div>
 
-            {/* Feature Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
-              <Badge variant="secondary" className="px-4 py-2 text-sm bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                {t('landing.hero.features.free')}
-              </Badge>
-              <Badge variant="secondary" className="px-4 py-2 text-sm bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                {t('landing.hero.features.realtime')}
-              </Badge>
-              <Badge variant="secondary" className="px-4 py-2 text-sm bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                Bilingual Support
-              </Badge>
+                {/* Feature Pills */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    {t('landing.hero.features.free')}
+                  </Badge>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    {t('landing.hero.features.realtime')}
+                  </Badge>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    Bilingual Support
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Right Hero Image */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl -z-10" />
+                <img 
+                  src={heroImage} 
+                  alt="KBN Superlist Hero" 
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                  data-testid="img-hero"
+                />
+              </div>
             </div>
           </div>
         </section>
 
         {/* Features Grid */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <section id="features" className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-6xl mx-auto">
             <div className="text-center space-y-5 mb-12 md:mb-16">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
@@ -209,7 +243,7 @@ export default function Landing() {
         </section>
 
         {/* CTA Section */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <section id="pricing" className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-4xl mx-auto relative">
             {/* Gradient background glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-blue-500/20 blur-3xl -z-10" />
@@ -246,21 +280,140 @@ export default function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/40 mt-16 backdrop-blur">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-lg blur-sm opacity-50" />
-                  <CheckCircle2 className="relative h-5 w-5 text-primary" />
+        <footer id="about" className="border-t border-border/40 mt-16 backdrop-blur">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            {/* Main Footer Content */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+              {/* Brand Column */}
+              <div className="col-span-2 md:col-span-1 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-lg blur-sm opacity-50" />
+                    <CheckCircle2 className="relative h-6 w-6 text-primary" />
+                  </div>
+                  <span className="font-bold text-lg bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                    {t('landing.title')}
+                  </span>
                 </div>
-                <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                  {t('landing.title')}
-                </span>
+                <p className="text-sm text-muted-foreground">
+                  {t('landing.hero.subtitle')}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {t('landing.footer.copyright')}
-              </p>
+
+              {/* Product Column */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">{t('landing.footer.product.title')}</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-features">
+                      {t('landing.footer.product.features')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-pricing">
+                      {t('landing.footer.product.pricing')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-security">
+                      {t('landing.footer.product.security')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-roadmap">
+                      {t('landing.footer.product.roadmap')}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Company Column */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">{t('landing.footer.company.title')}</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-about">
+                      {t('landing.footer.company.about')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-blog">
+                      {t('landing.footer.company.blog')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-careers">
+                      {t('landing.footer.company.careers')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-contact">
+                      {t('landing.footer.company.contact')}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Resources Column */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">{t('landing.footer.resources.title')}</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-documentation">
+                      {t('landing.footer.resources.documentation')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-support">
+                      {t('landing.footer.resources.support')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-community">
+                      {t('landing.footer.resources.community')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-status">
+                      {t('landing.footer.resources.status')}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Legal Column */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">{t('landing.footer.legal.title')}</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-privacy">
+                      {t('landing.footer.legal.privacy')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-terms">
+                      {t('landing.footer.legal.terms')}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-cookies">
+                      {t('landing.footer.legal.cookies')}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Footer */}
+            <div className="pt-8 border-t border-border/40">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground text-center sm:text-left">
+                  {t('landing.footer.copyright')}
+                </p>
+                <div className="flex items-center gap-4">
+                  <LanguageSwitcher />
+                </div>
+              </div>
             </div>
           </div>
         </footer>

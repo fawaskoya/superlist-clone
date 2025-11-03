@@ -96,6 +96,10 @@
   "landing": {
     "title": "KBN Superlist",
     "nav": {
+      "home": "Home",
+      "features": "Features",
+      "about": "About",
+      "pricing": "Pricing",
       "login": "Log in",
       "signup": "Sign up"
     },
@@ -144,7 +148,34 @@
       "button": "Create your account"
     },
     "footer": {
-      "copyright": "© 2024 KBN Superlist. All rights reserved."
+      "copyright": "© 2024 KBN Superlist. All rights reserved.",
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "pricing": "Pricing",
+        "security": "Security",
+        "roadmap": "Roadmap"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About Us",
+        "blog": "Blog",
+        "careers": "Careers",
+        "contact": "Contact"
+      },
+      "resources": {
+        "title": "Resources",
+        "documentation": "Documentation",
+        "support": "Support",
+        "community": "Community",
+        "status": "Status"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "cookies": "Cookie Policy"
+      }
     }
   },
   "common": {

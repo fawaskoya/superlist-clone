@@ -19,10 +19,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
-import type { Workspace, InsertWorkspace } from '@shared/schema';
+import type { InsertWorkspace } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 export function WorkspaceSwitcher() {
   const { t } = useTranslation();
@@ -30,12 +31,7 @@ export function WorkspaceSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newWorkspace, setNewWorkspace] = useState({ name: '', slug: '' });
-
-  const { data: workspaces, isLoading } = useQuery<Workspace[]>({
-    queryKey: ['/api/workspaces'],
-  });
-
-  const currentWorkspace = workspaces?.[0];
+  const { currentWorkspace, workspaces, switchWorkspace, isLoading } = useWorkspace();
 
   const createMutation = useMutation({
     mutationFn: (data: InsertWorkspace) => apiRequest('POST', '/api/workspaces', data),
@@ -88,6 +84,7 @@ export function WorkspaceSwitcher() {
             <DropdownMenuItem
               key={workspace.id}
               className="p-3"
+              onClick={() => switchWorkspace(workspace.id)}
               data-testid={`menu-item-workspace-${workspace.id}`}
             >
               <div className="flex items-center gap-3 w-full">
@@ -95,7 +92,7 @@ export function WorkspaceSwitcher() {
                   <div className="font-medium">{workspace.name}</div>
                   <div className="text-xs text-muted-foreground">@{workspace.slug}</div>
                 </div>
-                {workspace.id === currentWorkspace.id && (
+                {workspace.id === currentWorkspace?.id && (
                   <Check className="h-4 w-4 text-primary" />
                 )}
               </div>

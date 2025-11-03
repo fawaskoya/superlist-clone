@@ -265,6 +265,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quick View Routes
+  app.get('/api/workspaces/:workspaceId/tasks/today', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const tasks = await prisma.task.findMany({
+        where: {
+          list: {
+            workspaceId: req.params.workspaceId,
+          },
+          dueDate: {
+            gte: today,
+            lt: tomorrow,
+          },
+          parentId: null,
+        },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.get('/api/workspaces/:workspaceId/tasks/upcoming', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+
+      const tasks = await prisma.task.findMany({
+        where: {
+          list: {
+            workspaceId: req.params.workspaceId,
+          },
+          dueDate: {
+            gte: tomorrow,
+          },
+          parentId: null,
+        },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.get('/api/workspaces/:workspaceId/tasks/assigned', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const tasks = await prisma.task.findMany({
+        where: {
+          list: {
+            workspaceId: req.params.workspaceId,
+          },
+          assignedToId: req.userId,
+          parentId: null,
+        },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
   // Task Routes
   app.get('/api/lists/:listId/tasks', authenticateToken, async (req: AuthRequest, res, next) => {
     try {

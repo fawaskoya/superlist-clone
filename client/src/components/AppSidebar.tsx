@@ -13,21 +13,17 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import type { List as ListType, Workspace } from '@shared/schema';
+import type { List as ListType } from '@shared/schema';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 export function AppSidebar() {
   const { t } = useTranslation();
   const [location] = useLocation();
-
-  const { data: workspaces } = useQuery<Workspace[]>({
-    queryKey: ['/api/workspaces'],
-  });
-
-  const currentWorkspaceId = workspaces?.[0]?.id;
+  const { currentWorkspace } = useWorkspace();
 
   const { data: lists } = useQuery<ListType[]>({
-    queryKey: ['/api/workspaces', currentWorkspaceId, 'lists'],
-    enabled: !!currentWorkspaceId,
+    queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
+    enabled: !!currentWorkspace?.id,
   });
 
   const quickViews = [

@@ -1,21 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { TaskList } from '@/components/TaskList';
-import type { List, Workspace } from '@shared/schema';
+import type { List } from '@shared/schema';
 import { Inbox } from 'lucide-react';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-
-  const { data: workspaces } = useQuery<Workspace[]>({
-    queryKey: ['/api/workspaces'],
-  });
-
-  const currentWorkspaceId = workspaces?.[0]?.id;
+  const { currentWorkspace } = useWorkspace();
 
   const { data: lists, isLoading } = useQuery<List[]>({
-    queryKey: ['/api/workspaces', currentWorkspaceId, 'lists'],
-    enabled: !!currentWorkspaceId,
+    queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
+    enabled: !!currentWorkspace?.id,
   });
 
   const inboxList = lists?.find((list) => list.name === 'Inbox');

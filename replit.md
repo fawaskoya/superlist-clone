@@ -54,6 +54,40 @@ TaskFlow is built with a modern web application architecture, featuring a React 
 
 ## Recent Changes
 
+**2024-11-03 - Four Advanced Features Implementation (COMPLETE)**
+- ✅ **Feature 1: Task Activity Timeline**
+  - Added TaskActivity model with ActivityType enum (15 activity types)
+  - Created activityLogger.ts helper module for consistent activity logging
+  - Implemented GET /api/tasks/:id/activities endpoint
+  - Built TaskActivityTimeline component with chronological activity display
+  - Integrated activity logging into: task creation, status changes, priority changes, assignments, moves, comments, file attachments
+  - Real-time activity updates via WebSocket integration
+
+- ✅ **Feature 2: Rich Text Editor (Markdown Support)**
+  - Installed react-markdown and remark-gfm for markdown rendering
+  - Created MarkdownEditor component with Write/Preview tabs
+  - Integrated markdown editor into task description field in TaskDetailsDrawer
+  - Supports full markdown syntax: bold, italic, links, lists, tables, code blocks
+  - Split-view editing with live preview toggle
+
+- ✅ **Feature 3: File Attachments System**
+  - Added FileAttachment model to database schema
+  - Implemented local file storage with multer (10MB limit per file)
+  - Created upload directory structure and file management
+  - Built API endpoints: POST /api/tasks/:id/attachments (upload), GET /api/tasks/:id/attachments (list), GET /api/attachments/:id (download), DELETE /api/attachments/:id (delete)
+  - Created FileAttachments component with upload/download/delete functionality
+  - File metadata tracking: filename, size, MIME type, uploader, timestamp
+  - Integrated file activity logging (FILE_ATTACHED, FILE_REMOVED)
+
+- ✅ **Feature 4: Advanced Workspace Permissions**
+  - Extended Role enum with VIEWER role
+  - Added Permission enum with 8 granular permissions: MANAGE_WORKSPACE, MANAGE_MEMBERS, MANAGE_LISTS, CREATE_TASKS, EDIT_ALL_TASKS, DELETE_TASKS, COMMENT_TASKS, VIEW_ONLY
+  - Created permissions.ts helper module with role-based permission system
+  - Added custom permissions field to WorkspaceMember model
+  - Implemented permission checking functions: getUserWorkspacePermissions(), hasPermission(), updateMemberPermissions()
+  - Built API endpoints: GET /api/workspaces/:id/members (list with permissions), PATCH /api/workspaces/:workspaceId/members/:userId (update permissions)
+  - Default role-based permissions with override capability
+
 **2024-11-03 - Navigation Headers for Auth Pages**
 - ✅ **Login/Register Navigation** - Added navigation headers to auth pages
   - Created consistent header with brand logo linking to homepage

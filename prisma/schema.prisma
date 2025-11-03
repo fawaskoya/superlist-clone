@@ -15,14 +15,15 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  ownedWorkspaces    Workspace[]
+  ownedWorkspaces      Workspace[]
   workspaceMemberships WorkspaceMember[]
-  createdLists       List[]
-  createdTasks       Task[]
-  assignedTasks      Task[]              @relation("AssignedTasks")
-  comments           TaskComment[]
-  notifications      Notification[]
-  activities         TaskActivity[]
+  createdLists         List[]
+  createdTasks         Task[]
+  assignedTasks        Task[]              @relation("AssignedTasks")
+  comments             TaskComment[]
+  notifications        Notification[]
+  activities           TaskActivity[]
+  uploadedAttachments  FileAttachment[]
 }
 
 model Workspace {
@@ -106,10 +107,11 @@ model Task {
   assignedTo User?         @relation("AssignedTasks", fields: [assignedToId], references: [id])
   createdBy  User          @relation(fields: [createdById], references: [id])
   parent     Task?         @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks   Task[]        @relation("TaskSubtasks")
-  comments   TaskComment[]
-  tags       TaskTag[]
-  activities TaskActivity[]
+  subtasks    Task[]           @relation("TaskSubtasks")
+  comments    TaskComment[]
+  tags        TaskTag[]
+  activities  TaskActivity[]
+  attachments FileAttachment[]
 }
 
 model TaskComment {
@@ -173,6 +175,8 @@ enum ActivityType {
   COMMENT_ADDED
   TAG_ADDED
   TAG_REMOVED
+  FILE_ATTACHED
+  FILE_REMOVED
 }
 
 model TaskActivity {
@@ -188,4 +192,21 @@ model TaskActivity {
   user User @relation(fields: [userId], references: [id])
 
   @@index([taskId, createdAt])
+}
+
+model FileAttachment {
+  id           String   @id @default(cuid())
+  taskId       String
+  filename     String
+  originalName String
+  filepath     String
+  mimeType     String
+  size         Int
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  @@index([taskId])
 }

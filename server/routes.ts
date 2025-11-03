@@ -6,6 +6,9 @@ import { authenticateToken, generateTokens, type AuthRequest } from './middlewar
 import { summarizeTask, generateSubtasks, prioritizeTasks } from './services/ai';
 import { wsManager } from './websocket';
 import { logTaskCreated, logTaskStatusChanged, logTaskPriorityChanged, logTaskAssigned, logTaskUnassigned, logTaskMoved, logCommentAdded } from './activityLogger';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import {
   insertUserSchema,
   loginSchema,
@@ -844,6 +847,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(activities);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // File Attachment Routes
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+  });
+
+  const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  });
+
+  app.post('/api/tasks/:id/attachments', authenticateToken, upload.single('file'), async (req: AuthRequest, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const attachment = await prisma.fileAttachment.create({
+        data: {
+          taskId: req.params.id,
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          filepath: req.file.path,
+          mimeType: req.file.mimetype,
+          size: req.file.size,
+          uploadedById: req.userId!,
+        },
+        include: {
+          uploadedBy: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      // Log file attachment activity
+      await prisma.taskActivity.create({
+        data: {
+          taskId: req.params.id,
+          userId: req.userId!,
+          type: 'FILE_ATTACHED',
+          metadata: JSON.stringify({ filename: req.file.originalname, attachmentId: attachment.id }),
+        },
+      });
+
+      res.status(201).json(attachment);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.get('/api/tasks/:id/attachments', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const attachments = await prisma.fileAttachment.findMany({
+        where: { taskId: req.params.id },
+        include: {
+          uploadedBy: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      res.json(attachments);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.get('/api/attachments/:id', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const attachment = await prisma.fileAttachment.findUnique({
+        where: { id: req.params.id },
+      });
+
+      if (!attachment) {
+        return res.status(404).json({ message: 'Attachment not found' });
+      }
+
+      res.download(attachment.filepath, attachment.originalName);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.delete('/api/attachments/:id', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const attachment = await prisma.fileAttachment.findUnique({
+        where: { id: req.params.id },
+      });
+
+      if (!attachment) {
+        return res.status(404).json({ message: 'Attachment not found' });
+      }
+
+      // Delete file from filesystem
+      if (fs.existsSync(attachment.filepath)) {
+        fs.unlinkSync(attachment.filepath);
+      }
+
+      // Log file removal activity
+      await prisma.taskActivity.create({
+        data: {
+          taskId: attachment.taskId,
+          userId: req.userId!,
+          type: 'FILE_REMOVED',
+          metadata: JSON.stringify({ filename: attachment.originalName, attachmentId: attachment.id }),
+        },
+      });
+
+      await prisma.fileAttachment.delete({
+        where: { id: req.params.id },
+      });
+
+      res.status(204).send();
     } catch (error: any) {
       next(error);
     }

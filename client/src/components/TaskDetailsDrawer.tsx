@@ -23,6 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { TaskActivityTimeline } from './TaskActivityTimeline';
 import { MarkdownEditor } from './MarkdownEditor';
+import { FileAttachments } from './FileAttachments';
 import type { Task, TaskStatus, TaskPriority, TaskComment, InsertTask } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -439,6 +440,13 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
             <Button onClick={handleAddComment} size="sm" className="w-full">
               {t('common.create')}
             </Button>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label>File Attachments</Label>
+            {task && <FileAttachments taskId={task.id} />}
           </div>
 
           <Separator />

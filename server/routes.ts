@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { authenticateToken, generateTokens, type AuthRequest } from './middleware/auth';
 import { summarizeTask, generateSubtasks, prioritizeTasks } from './services/ai';
 import { wsManager } from './websocket';
+import { logTaskCreated, logTaskStatusChanged, logTaskPriorityChanged, logTaskAssigned, logTaskUnassigned, logTaskMoved, logCommentAdded } from './activityLogger';
 import {
   insertUserSchema,
   loginSchema,
@@ -487,6 +488,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Log activity
+      await logTaskCreated(task.id, req.userId!);
+
+      // If assigned to someone, log that too
+      if (task.assignedToId && task.assignedTo) {
+        await logTaskAssigned(task.id, req.userId!, task.assignedToId, task.assignedTo.name);
+      }
+
       // Broadcast to workspace
       wsManager.broadcastTaskCreated(task.list.workspaceId, task, req.userId);
 
@@ -621,11 +630,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = updateTaskSchema.parse(req.body);
 
-      // Get the current task to check for assignment changes
+      // Get the current task to check for changes
       const currentTask = await prisma.task.findUnique({
         where: { id: req.params.id },
-        select: { assignedToId: true, title: true },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
+
+      if (!currentTask) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
 
       const task = await prisma.task.update({
         where: { id: req.params.id },
@@ -652,6 +672,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         },
       });
+
+      // Log status changes
+      if (data.status && data.status !== currentTask.status) {
+        await logTaskStatusChanged(task.id, req.userId!, currentTask.status, data.status);
+      }
+
+      // Log priority changes
+      if (data.priority && data.priority !== currentTask.priority) {
+        await logTaskPriorityChanged(task.id, req.userId!, currentTask.priority, data.priority);
+      }
+
+      // Log assignment changes
+      if (data.assignedToId !== undefined && data.assignedToId !== currentTask.assignedToId) {
+        if (data.assignedToId === null && currentTask.assignedTo) {
+          // Unassigned
+          await logTaskUnassigned(task.id, req.userId!, currentTask.assignedToId!, currentTask.assignedTo.name);
+        } else if (data.assignedToId && task.assignedTo) {
+          // Assigned to someone
+          await logTaskAssigned(task.id, req.userId!, data.assignedToId, task.assignedTo.name);
+        }
+      }
 
       // Create notification if task was assigned to someone new
       if (
@@ -776,7 +817,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Log comment activity
+      await logCommentAdded(req.params.id, req.userId!, comment.id);
+
       res.status(201).json(comment);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Activity Timeline
+  app.get('/api/tasks/:id/activities', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const activities = await prisma.taskActivity.findMany({
+        where: { taskId: req.params.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      res.json(activities);
     } catch (error: any) {
       next(error);
     }

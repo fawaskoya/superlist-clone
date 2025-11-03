@@ -1,0 +1,463 @@
+Here’s a ready-to-paste super prompt for Replit 👇
+(You can just copy–paste this into Replit’s “Generate” / “Agent” box.)
+
+⸻
+
+
+You are an expert full-stack engineer inside Replit.
+
+🎯 GOAL  
+Build a **production-ready Superlist-style task & collaboration app** called **“KBN Superlist”** with:
+
+1. ✅ Full-stack architecture (backend + frontend in one Replit)
+2. ✅ User auth & multi-workspace support (like Superlist)
+3. ✅ Personal & shared task lists
+4. ✅ Clean, modern UI (Tailwind, responsive)
+5. ✅ **Bilingual UI: English + Arabic**, including full **RTL support for Arabic**
+6. ✅ **AI features** for task summarization, subtask generation, and smart prioritization using OpenAI (via API key env variable)
+
+The app should be easy to extend later.
+
+────────────────────────
+🔧 TECH STACK
+────────────────────────
+
+Use this exact stack unless something is impossible in Replit:
+
+- **Frontend**
+  - React + TypeScript
+  - Vite for bundling
+  - Tailwind CSS
+  - react-query or TanStack Query for server state
+  - react-router-dom for routing
+  - i18next + react-i18next for localization (English + Arabic)
+  - Headless UI or Radix for dialog/menu if needed
+
+- **Backend**
+  - Node.js + TypeScript
+  - Express.js
+  - Prisma ORM
+  - SQLite database (file-based) for simplicity inside Replit
+  - JWT-based auth (access token + refresh token)
+  - bcrypt for password hashing
+
+- **AI Integration**
+  - Use the official OpenAI Node.js client (or fetch-based calls)
+  - Read API key from env var: `OPENAI_API_KEY`
+
+- **Project Structure**
+  - Single repo, two folders:
+
+    - `/server`
+      - Express API, Prisma, auth, AI routes, validation
+    - `/client`
+      - React app, Vite, Tailwind, i18n
+
+  - Root `package.json` with `dev` script that:
+    - Runs backend on port 4000
+    - Runs frontend on port 5173
+    - (If needed, use concurrently to run both)
+
+────────────────────────
+📁 FILE / FOLDER STRUCTURE
+────────────────────────
+
+Create this approximate structure:
+
+- `package.json` (root, with workspaces or scripts for client+server)
+- `server/`
+  - `src/`
+    - `index.ts` (Express app entry)
+    - `config/`
+      - `env.ts` (reads PORT, JWT_SECRET, OPENAI_API_KEY)
+    - `db/`
+      - `prisma.ts` (Prisma client singleton)
+    - `middleware/`
+      - `authMiddleware.ts` (JWT verify)
+      - `errorHandler.ts`
+    - `routes/`
+      - `authRoutes.ts`
+      - `workspaceRoutes.ts`
+      - `listRoutes.ts`
+      - `taskRoutes.ts`
+      - `aiRoutes.ts`
+    - `controllers/`
+      - `authController.ts`
+      - `workspaceController.ts`
+      - `listController.ts`
+      - `taskController.ts`
+      - `aiController.ts`
+    - `types/` (shared backend types)
+  - `prisma/`
+    - `schema.prisma`
+- `client/`
+  - `index.html`
+  - `vite.config.ts`
+  - `tsconfig.json`
+  - `tailwind.config.cjs`
+  - `postcss.config.cjs`
+  - `src/`
+    - `main.tsx`
+    - `App.tsx`
+    - `routes/`
+      - `AuthLayout.tsx`
+      - `AppLayout.tsx`
+      - `LoginPage.tsx`
+      - `RegisterPage.tsx`
+      - `DashboardPage.tsx`
+      - `WorkspacePage.tsx`
+      - `SettingsPage.tsx`
+    - `components/`
+      - `Navbar.tsx`
+      - `Sidebar.tsx`
+      - `WorkspaceSwitcher.tsx`
+      - `TaskList.tsx`
+      - `TaskItem.tsx`
+      - `TaskDetailsDrawer.tsx`
+      - `LanguageSwitcher.tsx`
+      - `Button.tsx`
+      - `Input.tsx`
+      - `TextArea.tsx`
+      - `Modal.tsx`
+    - `api/`
+      - `client.ts` (axios or fetch wrapper)
+      - `authApi.ts`
+      - `workspaceApi.ts`
+      - `listApi.ts`
+      - `taskApi.ts`
+      - `aiApi.ts`
+    - `store/`
+      - `authStore.ts` (Zustand or Context for auth)
+      - `uiStore.ts` (UI state: theme, sidebar, etc.)
+      - `i18n/`
+        - `i18n.ts`
+        - `locales/`
+          - `en/translation.json`
+          - `ar/translation.json`
+    - `styles/`
+      - `globals.css`
+
+────────────────────────
+🗄️ DATABASE DESIGN (Prisma schema)
+────────────────────────
+
+Create `server/prisma/schema.prisma` with a minimal yet extensible design:
+
+- `User`
+  - id (String, cuid, @id)
+  - email (String, unique)
+  - passwordHash (String)
+  - name (String)
+  - createdAt (DateTime)
+  - updatedAt (DateTime)
+
+- `Workspace`
+  - id
+  - name
+  - slug
+  - ownerId → User
+  - createdAt, updatedAt
+
+- `WorkspaceMember`
+  - id
+  - workspaceId → Workspace
+  - userId → User
+  - role (enum: OWNER, ADMIN, MEMBER)
+  - createdAt
+
+- `List` (like a Superlist list)
+  - id
+  - workspaceId → Workspace
+  - name
+  - description
+  - isPersonal (Boolean, for user-private lists under a workspace)
+  - createdById → User
+  - createdAt, updatedAt
+
+- `Task`
+  - id
+  - listId → List
+  - title
+  - description
+  - status (enum: TODO, IN_PROGRESS, DONE)
+  - priority (enum: LOW, MEDIUM, HIGH)
+  - dueDate (DateTime?)
+  - assignedToId → User?
+  - createdById → User
+  - parentId → Task? (for subtasks)
+  - orderIndex (Float for drag-and-drop ordering)
+  - createdAt, updatedAt
+
+- `TaskComment`
+  - id
+  - taskId → Task
+  - authorId → User
+  - body
+  - createdAt
+
+- `Tag`
+  - id
+  - workspaceId → Workspace
+  - name
+  - color
+
+- `TaskTag`
+  - id
+  - taskId → Task
+  - tagId → Tag
+
+- `Notification` (optional simple model)
+  - id
+  - userId → User
+  - type (String)
+  - data (Json)
+  - isRead (Boolean)
+  - createdAt
+
+Use SQLite datasource; generate client and migrate on startup.
+
+────────────────────────
+🔐 AUTHENTICATION / SECURITY
+────────────────────────
+
+Implement **simple email/password auth with JWT**:
+
+- `POST /auth/register`
+  - body: `{ name, email, password }`
+  - Hash password using bcrypt
+  - Create default workspace: “My Workspace”
+  - Return user info and JWT access token + refresh token
+
+- `POST /auth/login`
+  - body: `{ email, password }`
+  - Compare password
+  - Return user info, access token, refresh token
+
+- `POST /auth/refresh`
+  - body: `{ refreshToken }`
+  - Issue new access token
+
+- Store tokens on frontend using `localStorage` (for now) or httpOnly cookie if easy.
+
+- Protect routes with `authMiddleware` that reads `Authorization: Bearer <token>` and attaches `req.user`.
+
+────────────────────────
+📡 API DESIGN
+────────────────────────
+
+Create REST endpoints:
+
+**Auth**
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+
+**Workspace**
+- `GET /api/workspaces` (current user)
+- `POST /api/workspaces` (create)
+- `GET /api/workspaces/:id`
+- `PATCH /api/workspaces/:id`
+- `GET /api/workspaces/:id/members`
+
+**Lists**
+- `GET /api/workspaces/:workspaceId/lists`
+- `POST /api/workspaces/:workspaceId/lists`
+- `GET /api/lists/:id`
+- `PATCH /api/lists/:id`
+- `DELETE /api/lists/:id`
+
+**Tasks**
+- `GET /api/lists/:listId/tasks`
+- `POST /api/lists/:listId/tasks`
+- `GET /api/tasks/:id`
+- `PATCH /api/tasks/:id`
+- `DELETE /api/tasks/:id`
+- `POST /api/tasks/:id/comments`
+- `GET /api/tasks/:id/comments`
+
+**AI**
+Use OpenAI to do smart stuff:
+
+- `POST /api/ai/summarize-task`
+  - body: `{ title, description }`
+  - Returns: `{ summary }`
+
+- `POST /api/ai/generate-subtasks`
+  - body: `{ title, description, context? }`
+  - Returns: `{ subtasks: string[] }`
+
+- `POST /api/ai/prioritize-tasks`
+  - body: `{ tasks: [{ id, title, description, dueDate?, priority? }] }`
+  - Returns: `{ tasks: [{ id, suggestedPriority, reasoning }] }`
+
+Use `OPENAI_API_KEY` from env and a GPT-4.x or GPT-o3-level model.
+
+────────────────────────
+🌍 BILINGUAL & RTL SUPPORT (ENGLISH + ARABIC)
+────────────────────────
+
+Implement full **i18n** for the UI:
+
+1. Use `i18next` + `react-i18next`.
+2. Configure two locales: `en` and `ar`.
+3. Create translation files:
+
+   - `client/src/i18n/locales/en/translation.json`
+   - `client/src/i18n/locales/ar/translation.json`
+
+   Include keys for all UI strings, for example:
+
+   ```json
+   {
+     "appName": "KBN Superlist",
+     "auth": {
+       "login": "Login",
+       "register": "Create account",
+       "email": "Email",
+       "password": "Password"
+     },
+     "sidebar": {
+       "myDay": "My Day",
+       "inbox": "Inbox",
+       "today": "Today",
+       "upcoming": "Upcoming",
+       "assignedToMe": "Assigned to me"
+     },
+     "tasks": {
+       "addTaskPlaceholder": "Add a task...",
+       "noTasks": "No tasks yet",
+       "dueToday": "Due today",
+       "overdue": "Overdue"
+     }
+   }
+
+And Arabic equivalent in ar/translation.json with proper Arabic phrases.
+	4.	Implement a LanguageSwitcher component (e.g. button or toggle) that allows user to switch between en and ar.
+	•	Persist selected language to localStorage.
+	•	On change, update i18n.language.
+	5.	For RTL:
+	•	When the active language is ar, set:
+	•	document.documentElement.dir = "rtl";
+	•	Add a class on body or a root div (e.g. rtl).
+	•	Tailwind config: enable rtl support via dir selector or plugin.
+	•	Ensure text alignment and flex direction swap where appropriate in Arabic mode.
+	6.	UI layout:
+	•	Sidebar should automatically flip to the right when dir="rtl" (use flex-row-reverse conditionally).
+	•	All icons and chevrons should flip where needed (use CSS or conditional classes).
+
+────────────────────────
+🎨 UI / UX GUIDELINES (SUPERLIST-LIKE)
+────────────────────────
+
+Aim for a clean, modern, Superlist-like UI:
+	•	Layout
+	•	App shell:
+	•	Top Navbar with:
+	•	App logo/name (“KBN Superlist”)
+	•	Workspace switcher
+	•	Language switcher (EN / AR)
+	•	User profile dropdown (logout)
+	•	Left Sidebar with:
+	•	Quick views: Inbox, Today, Upcoming, Assigned to me
+	•	User lists grouped by workspace
+	•	Main content:
+	•	List header (list name, description, members, AI assist button)
+	•	Tasks section:
+	•	Task items in a modern card/list layout
+	•	Inline “add task” row
+	•	Right-side drawer for task details (opens when task clicked)
+	•	Task details drawer
+	•	Title (editable)
+	•	Description (rich text not required; simple textarea is fine)
+	•	Status, priority tags
+	•	Due date picker
+	•	Assigned to (dropdown of workspace members)
+	•	Subtasks list (with checkbox)
+	•	Comments section
+	•	AI buttons:
+	•	“🪄 Summarize”
+	•	“🪄 Generate Subtasks”
+	•	“🪄 Improve wording”
+	•	Styling
+	•	Use Tailwind CSS with:
+	•	Soft gray background, white cards, subtle shadow
+	•	Rounded corners (rounded-xl or rounded-2xl)
+	•	Plenty of padding and spacing (space-y-4, gap-4)
+	•	Make it responsive for desktop and tablet. Mobile can be basic.
+
+────────────────────────
+🤖 AI FEATURES – FRONTEND INTEGRATION
+────────────────────────
+
+On the frontend:
+	•	In TaskDetailsDrawer, add buttons that call the AI endpoints:
+	•	“Summarize Task”
+	•	Calls /api/ai/summarize-task with current task title & description
+	•	Shows returned summary in a new “AI Summary” section or replaces description after confirmation
+	•	“Generate Subtasks”
+	•	Calls /api/ai/generate-subtasks
+	•	Shows list of suggested subtasks with checkboxes
+	•	User can click “Add selected subtasks” to create them under this task
+	•	“Suggest Priority”
+	•	Calls /api/ai/prioritize-tasks for the current task only
+	•	Updates priority field based on AI suggestion
+	•	Use react-query or simple hooks (useMutation, useQuery) for API calls.
+	•	Show loading state and error handling.
+
+────────────────────────
+🚀 INITIAL DATA & ONBOARDING
+────────────────────────
+	•	After registration:
+	•	Create default workspace (“My Workspace”).
+	•	Create default list (“Inbox”).
+	•	Create 1–2 sample tasks to demonstrate features:
+	•	Example English task
+	•	Example Arabic task to show Arabic rendering when language set to AR.
+
+────────────────────────
+🧪 DEV EXPERIENCE & SCRIPTS
+────────────────────────
+
+In the root package.json, define scripts:
+	•	"dev:server": "cd server && ts-node-dev src/index.ts"
+	•	"dev:client": "cd client && npm run dev"
+	•	"dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+
+If concurrently is not available, adjust to Replit’s standard way of running multiple processes or create a simple shell script.
+
+Ensure README.md explains:
+	•	How to run migrations:
+	•	cd server && npx prisma migrate dev --name init
+	•	How to start dev:
+	•	npm run dev
+	•	Where backend is running (e.g. port 4000).
+	•	Where frontend is running (e.g. port 5173).
+	•	That OPENAI_API_KEY must be set in Replit secrets.
+
+────────────────────────
+✅ ACCEPTANCE CRITERIA
+────────────────────────
+	1.	I can register, login, and see my default workspace + Inbox list.
+	2.	I can create multiple workspaces, lists, and tasks.
+	3.	I can open a task, edit details, add subtasks & comments.
+	4.	I can toggle language between English and Arabic, and:
+	•	All labels switch language.
+	•	Layout switches to proper RTL for Arabic (sidebar on right, text aligned).
+	5.	AI endpoints work when OPENAI_API_KEY is configured:
+	•	Summarize task
+	•	Generate subtasks
+	•	Suggest priority
+	6.	The UI is clean, responsive, and feels similar in spirit to Superlist:
+	•	Modern typography, spacing, and minimalism.
+	7.	Code is structured, typed (TypeScript), and reasonably documented.
+
+Please now:
+	1.	Scaffold the full project.
+	2.	Implement all backend routes and Prisma models.
+	3.	Implement the frontend with routing, i18n (EN/AR), RTL support, and core screens.
+	4.	Wire up AI features.
+	5.	Make sure everything runs properly inside Replit.
+
+---
+
+If you’d like, next I can help you **design the translation keys + Arabic copy** or add **extra AI features** like smart daily planning (“Generate my plan for today from open tasks”).

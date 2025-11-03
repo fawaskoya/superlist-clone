@@ -119,6 +119,22 @@ KBN Superlist is a comprehensive task management and collaboration platform that
 
 ## Recent Changes
 
+**2024-11-03 - Next Phase Features (In Progress)**
+- Implemented real-time collaboration with WebSocket infrastructure
+  - Created WebSocketManager with connection handling and workspace subscriptions
+  - Added event broadcasting for task/list operations (create, update, delete)
+  - Built WebSocketContext with auto-reconnection and query invalidation
+  - Fixed subscription management to properly unsubscribe when switching workspaces
+- Implemented drag-and-drop task reordering
+  - Integrated @dnd-kit for sortable tasks with visual feedback
+  - Added proper order index recalculation with transaction support
+  - Created drag handle with GripVertical icon (appears on hover)
+  - Supports cross-list moves with automatic reindexing
+- Started advanced search and filtering
+  - Added backend search endpoint with full-text search (title, description)
+  - Implemented filters for status, priority, and assignedTo
+  - Remaining: date range filters, tags filtering, frontend search UI
+
 **2024-01 - Initial Implementation**
 - Defined complete Prisma database schema
 - Set up i18n with comprehensive English and Arabic translations
@@ -129,6 +145,8 @@ KBN Superlist is a comprehensive task management and collaboration platform that
 - Implemented task management components (TaskList, TaskItem, TaskDetailsDrawer)
 - Added workspace switcher and language switcher
 - Configured design system tokens in Tailwind
+- Fixed critical multi-workspace selection bug with WorkspaceContext
+- Created Today/Upcoming/Assigned quick-view pages with backend filtering
 
 ## Development
 

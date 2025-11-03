@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Flag, User } from 'lucide-react';
+import { Calendar, Flag, User, GripVertical } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -8,6 +8,8 @@ import type { Task, TaskPriority, TaskStatus } from '@shared/schema';
 import { format, isPast, isToday } from 'date-fns';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TaskItemProps {
   task: Task & { assignedTo?: { name: string } };
@@ -17,6 +19,20 @@ interface TaskItemProps {
 export function TaskItem({ task, onSelect }: TaskItemProps) {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const updateMutation = useMutation({
     mutationFn: (status: TaskStatus) =>
@@ -42,14 +58,24 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
 
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={`group flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover-elevate cursor-pointer ${
         isDone ? 'opacity-60' : ''
-      }`}
+      } ${isDragging ? 'opacity-50' : ''}`}
       onClick={() => onSelect(task)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-testid={`task-item-${task.id}`}
     >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </div>
       <Checkbox
         checked={isDone}
         onCheckedChange={handleCheckboxChange}

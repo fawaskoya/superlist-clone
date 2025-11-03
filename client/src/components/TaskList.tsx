@@ -9,6 +9,21 @@ import type { Task } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface TaskListProps {
   listId: string;
@@ -24,6 +39,13 @@ export function TaskList({ listId }: TaskListProps) {
     queryKey: ['/api/lists', listId, 'tasks'],
     enabled: !!listId,
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const createMutation = useMutation({
     mutationFn: (title: string) =>
@@ -41,10 +63,50 @@ export function TaskList({ listId }: TaskListProps) {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: ({ taskId, newIndex }: { taskId: string; newIndex: number }) =>
+      apiRequest('PATCH', `/api/tasks/${taskId}/reorder`, { orderIndex: newIndex }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/lists', listId, 'tasks'] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
   const handleAddTask = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && newTaskTitle.trim()) {
       createMutation.mutate(newTaskTitle.trim());
     }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = sortedTasks.findIndex((task) => task.id === active.id);
+    const newIndex = sortedTasks.findIndex((task) => task.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // Optimistically update the UI
+    const reorderedTasks = arrayMove(sortedTasks, oldIndex, newIndex);
+    queryClient.setQueryData(['/api/lists', listId, 'tasks'], reorderedTasks);
+
+    // Update the server
+    reorderMutation.mutate({
+      taskId: active.id as string,
+      newIndex: newIndex,
+    });
   };
 
   if (isLoading) {
@@ -76,15 +138,26 @@ export function TaskList({ listId }: TaskListProps) {
             <div className="text-muted-foreground text-sm">{t('task.noTasks')}</div>
           </div>
         ) : (
-          <div>
-            {sortedTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onSelect={setSelectedTask}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortedTasks.map((task) => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div>
+                {sortedTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTask}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </Card>
 

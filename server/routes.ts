@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authenticateToken, generateTokens, type AuthRequest } from './middleware/auth';
 import { summarizeTask, generateSubtasks, prioritizeTasks } from './services/ai';
+import { wsManager } from './websocket';
 import {
   insertUserSchema,
   loginSchema,
@@ -364,6 +365,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/workspaces/:workspaceId/search', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { q, status, priority, assignedTo } = req.query;
+      
+      const where: any = {
+        list: {
+          workspaceId: req.params.workspaceId,
+        },
+        parentId: null,
+      };
+
+      if (q) {
+        where.OR = [
+          { title: { contains: q as string, mode: 'insensitive' } },
+          { description: { contains: q as string, mode: 'insensitive' } },
+        ];
+      }
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (priority) {
+        where.priority = priority;
+      }
+
+      if (assignedTo) {
+        where.assignedToId = assignedTo;
+      }
+
+      const tasks = await prisma.task.findMany({
+        where,
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          list: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
   // Task Routes
   app.get('/api/lists/:listId/tasks', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
@@ -421,8 +479,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: true,
             },
           },
+          list: {
+            select: {
+              workspaceId: true,
+            },
+          },
         },
       });
+
+      // Broadcast to workspace
+      wsManager.broadcastTaskCreated(task.list.workspaceId, task, req.userId);
 
       res.status(201).json(task);
     } catch (error: any) {
@@ -455,6 +521,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/tasks/:id/reorder', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { orderIndex, listId } = req.body;
+      const taskId = req.params.id;
+
+      const currentTask = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          list: {
+            select: {
+              workspaceId: true,
+            },
+          },
+        },
+      });
+
+      if (!currentTask) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+
+      const targetListId = listId || currentTask.listId;
+      const workspaceId = currentTask.list.workspaceId;
+
+      // Get all tasks in the target list
+      const tasksInList = await prisma.task.findMany({
+        where: {
+          listId: targetListId,
+          parentId: null,
+          id: { not: taskId },
+        },
+        orderBy: { orderIndex: 'asc' },
+      });
+
+      // Calculate new order indices
+      const updates: { id: string; orderIndex: number; listId?: string }[] = [];
+      
+      // Insert task at new position
+      let currentIndex = 0;
+      for (let i = 0; i <= tasksInList.length; i++) {
+        if (i === orderIndex) {
+          updates.push({
+            id: taskId,
+            orderIndex: currentIndex++,
+            ...(listId ? { listId } : {}),
+          });
+        }
+        if (i < tasksInList.length) {
+          updates.push({
+            id: tasksInList[i].id,
+            orderIndex: currentIndex++,
+          });
+        }
+      }
+
+      // Update all tasks in a transaction
+      await prisma.$transaction(
+        updates.map((update) =>
+          prisma.task.update({
+            where: { id: update.id },
+            data: {
+              orderIndex: update.orderIndex,
+              ...(update.listId ? { listId: update.listId } : {}),
+            },
+          })
+        )
+      );
+
+      const updatedTask = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          list: {
+            select: {
+              id: true,
+              name: true,
+              workspaceId: true,
+            },
+          },
+        },
+      });
+
+      // Broadcast to workspace
+      wsManager.broadcastTaskUpdated(workspaceId, updatedTask!, req.userId);
+
+      res.json(updatedTask);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
   app.patch('/api/tasks/:id', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
       const data = updateTaskSchema.parse(req.body);
@@ -477,8 +639,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: true,
             },
           },
+          list: {
+            select: {
+              workspaceId: true,
+            },
+          },
         },
       });
+
+      // Broadcast to workspace
+      wsManager.broadcastTaskUpdated(task.list.workspaceId, task, req.userId);
 
       res.json(task);
     } catch (error: any) {
@@ -488,9 +658,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/tasks/:id', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      const task = await prisma.task.findUnique({
+        where: { id: req.params.id },
+        include: {
+          list: {
+            select: {
+              workspaceId: true,
+            },
+          },
+        },
+      });
+
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+
       await prisma.task.delete({
         where: { id: req.params.id },
       });
+
+      // Broadcast to workspace
+      wsManager.broadcastTaskDeleted(task.list.workspaceId, req.params.id, req.userId);
 
       res.status(204).send();
     } catch (error: any) {

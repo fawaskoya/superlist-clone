@@ -93,6 +93,60 @@
     "noNotifications": "No notifications",
     "taskAssigned": "You were assigned to {{title}}"
   },
+  "landing": {
+    "title": "KBN Superlist",
+    "nav": {
+      "login": "Log in",
+      "signup": "Sign up"
+    },
+    "hero": {
+      "title": "Your work, organized and supercharged",
+      "subtitle": "A powerful task management platform with AI-powered features, real-time collaboration, and bilingual support.",
+      "cta": "Get started free",
+      "login": "Log in",
+      "features": {
+        "free": "Free to use",
+        "ai": "AI-powered",
+        "realtime": "Real-time collaboration"
+      }
+    },
+    "features": {
+      "title": "Everything you need to stay organized",
+      "subtitle": "Built for teams and individuals who want to work smarter, not harder.",
+      "tasks": {
+        "title": "Smart Task Management",
+        "description": "Organize tasks with lists, subtasks, priorities, and due dates. Drag and drop to reorder."
+      },
+      "collaboration": {
+        "title": "Real-time Collaboration",
+        "description": "Work together seamlessly with your team. See updates instantly with WebSocket technology."
+      },
+      "ai": {
+        "title": "AI-Powered Features",
+        "description": "Get smart suggestions for subtasks, priorities, and task summaries powered by AI."
+      },
+      "bilingual": {
+        "title": "Bilingual Support",
+        "description": "Full support for English and Arabic with proper RTL layout and translations."
+      },
+      "notifications": {
+        "title": "Smart Notifications",
+        "description": "Stay informed with real-time notifications when tasks are assigned or updated."
+      },
+      "search": {
+        "title": "Advanced Search",
+        "description": "Find anything instantly with powerful search and filtering across all your tasks."
+      }
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "subtitle": "Join thousands of users organizing their work with KBN Superlist.",
+      "button": "Create your account"
+    },
+    "footer": {
+      "copyright": "© 2024 KBN Superlist. All rights reserved."
+    }
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

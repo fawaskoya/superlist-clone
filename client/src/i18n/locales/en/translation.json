@@ -1,0 +1,95 @@
+{
+  "appName": "KBN Superlist",
+  "auth": {
+    "login": "Login",
+    "register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "loginButton": "Sign in",
+    "registerButton": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginHere": "Login here",
+    "registerHere": "Register here"
+  },
+  "sidebar": {
+    "myDay": "My Day",
+    "inbox": "Inbox",
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "assignedToMe": "Assigned to me",
+    "lists": "Lists",
+    "newList": "New List"
+  },
+  "workspace": {
+    "myWorkspace": "My Workspace",
+    "switchWorkspace": "Switch workspace",
+    "createWorkspace": "Create workspace",
+    "workspaceName": "Workspace name",
+    "workspaceSettings": "Workspace settings",
+    "members": "Members"
+  },
+  "list": {
+    "createList": "Create list",
+    "listName": "List name",
+    "listDescription": "Description",
+    "deleteList": "Delete list",
+    "editList": "Edit list",
+    "personalList": "Personal list",
+    "sharedList": "Shared list"
+  },
+  "task": {
+    "addTask": "Add a task...",
+    "noTasks": "No tasks yet",
+    "dueToday": "Due today",
+    "overdue": "Overdue",
+    "title": "Task title",
+    "description": "Description",
+    "status": "Status",
+    "priority": "Priority",
+    "dueDate": "Due date",
+    "assignedTo": "Assigned to",
+    "subtasks": "Subtasks",
+    "comments": "Comments",
+    "addComment": "Add comment...",
+    "noComments": "No comments yet",
+    "noSubtasks": "No subtasks yet",
+    "addSubtask": "Add subtask",
+    "createdBy": "Created by",
+    "taskDetails": "Task details"
+  },
+  "status": {
+    "TODO": "To Do",
+    "IN_PROGRESS": "In Progress",
+    "DONE": "Done"
+  },
+  "priority": {
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High"
+  },
+  "ai": {
+    "summarize": "Summarize",
+    "generateSubtasks": "Generate Subtasks",
+    "suggestPriority": "Suggest Priority",
+    "aiSummary": "AI Summary",
+    "suggestedSubtasks": "Suggested Subtasks",
+    "addSelected": "Add selected subtasks",
+    "processing": "Processing..."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "logout": "Logout",
+    "settings": "Settings",
+    "profile": "Profile"
+  }
+}

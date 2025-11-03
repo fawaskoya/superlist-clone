@@ -1,0 +1,95 @@
+{
+  "appName": "قائمة KBN الفائقة",
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "name": "الاسم",
+    "loginButton": "تسجيل الدخول",
+    "registerButton": "التسجيل",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "loginHere": "سجل الدخول هنا",
+    "registerHere": "سجل هنا"
+  },
+  "sidebar": {
+    "myDay": "يومي",
+    "inbox": "صندوق الوارد",
+    "today": "اليوم",
+    "upcoming": "قادم",
+    "assignedToMe": "المسندة إلي",
+    "lists": "القوائم",
+    "newList": "قائمة جديدة"
+  },
+  "workspace": {
+    "myWorkspace": "مساحة عملي",
+    "switchWorkspace": "تبديل مساحة العمل",
+    "createWorkspace": "إنشاء مساحة عمل",
+    "workspaceName": "اسم مساحة العمل",
+    "workspaceSettings": "إعدادات مساحة العمل",
+    "members": "الأعضاء"
+  },
+  "list": {
+    "createList": "إنشاء قائمة",
+    "listName": "اسم القائمة",
+    "listDescription": "الوصف",
+    "deleteList": "حذف القائمة",
+    "editList": "تعديل القائمة",
+    "personalList": "قائمة شخصية",
+    "sharedList": "قائمة مشتركة"
+  },
+  "task": {
+    "addTask": "إضافة مهمة...",
+    "noTasks": "لا توجد مهام بعد",
+    "dueToday": "مستحقة اليوم",
+    "overdue": "متأخرة",
+    "title": "عنوان المهمة",
+    "description": "الوصف",
+    "status": "الحالة",
+    "priority": "الأولوية",
+    "dueDate": "تاريخ الاستحقاق",
+    "assignedTo": "مسندة إلى",
+    "subtasks": "المهام الفرعية",
+    "comments": "التعليقات",
+    "addComment": "إضافة تعليق...",
+    "noComments": "لا توجد تعليقات بعد",
+    "noSubtasks": "لا توجد مهام فرعية بعد",
+    "addSubtask": "إضافة مهمة فرعية",
+    "createdBy": "تم الإنشاء بواسطة",
+    "taskDetails": "تفاصيل المهمة"
+  },
+  "status": {
+    "TODO": "للقيام به",
+    "IN_PROGRESS": "قيد التنفيذ",
+    "DONE": "منجز"
+  },
+  "priority": {
+    "LOW": "منخفضة",
+    "MEDIUM": "متوسطة",
+    "HIGH": "عالية"
+  },
+  "ai": {
+    "summarize": "ملخص",
+    "generateSubtasks": "توليد مهام فرعية",
+    "suggestPriority": "اقتراح الأولوية",
+    "aiSummary": "ملخص الذكاء الاصطناعي",
+    "suggestedSubtasks": "المهام الفرعية المقترحة",
+    "addSelected": "إضافة المهام المحددة",
+    "processing": "جاري المعالجة..."
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "close": "إغلاق",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "نجح",
+    "logout": "تسجيل الخروج",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي"
+  }
+}

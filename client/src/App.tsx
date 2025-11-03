@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
 import { queryClient } from './lib/queryClient';
@@ -100,14 +101,16 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <AppContent />
-          </TooltipProvider>
-        </LanguageProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <TooltipProvider>
+              <Toaster />
+              <AppContent />
+            </TooltipProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

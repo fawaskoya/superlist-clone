@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   CheckCircle2,
   ListTodo,
@@ -113,6 +114,7 @@ export default function Landing() {
               </div>
               
               <div className="flex items-center gap-3">
+                <ThemeToggle />
                 <LanguageSwitcher />
                 <Link href="/login">
                   <Button variant="ghost" data-testid="button-login">
@@ -141,6 +143,7 @@ export default function Landing() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <ThemeToggle />
                   <LanguageSwitcher />
                   <Link href="/register">
                     <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600" data-testid="button-signup-mobile">

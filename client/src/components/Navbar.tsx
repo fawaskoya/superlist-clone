@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeToggle } from './ThemeToggle';
 import { SearchBar } from './SearchBar';
 import { NotificationBell } from './NotificationBell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -45,6 +46,7 @@ export function Navbar() {
 
       <div className="flex items-center gap-3">
         <NotificationBell />
+        <ThemeToggle />
         <LanguageSwitcher />
         
         <DropdownMenu>

@@ -57,12 +57,20 @@ function PublicRoute({ component: Component }: { component: () => JSX.Element })
 }
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   const sidebarStyle = {
     '--sidebar-width': '16rem',
     '--sidebar-width-icon': '3rem',
   } as React.CSSProperties;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <Switch>
@@ -107,7 +115,9 @@ function AppContent() {
           </WebSocketProvider>
         </WorkspaceProvider>
       ) : (
-        <Route component={NotFound} />
+        <Route path="/">
+          <Redirect to="/login" />
+        </Route>
       )}
     </Switch>
   );

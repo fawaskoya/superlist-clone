@@ -4,7 +4,7 @@ import { useWorkspace } from './WorkspaceContext';
 import { queryClient } from '@/lib/queryClient';
 
 interface WebSocketMessage {
-  type: 'connected' | 'task:created' | 'task:updated' | 'task:deleted' | 'list:created' | 'list:updated' | 'list:deleted' | 'workspace:updated';
+  type: 'connected' | 'task:created' | 'task:updated' | 'task:deleted' | 'list:created' | 'list:updated' | 'list:deleted' | 'workspace:updated' | 'notification:created';
   payload: any;
 }
 
@@ -30,8 +30,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
+    // Construct WebSocket URL properly for both local and Replit environments
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
+    const host = window.location.host; // This already includes the port if present
     const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
 
     try {
@@ -123,6 +124,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
       case 'workspace:updated':
         queryClient.invalidateQueries({ queryKey: ['/api/workspaces'] });
+        break;
+
+      case 'notification:created':
+        // Invalidate notifications query
+        queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
         break;
     }
   };

@@ -78,6 +78,21 @@
     "addSelected": "إضافة المهام المحددة",
     "processing": "جاري المعالجة..."
   },
+  "search": {
+    "placeholder": "البحث عن المهام...",
+    "filters": "الفلاتر",
+    "clearFilters": "مسح الفلاتر",
+    "allStatuses": "جميع الحالات",
+    "allPriorities": "جميع الأولويات",
+    "searching": "جاري البحث...",
+    "noResults": "لم يتم العثور على نتائج"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "markAllRead": "وضع علامة مقروء على الكل",
+    "noNotifications": "لا توجد إشعارات",
+    "taskAssigned": "تم تعيينك إلى {{title}}"
+  },
   "common": {
     "save": "حفظ",
     "cancel": "إلغاء",

@@ -78,6 +78,21 @@
     "addSelected": "Add selected subtasks",
     "processing": "Processing..."
   },
+  "search": {
+    "placeholder": "Search tasks...",
+    "filters": "Filters",
+    "clearFilters": "Clear filters",
+    "allStatuses": "All statuses",
+    "allPriorities": "All priorities",
+    "searching": "Searching...",
+    "noResults": "No results found"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "taskAssigned": "You were assigned to {{title}}"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

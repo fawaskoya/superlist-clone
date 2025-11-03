@@ -15,6 +15,7 @@ interface WSMessage {
 class WebSocketManager {
   private wss: WebSocketServer | null = null;
   private clients: Map<string, Set<AuthenticatedWebSocket>> = new Map();
+  private userClients: Map<string, Set<AuthenticatedWebSocket>> = new Map();
 
   initialize(server: Server) {
     this.wss = new WebSocketServer({ server, path: '/ws' });
@@ -33,6 +34,12 @@ class WebSocketManager {
         ws.userId = decoded.userId;
         ws.workspaceIds = new Set();
 
+        // Track user connection
+        if (!this.userClients.has(ws.userId)) {
+          this.userClients.set(ws.userId, new Set());
+        }
+        this.userClients.get(ws.userId)?.add(ws);
+
         ws.on('message', (data: string) => {
           try {
             const message: WSMessage = JSON.parse(data.toString());
@@ -47,6 +54,7 @@ class WebSocketManager {
             ws.workspaceIds?.forEach(workspaceId => {
               this.clients.get(workspaceId)?.delete(ws);
             });
+            this.userClients.get(ws.userId)?.delete(ws);
           }
         });
 
@@ -138,6 +146,19 @@ class WebSocketManager {
       type: 'workspace:updated',
       payload: workspace
     }, userId);
+  }
+
+  // Broadcast to a specific user
+  broadcastToUser(userId: string, message: any) {
+    const clients = this.userClients.get(userId);
+    if (!clients) return;
+
+    const messageStr = JSON.stringify(message);
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(messageStr);
+      }
+    });
   }
 }
 

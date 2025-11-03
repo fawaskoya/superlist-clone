@@ -12,6 +12,8 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SearchBar } from './SearchBar';
+import { NotificationBell } from './NotificationBell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
@@ -34,13 +36,15 @@ export function Navbar() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-background px-6 sticky top-0 z-50">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-1">
         <SidebarTrigger data-testid="button-sidebar-toggle" className="h-9 w-9" />
         <h1 className="text-xl font-semibold">{t('appName')}</h1>
         <WorkspaceSwitcher />
+        <SearchBar />
       </div>
 
       <div className="flex items-center gap-3">
+        <NotificationBell />
         <LanguageSwitcher />
         
         <DropdownMenu>

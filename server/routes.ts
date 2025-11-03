@@ -621,6 +621,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = updateTaskSchema.parse(req.body);
 
+      // Get the current task to check for assignment changes
+      const currentTask = await prisma.task.findUnique({
+        where: { id: req.params.id },
+        select: { assignedToId: true, title: true },
+      });
+
       const task = await prisma.task.update({
         where: { id: req.params.id },
         data: {
@@ -646,6 +652,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         },
       });
+
+      // Create notification if task was assigned to someone new
+      if (
+        data.assignedToId !== undefined &&
+        data.assignedToId !== currentTask?.assignedToId &&
+        data.assignedToId !== null &&
+        data.assignedToId !== req.userId
+      ) {
+        const notification = await prisma.notification.create({
+          data: {
+            userId: data.assignedToId,
+            type: 'TASK_ASSIGNED',
+            data: JSON.stringify({
+              taskId: task.id,
+              taskTitle: task.title,
+              assignedBy: req.userId,
+            }),
+          },
+        });
+
+        // Broadcast notification via WebSocket
+        wsManager.broadcastToUser(data.assignedToId, {
+          type: 'notification:created',
+          payload: notification,
+        });
+      }
 
       // Broadcast to workspace
       wsManager.broadcastTaskUpdated(task.list.workspaceId, task, req.userId);
@@ -779,6 +811,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await prioritizeTasks(data.tasks);
 
       res.json({ tasks });
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Notification Routes
+  app.get('/api/notifications', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const notifications = await prisma.notification.findMany({
+        where: {
+          userId: req.userId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 50,
+      });
+
+      res.json(notifications);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const notification = await prisma.notification.update({
+        where: {
+          id: req.params.id,
+          userId: req.userId,
+        },
+        data: {
+          isRead: true,
+        },
+      });
+
+      res.json(notification);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.patch('/api/notifications/mark-all-read', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      await prisma.notification.updateMany({
+        where: {
+          userId: req.userId,
+          isRead: false,
+        },
+        data: {
+          isRead: true,
+        },
+      });
+
+      res.json({ success: true });
     } catch (error: any) {
       next(error);
     }

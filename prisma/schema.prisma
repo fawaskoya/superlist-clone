@@ -46,14 +46,27 @@ enum Role {
   OWNER
   ADMIN
   MEMBER
+  VIEWER
+}
+
+enum Permission {
+  MANAGE_WORKSPACE
+  MANAGE_MEMBERS
+  MANAGE_LISTS
+  CREATE_TASKS
+  EDIT_ALL_TASKS
+  DELETE_TASKS
+  COMMENT_TASKS
+  VIEW_ONLY
 }
 
 model WorkspaceMember {
-  id          String   @id @default(cuid())
-  workspaceId String
-  userId      String
-  role        Role     @default(MEMBER)
-  createdAt   DateTime @default(now())
+  id           String       @id @default(cuid())
+  workspaceId  String
+  userId       String
+  role         Role         @default(MEMBER)
+  permissions  String?
+  createdAt    DateTime     @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)

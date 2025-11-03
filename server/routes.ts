@@ -6,6 +6,7 @@ import { authenticateToken, generateTokens, type AuthRequest } from './middlewar
 import { summarizeTask, generateSubtasks, prioritizeTasks } from './services/ai';
 import { wsManager } from './websocket';
 import { logTaskCreated, logTaskStatusChanged, logTaskPriorityChanged, logTaskAssigned, logTaskUnassigned, logTaskMoved, logCommentAdded } from './activityLogger';
+import { getUserWorkspacePermissions, updateMemberPermissions, ROLE_PERMISSIONS } from './permissions';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -215,6 +216,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(workspace);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Workspace Member & Permission Routes
+  app.get('/api/workspaces/:id/members', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const members = await prisma.workspaceMember.findMany({
+        where: { workspaceId: req.params.id },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      const membersWithPermissions = await Promise.all(
+        members.map(async (member) => {
+          const permissions = await getUserWorkspacePermissions(member.userId, req.params.id);
+          return {
+            ...member,
+            effectivePermissions: permissions,
+            defaultPermissions: ROLE_PERMISSIONS[member.role],
+          };
+        })
+      );
+
+      res.json(membersWithPermissions);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.patch('/api/workspaces/:workspaceId/members/:userId', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { permissions, role } = req.body;
+
+      // Check if requester has MANAGE_MEMBERS permission
+      const hasPermission = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
+      if (!hasPermission.includes('MANAGE_MEMBERS' as any)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      const updateData: any = {};
+      if (role) updateData.role = role;
+      if (permissions) updateData.permissions = JSON.stringify(permissions);
+
+      const member = await prisma.workspaceMember.update({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.workspaceId,
+            userId: req.params.userId,
+          },
+        },
+        data: updateData,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      res.json(member);
     } catch (error: any) {
       next(error);
     }

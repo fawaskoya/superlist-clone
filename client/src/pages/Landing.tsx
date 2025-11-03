@@ -84,7 +84,8 @@ export default function Landing() {
         {/* Navigation */}
         <nav className="border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between gap-4">
+            {/* Desktop & Tablet Navigation */}
+            <div className="hidden sm:flex h-16 items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-lg blur-sm opacity-75" />
@@ -95,18 +96,18 @@ export default function Landing() {
                 </span>
               </div>
               
-              {/* Desktop Navigation Links */}
-              <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
-                <a href="#home" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-home">
+              {/* Navigation Links */}
+              <div className="flex items-center gap-4 md:gap-6 flex-1 justify-center">
+                <a href="#home" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-home">
                   {t('landing.nav.home')}
                 </a>
-                <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-features">
+                <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-features">
                   {t('landing.nav.features')}
                 </a>
-                <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-about">
+                <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-about">
                   {t('landing.nav.about')}
                 </a>
-                <a href="#pricing" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors" data-testid="link-pricing">
+                <a href="#pricing" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-pricing">
                   {t('landing.nav.pricing')}
                 </a>
               </div>
@@ -114,7 +115,7 @@ export default function Landing() {
               <div className="flex items-center gap-3">
                 <LanguageSwitcher />
                 <Link href="/login">
-                  <Button variant="ghost" className="hidden sm:flex" data-testid="button-login">
+                  <Button variant="ghost" data-testid="button-login">
                     {t('landing.nav.login')}
                   </Button>
                 </Link>
@@ -122,6 +123,51 @@ export default function Landing() {
                   <Button className="bg-gradient-to-r from-primary to-purple-600" data-testid="button-signup">
                     {t('landing.nav.signup')}
                   </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex sm:hidden flex-col">
+              {/* Top Row: Logo + Actions */}
+              <div className="flex h-14 items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-lg blur-sm opacity-75" />
+                    <CheckCircle2 className="relative h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                    {t('landing.title')}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <LanguageSwitcher />
+                  <Link href="/register">
+                    <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600" data-testid="button-signup-mobile">
+                      {t('landing.nav.signup')}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Bottom Row: Navigation Links */}
+              <div className="flex items-center gap-4 pb-2 overflow-x-auto">
+                <a href="#home" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-home-mobile">
+                  {t('landing.nav.home')}
+                </a>
+                <a href="#features" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-features-mobile">
+                  {t('landing.nav.features')}
+                </a>
+                <a href="#about" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-about-mobile">
+                  {t('landing.nav.about')}
+                </a>
+                <a href="#pricing" className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-pricing-mobile">
+                  {t('landing.nav.pricing')}
+                </a>
+                <Link href="/login">
+                  <a className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors whitespace-nowrap" data-testid="link-login-mobile">
+                    {t('landing.nav.login')}
+                  </a>
                 </Link>
               </div>
             </div>
@@ -186,7 +232,7 @@ export default function Landing() {
                   </Badge>
                   <Badge variant="secondary" className="px-4 py-2 text-sm bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
                     <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                    Bilingual Support
+                    {t('landing.hero.features.bilingual')}
                   </Badge>
                 </div>
               </div>

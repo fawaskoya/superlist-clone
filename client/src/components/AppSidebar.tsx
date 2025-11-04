@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 import { Inbox, Calendar, Clock, User, List, Plus } from 'lucide-react';
@@ -12,19 +13,62 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import type { List as ListType } from '@shared/schema';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import type { List as ListType, InsertList } from '@shared/schema';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
+import { useToast } from '@/hooks/use-toast';
 
 export function AppSidebar() {
   const { t } = useTranslation();
   const [location] = useLocation();
   const { currentWorkspace } = useWorkspace();
+  const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newListName, setNewListName] = useState('');
 
   const { data: lists } = useQuery<ListType[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
     enabled: !!currentWorkspace?.id,
   });
+
+  const createListMutation = useMutation({
+    mutationFn: (data: InsertList) => apiRequest('POST', `/api/workspaces/${currentWorkspace?.id}/lists`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'] });
+      setDialogOpen(false);
+      setNewListName('');
+      toast({
+        title: t('common.success'),
+        description: 'List created successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    },
+  });
+
+  const handleCreateList = () => {
+    if (!newListName.trim() || !currentWorkspace) return;
+    createListMutation.mutate({
+      name: newListName.trim(),
+      isPersonal: false,
+    });
+  };
 
   const quickViews = [
     { title: t('sidebar.inbox'), icon: Inbox, path: '/dashboard', testId: 'link-inbox' },
@@ -71,6 +115,7 @@ export function AppSidebar() {
               variant="ghost"
               size="icon"
               className="h-6 w-6"
+              onClick={() => setDialogOpen(true)}
               data-testid="button-create-list"
             >
               <Plus className="h-4 w-4" />
@@ -96,6 +141,46 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('list.createList')}</DialogTitle>
+            <DialogDescription>
+              Create a new list to organize your tasks.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="list-name">{t('list.listName')}</Label>
+              <Input
+                id="list-name"
+                placeholder="My Tasks"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newListName.trim()) {
+                    handleCreateList();
+                  }
+                }}
+                data-testid="input-list-name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleCreateList}
+              disabled={createListMutation.isPending || !newListName.trim()}
+              data-testid="button-create-list-submit"
+            >
+              {createListMutation.isPending ? t('common.loading') : t('common.create')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   );
 }

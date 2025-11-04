@@ -64,11 +64,9 @@ export default function RegisterPage() {
       {/* Navigation Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors" data-testid="link-home">
-              <CheckSquare className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-lg">{t('appName')}</span>
-            </a>
+          <Link href="/" className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors" data-testid="link-home">
+            <CheckSquare className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-lg">{t('appName')}</span>
           </Link>
           
           <div className="flex items-center gap-2">

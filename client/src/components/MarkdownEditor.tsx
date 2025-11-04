@@ -53,12 +53,11 @@ export function MarkdownEditor({
           data-testid="markdown-preview"
         >
           {value ? (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              className="prose prose-sm dark:prose-invert max-w-none"
-            >
-              {value}
-            </ReactMarkdown>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {value}
+              </ReactMarkdown>
+            </div>
           ) : (
             <div className="text-sm text-muted-foreground italic">
               Nothing to preview yet. Switch to Write tab to add content.

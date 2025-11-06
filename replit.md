@@ -118,6 +118,30 @@ TaskFlow is built with a modern web application architecture, featuring a React 
   - Login/Register pages: Theme toggle in navigation header
   - All pages support seamless theme switching with persistence
 
+**2024-11-06 - Task Creation UI & Date Filtering (Complete)**
+- ✅ **Visible Task Creation Button** - Enhanced task creation UX
+  - Added visible "Add" button to TaskList component next to input field
+  - Supports both button click and Enter key for task creation
+  - Button uses `size="lg"` (min-h-10, 40px) to match Input height
+  - Input uses `min-h-10` (40px) for perfect height alignment
+  - Architect-reviewed and approved for height consistency compliance
+  - Proper disabled states and loading indicators
+  - data-testid: "button-add-task" for E2E testing
+  
+- ✅ **Today/Upcoming Page Filtering** - Date-based task views working correctly
+  - Verified backend endpoints already implemented:
+    - `GET /api/workspaces/:workspaceId/tasks/today` - Tasks due today
+    - `GET /api/workspaces/:workspaceId/tasks/upcoming` - Tasks with future due dates
+  - QuickViewTaskList component uses correct query structure
+  - E2E tests confirm accurate filtering with no overlap
+  - Tasks appear in correct views based on due date
+  
+- ✅ **List Creation Dialog** - Fixed sidebar list creation
+  - Added Dialog component for creating new lists
+  - Fixed schema validation (removed workspaceId from request body)
+  - Smooth workflow: Click "+" button → Enter name → Submit
+  - Proper error handling and success notifications
+
 **Previously Completed Features:**
 - Professional landing page with hero image, features showcase, and comprehensive footer
 - Complete bilingual support (English/Arabic) with RTL layout

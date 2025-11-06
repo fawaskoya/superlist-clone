@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { TaskItem } from './TaskItem';
 import { TaskDetailsDrawer } from './TaskDetailsDrawer';
@@ -78,8 +79,15 @@ export function TaskList({ listId }: TaskListProps) {
     },
   });
 
-  const handleAddTask = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && newTaskTitle.trim()) {
+  const handleAddTask = (e?: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e && e.key !== 'Enter') return;
+    if (newTaskTitle.trim()) {
+      createMutation.mutate(newTaskTitle.trim());
+    }
+  };
+
+  const handleAddTaskClick = () => {
+    if (newTaskTitle.trim()) {
       createMutation.mutate(newTaskTitle.trim());
     }
   };
@@ -122,16 +130,24 @@ export function TaskList({ listId }: TaskListProps) {
   return (
     <>
       <Card className="overflow-hidden">
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <Plus className="h-5 w-5 text-muted-foreground" />
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
           <Input
             placeholder={t('task.addTask')}
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             onKeyDown={handleAddTask}
-            className="border-0 shadow-none focus-visible:ring-0 px-0 h-auto"
+            className="border-0 shadow-none focus-visible:ring-0 px-0 min-h-10 flex-1"
             data-testid="input-add-task"
           />
+          <Button
+            size="lg"
+            onClick={handleAddTaskClick}
+            disabled={!newTaskTitle.trim() || createMutation.isPending}
+            data-testid="button-add-task"
+          >
+            {createMutation.isPending ? t('common.loading') : t('common.add')}
+          </Button>
         </div>
         {sortedTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">

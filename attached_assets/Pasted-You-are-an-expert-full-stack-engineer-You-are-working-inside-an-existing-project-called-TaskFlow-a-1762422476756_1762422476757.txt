@@ -1,0 +1,273 @@
+You are an expert full-stack engineer.
+You are working inside an existing project called TaskFlow, a Superlist-style task manager. The UI currently has:
+
+Left sidebar: “My Day” with Inbox, Today, Upcoming, Assigned to me, and a Lists section.
+
+Main area: an Inbox view that shows tasks in a single list.
+
+Top bar: workspace selector, search bar, filter icon, profile/avatar.
+
+I want you to implement the same conceptual behavior as Superlist’s “Inbox” and “Tasks” pages, using the existing tech stack and design system already in this repo. Do not rewrite the app from scratch; extend and refactor what’s already here.
+
+1. Overall Concept
+
+Implement two distinct but connected top-level views:
+
+Inbox page (capture view)
+
+Default landing list for new, unorganized tasks.
+
+A “dumping ground / capture box” for quick entries.
+
+Tasks here may optionally have due dates, priorities, and list assignments, but they can also be just raw items.
+
+From Inbox, the user should be able to quickly move tasks into other lists or assign dates.
+
+Tasks page (global organized view)
+
+A global, cross-list view of all actionable tasks (except completed, unless filtered in).
+
+Shows tasks from all lists and from Inbox, with filters and grouping (by date, priority, list, etc.).
+
+This is where the user reviews and manages everything that’s already “organized”.
+
+The behavior should mirror Superlist:
+
+Inbox = capture first, organize later
+
+Tasks = review, prioritize, and work across everything
+
+2. Data Model Requirements
+
+Update or confirm the data model so it supports this behavior. You can adjust existing models if needed, but keep migrations/backwards-compatibility in mind.
+
+For each task, we need at least:
+
+id
+
+title
+
+description (optional, long text)
+
+status ("open" | "completed" | "archived" or similar)
+
+createdAt
+
+updatedAt
+
+completedAt (nullable)
+
+dueDate (nullable)
+
+priority (nullable enum: "low" | "medium" | "high" or numeric)
+
+listId (nullable — if null, the task is in Inbox)
+
+isInboxDefault or equivalent logic so that:
+
+Any new task created from the Inbox view is saved with listId = null (or a special inbox list id).
+
+assigneeId (optional, for “Assigned to me”)
+
+tags / labels (optional array)
+
+If the app already has a list model (like List or Project), use this rule:
+
+Either: model Inbox as listId = null
+
+Or: model Inbox as a special List with type = "inbox".
+
+Choose the simpler approach based on existing code, but keep the concept of Inbox being the default capture list.
+
+3. Inbox Page Behavior
+
+Route & layout
+
+Ensure there is a distinct route/view for Inbox, e.g. /inbox.
+
+Left sidebar “Inbox” item should navigate to this route and visually show it as active.
+
+Functionality
+
+At the top of the Inbox view, keep the “Add a task…” input bar.
+
+When the user creates a task here:
+
+Save it with listId = null (or the special Inbox list id).
+
+It should immediately appear in the list below.
+
+Each Inbox task row should support:
+
+Toggle complete.
+
+Click to open a details drawer / panel (use existing details UI).
+
+Set due date, priority, assignee.
+
+“Move to list…” action to assign it to a specific list (this removes it from the pure Inbox capture view if your logic is listId = null → Inbox).
+
+Optional but nice:
+
+Show a subtle label like “Inbox” on each item so it’s obvious that this is the raw capture list.
+
+Keyboard shortcut on Inbox page:
+
+Enter after typing creates a task and keeps the input focused.
+
+Cmd/Ctrl + N creates a new task input.
+
+4. Tasks Page Behavior (New View)
+
+Create a Tasks page similar to Superlist’s “Tasks” central view.
+
+Routing & Navigation
+
+Add a new top-level route, e.g. /tasks.
+
+Add a corresponding nav item in the left sidebar under “My Day” or near it:
+
+Label it “Tasks”.
+
+When clicked, show the global tasks view.
+
+UI Structure
+
+Main header:
+
+Title: “Tasks”
+
+Use the same top bar with search and filter controls.
+
+Under the header, show a list of tasks grouped by a default criterion, e.g.:
+
+Group by Due date: Overdue, Today, Tomorrow, Upcoming, No due date.
+OR
+
+Group by List, with Inbox tasks grouped under “Inbox”.
+
+Pick the grouping that’s easiest to implement with the existing components, but write the code to be extensible so we can change grouping options later.
+
+Filtering and Sorting
+
+Global Tasks view should support:
+
+Text search (reuse existing search input).
+
+Filters for:
+
+Status: open/complete.
+
+List: all lists vs specific list.
+
+Priority.
+
+Assignee (for “Assigned to me” integration).
+
+The filter icon in the top bar should open a dropdown or side panel with these options. Use existing UI primitives if present.
+
+Task entries in Tasks page
+
+For each task:
+
+Show:
+
+Checkbox for completion.
+
+Title.
+
+List name (e.g. “Inbox” if listId = null).
+
+Due date (with pill style similar to your existing date tags).
+
+Priority badge.
+
+Clicking a task opens the same details drawer as Inbox.
+
+Completing a task should:
+
+Update status and optionally hide it from the default view (unless “Show completed” is enabled).
+
+5. Today, Upcoming, Assigned to Me Integration
+
+Keep / reuse the existing “Today”, “Upcoming”, “Assigned to me” pages, but make sure they are implemented consistently using the same underlying task model:
+
+Today = all open tasks with dueDate = today (regardless of list).
+
+Upcoming = open tasks with future dueDate beyond today.
+
+Assigned to me = tasks where assigneeId = current user.
+
+These views should pull from the same data set as Inbox + Tasks; no duplication of logic.
+
+6. Code Architecture & Implementation Notes
+
+Detect the existing frontend stack (likely React + TypeScript + Tailwind).
+
+Use existing shared components for task rows, date pills, priority tags, drawers, etc.
+
+If a TaskList or generic TaskTable component exists, refactor it to be reusable between Inbox, Tasks, Today, etc.
+
+Backend:
+
+Identify how data is stored (Prisma/Postgres, Supabase, filesystem, etc.).
+
+Add or adjust fields/migrations as needed to support:
+
+listId as optional.
+
+status, dueDate, priority, etc. (if not already present).
+
+API:
+
+Ensure there are endpoints or server actions for:
+
+Creating a task (with optional listId, dueDate, priority, etc.).
+
+Querying tasks with flexible filters (list, due date range, status, search text).
+
+Implement list-level and global queries to power Inbox and Tasks.
+
+7. UX Details & Polish
+
+When on Inbox and the user creates a task, it should feel instant and snappy (optimistic UI update).
+
+When moving a task from Inbox to a list:
+
+Immediately remove it from Inbox if using listId = null rule.
+
+In Tasks view, it should now show under that list group.
+
+Make sure the current active page is visually highlighted in the sidebar (Inbox vs Tasks vs Today, etc.).
+
+Keep dark theme styling consistent with the existing UI (do not introduce drastically new styles unless necessary).
+
+8. Deliverables
+
+New/updated routes/components:
+
+InboxPage (refined as capture view).
+
+TasksPage (new global view).
+
+Updated data model & migrations for tasks/lists.
+
+API / server logic for flexible task querying.
+
+Sidebar nav updated with “Tasks”.
+
+Any necessary reusable components for displaying task lists.
+
+Brief code comments explaining:
+
+How Inbox vs Tasks logic works.
+
+How to add new filters/groupings later.
+
+After implementing, run the app and verify:
+
+I can create tasks in Inbox, keep them unassigned, and later move them to a list.
+
+Tasks page shows all tasks from all lists + Inbox with proper grouping and filtering.
+
+Today/Upcoming/Assigned to me still work, using the same underlying task logic.

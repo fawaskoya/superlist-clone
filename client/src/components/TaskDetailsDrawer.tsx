@@ -231,15 +231,6 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       <SheetContent className="w-96 p-6 overflow-y-auto" data-testid="drawer-task-details">
         <SheetHeader className="mb-6">
           <SheetTitle className="sr-only">{t('task.taskDetails')}</SheetTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-6 top-6 h-8 w-8"
-            data-testid="button-close-drawer"
-          >
-            <X className="h-5 w-5" />
-          </Button>
         </SheetHeader>
 
         <div className="space-y-6">

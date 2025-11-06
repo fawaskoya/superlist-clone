@@ -80,6 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             title: 'Welcome to TaskFlow!',
             description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
             listId: inboxList.id,
+            workspaceId: workspace.id,
             createdById: user.id,
             status: 'TODO',
             priority: 'MEDIUM',
@@ -89,6 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             title: 'Try the AI features',
             description: 'Click on any task to open the details drawer, then use the AI buttons to summarize, generate subtasks, or get priority suggestions.',
             listId: inboxList.id,
+            workspaceId: workspace.id,
             createdById: user.id,
             status: 'TODO',
             priority: 'HIGH',
@@ -345,9 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const tasks = await prisma.task.findMany({
         where: {
-          list: {
-            workspaceId: req.params.workspaceId,
-          },
+          workspaceId: req.params.workspaceId,
           dueDate: {
             gte: today,
             lt: tomorrow,
@@ -360,6 +360,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: true,
               name: true,
               email: true,
+            },
+          },
+          list: {
+            select: {
+              id: true,
+              name: true,
             },
           },
         },
@@ -380,9 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const tasks = await prisma.task.findMany({
         where: {
-          list: {
-            workspaceId: req.params.workspaceId,
-          },
+          workspaceId: req.params.workspaceId,
           dueDate: {
             gte: tomorrow,
           },
@@ -394,6 +398,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: true,
               name: true,
               email: true,
+            },
+          },
+          list: {
+            select: {
+              id: true,
+              name: true,
             },
           },
         },
@@ -410,9 +420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tasks = await prisma.task.findMany({
         where: {
-          list: {
-            workspaceId: req.params.workspaceId,
-          },
+          workspaceId: req.params.workspaceId,
           assignedToId: req.userId,
           parentId: null,
         },
@@ -424,11 +432,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: true,
             },
           },
+          list: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
         orderBy: { dueDate: 'asc' },
       });
 
       res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Get inbox tasks (tasks without a list)
+  app.get('/api/workspaces/:workspaceId/tasks/inbox', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const tasks = await prisma.task.findMany({
+        where: {
+          workspaceId: req.params.workspaceId,
+          listId: null,
+          parentId: null,
+        },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { orderIndex: 'asc' },
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Get all tasks in workspace (for global Tasks view)
+  app.get('/api/workspaces/:workspaceId/tasks/all', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { status, listId, priority } = req.query;
+      
+      const where: any = {
+        workspaceId: req.params.workspaceId,
+        parentId: null,
+      };
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (listId !== undefined) {
+        where.listId = listId === 'null' ? null : listId;
+      }
+
+      if (priority) {
+        where.priority = priority;
+      }
+
+      const tasks = await prisma.task.findMany({
+        where,
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          list: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: [
+          { dueDate: 'asc' },
+          { createdAt: 'desc' },
+        ],
+      });
+
+      res.json(tasks);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Create inbox task (no list assignment)
+  app.post('/api/workspaces/:workspaceId/tasks', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const data = insertTaskSchema.parse(req.body);
+
+      const maxOrder = await prisma.task.findFirst({
+        where: { 
+          workspaceId: req.params.workspaceId,
+          listId: null,
+          parentId: data.parentId || null 
+        },
+        orderBy: { orderIndex: 'desc' },
+        select: { orderIndex: true },
+      });
+
+      const task = await prisma.task.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          status: data.status || 'TODO',
+          priority: data.priority || 'MEDIUM',
+          dueDate: data.dueDate ? new Date(data.dueDate) : null,
+          assignedToId: data.assignedToId,
+          parentId: data.parentId,
+          listId: null,
+          workspaceId: req.params.workspaceId,
+          createdById: req.userId!,
+          orderIndex: (maxOrder?.orderIndex || 0) + 1,
+        },
+        include: {
+          assignedTo: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Log activity
+      await logTaskCreated(task.id, req.userId!);
+
+      // If assigned to someone, log that too
+      if (task.assignedToId && task.assignedTo) {
+        await logTaskAssigned(task.id, req.userId!, task.assignedToId, task.assignedTo.name);
+      }
+
+      // Broadcast to workspace
+      wsManager.broadcastTaskCreated(req.params.workspaceId, task, req.userId);
+
+      res.status(201).json(task);
     } catch (error: any) {
       next(error);
     }
@@ -725,7 +874,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...(data.dueDate !== undefined && { dueDate: data.dueDate ? new Date(data.dueDate) : null }),
           ...(data.assignedToId !== undefined && { assignedToId: data.assignedToId }),
         },
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          status: true,
+          priority: true,
+          dueDate: true,
+          orderIndex: true,
+          listId: true,
+          workspaceId: true,
+          assignedToId: true,
+          createdById: true,
+          parentId: true,
+          createdAt: true,
+          updatedAt: true,
           assignedTo: {
             select: {
               id: true,
@@ -735,6 +898,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           list: {
             select: {
+              id: true,
+              name: true,
               workspaceId: true,
             },
           },
@@ -789,7 +954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Broadcast to workspace
-      wsManager.broadcastTaskUpdated(task.list.workspaceId, task, req.userId);
+      wsManager.broadcastTaskUpdated(task.workspaceId, task, req.userId);
 
       res.json(task);
     } catch (error: any) {
@@ -801,12 +966,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const task = await prisma.task.findUnique({
         where: { id: req.params.id },
-        include: {
-          list: {
-            select: {
-              workspaceId: true,
-            },
-          },
+        select: {
+          id: true,
+          workspaceId: true,
         },
       });
 
@@ -819,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Broadcast to workspace
-      wsManager.broadcastTaskDeleted(task.list.workspaceId, req.params.id, req.userId);
+      wsManager.broadcastTaskDeleted(task.workspaceId, req.params.id, req.userId);
 
       res.status(204).send();
     } catch (error: any) {

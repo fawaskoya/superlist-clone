@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
-import { Inbox, Calendar, Clock, User, List, Plus } from 'lucide-react';
+import { Inbox, Calendar, Clock, User, List, Plus, ListCheck } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -72,6 +72,7 @@ export function AppSidebar() {
 
   const quickViews = [
     { title: t('sidebar.inbox'), icon: Inbox, path: '/dashboard', testId: 'link-inbox' },
+    { title: t('sidebar.tasks', { defaultValue: 'Tasks' }), icon: ListCheck, path: '/tasks', testId: 'link-tasks' },
     { title: t('sidebar.today'), icon: Calendar, path: '/today', testId: 'link-today' },
     { title: t('sidebar.upcoming'), icon: Clock, path: '/upcoming', testId: 'link-upcoming' },
     { title: t('sidebar.assignedToMe'), icon: User, path: '/assigned', testId: 'link-assigned' },

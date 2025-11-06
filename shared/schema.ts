@@ -78,6 +78,7 @@ export const insertTaskSchema = z.object({
   dueDate: z.string().optional(),
   assignedToId: z.string().optional(),
   parentId: z.string().optional(),
+  listId: z.string().optional().nullable(),
 });
 
 export const updateTaskSchema = z.object({
@@ -87,6 +88,7 @@ export const updateTaskSchema = z.object({
   priority: TaskPriorityEnum.optional(),
   dueDate: z.string().optional().nullable(),
   assignedToId: z.string().optional().nullable(),
+  listId: z.string().optional().nullable(),
 });
 
 export type InsertTask = z.infer<typeof insertTaskSchema>;
@@ -94,7 +96,8 @@ export type UpdateTask = z.infer<typeof updateTaskSchema>;
 
 export interface Task {
   id: string;
-  listId: string;
+  listId: string | null;
+  workspaceId: string;
   title: string;
   description: string | null;
   status: TaskStatus;
@@ -106,6 +109,7 @@ export interface Task {
   orderIndex: number;
   createdAt: Date;
   updatedAt: Date;
+  list?: List | null;
 }
 
 // Comment schemas

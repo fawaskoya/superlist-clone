@@ -24,31 +24,40 @@ import { Badge } from '@/components/ui/badge';
 import { TaskActivityTimeline } from './TaskActivityTimeline';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileAttachments } from './FileAttachments';
-import type { Task, TaskStatus, TaskPriority, TaskComment, InsertTask } from '@shared/schema';
+import type { Task, TaskStatus, TaskPriority, TaskComment, InsertTask, List } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { format } from 'date-fns';
 
 interface TaskDetailsDrawerProps {
   task: Task | null;
   onClose: () => void;
-  listId: string;
+  listId: string | null;
 }
 
 export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { currentWorkspace } = useWorkspace();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TaskStatus>('TODO');
   const [priority, setPriority] = useState<TaskPriority>('MEDIUM');
   const [dueDate, setDueDate] = useState('');
+  const [selectedListId, setSelectedListId] = useState<string | null>(listId);
   const [newComment, setNewComment] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
   const [aiSummary, setAiSummary] = useState('');
   const [suggestedSubtasks, setSuggestedSubtasks] = useState<string[]>([]);
   const [selectedSubtasks, setSelectedSubtasks] = useState<Set<number>>(new Set());
+
+  // Fetch available lists for the list selector
+  const { data: lists } = useQuery<List[]>({
+    queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
+    enabled: !!currentWorkspace?.id,
+  });
 
   useEffect(() => {
     if (task) {
@@ -57,6 +66,7 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       setStatus(task.status);
       setPriority(task.priority);
       setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '');
+      setSelectedListId(task.listId);
     }
   }, [task]);
 
@@ -70,11 +80,24 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
     enabled: !!task?.id,
   });
 
+  const invalidateTaskCaches = () => {
+    // Invalidate all possible task caches
+    if (listId) {
+      queryClient.invalidateQueries({ queryKey: ['/api/lists', listId, 'tasks'] });
+    }
+    if (selectedListId) {
+      queryClient.invalidateQueries({ queryKey: ['/api/lists', selectedListId, 'tasks'] });
+    }
+    if (currentWorkspace?.id) {
+      queryClient.invalidateQueries({ queryKey: ['/api/workspaces', currentWorkspace.id, 'tasks'] });
+    }
+  };
+
   const updateMutation = useMutation({
     mutationFn: (data: Partial<Task>) =>
       apiRequest('PATCH', `/api/tasks/${task?.id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/lists', listId, 'tasks'] });
+      invalidateTaskCaches();
     },
   });
 
@@ -88,14 +111,18 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
   });
 
   const createSubtaskMutation = useMutation({
-    mutationFn: (subtaskTitle: string) =>
-      apiRequest('POST', `/api/lists/${listId}/tasks`, {
+    mutationFn: (subtaskTitle: string) => {
+      const endpoint = selectedListId 
+        ? `/api/lists/${selectedListId}/tasks`
+        : `/api/workspaces/${currentWorkspace?.id}/tasks`;
+      return apiRequest('POST', endpoint, {
         title: subtaskTitle,
         parentId: task?.id,
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', task?.id, 'subtasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/lists', listId, 'tasks'] });
+      invalidateTaskCaches();
       setNewSubtask('');
     },
   });

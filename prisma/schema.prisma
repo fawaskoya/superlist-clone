@@ -38,6 +38,7 @@ model Workspace {
   members WorkspaceMember[]
   lists   List[]
   tags    Tag[]
+  tasks   Task[]
 
   @@unique([ownerId, slug])
 }
@@ -103,7 +104,7 @@ enum TaskPriority {
 
 model Task {
   id           String       @id @default(cuid())
-  listId       String
+  listId       String?
   title        String
   description  String?
   status       TaskStatus   @default(TODO)
@@ -115,8 +116,10 @@ model Task {
   orderIndex   Float        @default(0)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  workspaceId  String
 
-  list       List          @relation(fields: [listId], references: [id], onDelete: Cascade)
+  list       List?         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  workspace  Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   assignedTo User?         @relation("AssignedTasks", fields: [assignedToId], references: [id])
   createdBy  User          @relation(fields: [createdById], references: [id])
   parent     Task?         @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)

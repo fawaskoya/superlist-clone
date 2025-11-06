@@ -142,6 +142,45 @@ TaskFlow is built with a modern web application architecture, featuring a React 
   - Smooth workflow: Click "+" button → Enter name → Submit
   - Proper error handling and success notifications
 
+**2024-11-06 - Inbox/Tasks System Implementation (Complete)**
+- ✅ **Database Schema Evolution** - Made Task.listId nullable for Inbox support
+  - Modified Task model: listId is now optional (nullable)
+  - Added workspaceId field to Task model (required, with workspace relation)
+  - Migration strategy: Added workspaceId as nullable, populated from list.workspaceId, then made required
+  - Preserves all existing data while enabling new Inbox functionality
+  
+- ✅ **Backend API Enhancements** - New endpoints and bug fixes
+  - Created POST /api/workspaces/:id/tasks - Create inbox tasks (listId = null)
+  - Created GET /api/workspaces/:id/tasks/inbox - Fetch inbox tasks
+  - Created GET /api/workspaces/:id/tasks/all - Fetch all workspace tasks
+  - Fixed PATCH /api/tasks/:id - Uses task.workspaceId instead of task.list.workspaceId
+  - Fixed DELETE /api/tasks/:id - Uses task.workspaceId instead of task.list.workspaceId
+  - Fixed GET /api/workspaces/:id/tasks/today - Now includes inbox tasks with today's due date
+  - Fixed GET /api/workspaces/:id/tasks/upcoming - Now includes inbox tasks with future due dates
+  - Fixed POST /api/auth/register - Default tasks now include workspaceId
+  
+- ✅ **Frontend Components & Pages** - New views and navigation
+  - Created InboxTaskList component - Displays tasks where listId = null
+  - Created TasksPage (/tasks) - Global task view with date-based grouping
+  - Updated DashboardPage (/dashboard) - Now uses InboxTaskList for quick capture
+  - Updated AppSidebar - Added "Tasks" navigation link with ListCheck icon
+  - Updated App.tsx - Added /tasks route to routing configuration
+  - TaskDetailsDrawer - Works seamlessly with both inbox and list tasks
+  
+- ✅ **Architecture & Design Patterns**
+  - Inbox paradigm: Tasks with listId = null serve as quick capture inbox
+  - Tasks page: Global view showing ALL tasks (inbox + lists) grouped by due date
+  - Grouping logic: Overdue, Today, Tomorrow, Upcoming, No due date
+  - Tasks remain in inbox even when assigned due dates or other properties
+  - All endpoints consistently use task.workspaceId for workspace-level operations
+  
+- ✅ **E2E Testing & Validation**
+  - Comprehensive test coverage for registration, inbox creation, task updates
+  - Verified Today/Upcoming pages include inbox tasks correctly
+  - Confirmed status updates, due date changes work for inbox tasks
+  - All CRUD operations tested and working for both inbox and list tasks
+  - No breaking changes to existing functionality
+
 **Previously Completed Features:**
 - Professional landing page with hero image, features showcase, and comprehensive footer
 - Complete bilingual support (English/Arabic) with RTL layout

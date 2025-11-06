@@ -13,6 +13,7 @@ import Landing from '@/pages/Landing';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
+import TasksPage from '@/pages/TasksPage';
 import ListPage from '@/pages/ListPage';
 import TodayPage from '@/pages/TodayPage';
 import UpcomingPage from '@/pages/UpcomingPage';
@@ -41,7 +42,7 @@ function AppContent() {
 
   // Check if current path is a private route
   // NOTE: When adding new private routes, make sure to add them to this list
-  const privatePaths = ['/dashboard', '/today', '/upcoming', '/assigned', '/list'];
+  const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list'];
   const isPrivateRoute = privatePaths.some(path => location.startsWith(path));
 
   // If user is authenticated, show the app with persistent layout
@@ -66,6 +67,7 @@ function AppContent() {
                       <Redirect to="/dashboard" />
                     </Route>
                     <Route path="/dashboard" component={DashboardPage} />
+                    <Route path="/tasks" component={TasksPage} />
                     <Route path="/list/:id" component={ListPage} />
                     <Route path="/today" component={TodayPage} />
                     <Route path="/upcoming" component={UpcomingPage} />

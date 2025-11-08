@@ -46,6 +46,7 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
   const [status, setStatus] = useState<TaskStatus>('TODO');
   const [priority, setPriority] = useState<TaskPriority>('MEDIUM');
   const [dueDate, setDueDate] = useState('');
+  const [assignedToId, setAssignedToId] = useState<string | null>(null);
   const [selectedListId, setSelectedListId] = useState<string | null>(listId);
   const [newComment, setNewComment] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
@@ -59,6 +60,22 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
     enabled: !!currentWorkspace?.id,
   });
 
+  // Fetch workspace members for assignee selector
+  interface Member {
+    userId: string;
+    role: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  }
+
+  const { data: members } = useQuery<Member[]>({
+    queryKey: ['/api/workspaces', currentWorkspace?.id, 'members'],
+    enabled: !!currentWorkspace?.id,
+  });
+
   useEffect(() => {
     if (task) {
       setTitle(task.title);
@@ -66,6 +83,7 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       setStatus(task.status);
       setPriority(task.priority);
       setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '');
+      setAssignedToId((task as any).assignedToId || null);
       setSelectedListId(task.listId);
     }
   }, [task]);
@@ -396,6 +414,36 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
               }}
               data-testid="input-task-due-date"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t('task.assignee')}</Label>
+            <Select
+              value={assignedToId || 'unassigned'}
+              onValueChange={(value) => {
+                const newAssignee = value === 'unassigned' ? null : value;
+                setAssignedToId(newAssignee);
+                handleUpdate('assignedToId', newAssignee);
+              }}
+            >
+              <SelectTrigger data-testid="select-assignee">
+                <SelectValue placeholder={t('task.assigneePlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned" data-testid="select-item-assignee-unassigned">
+                  {t('task.unassigned')}
+                </SelectItem>
+                {members?.map((member) => (
+                  <SelectItem
+                    key={member.userId}
+                    value={member.user.id}
+                    data-testid={`select-item-assignee-${member.user.id}`}
+                  >
+                    {member.user.name} ({member.user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Separator />

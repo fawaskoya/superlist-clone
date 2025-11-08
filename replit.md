@@ -28,7 +28,7 @@ TaskFlow is built with a modern web application architecture, featuring a React 
 - **AI Features**: Integration with OpenAI for task summarization, subtask generation, and priority suggestions.
 - **Real-time Features**: WebSocket infrastructure for real-time collaboration, including task updates, reordering, and notifications.
 - **Database Schema**: Designed with Prisma, including models for User, Workspace, List, Task (with subtasks), TaskComment, Tag, Notification, TaskActivity, and FileAttachment.
-- **Task Management**: CRUD for tasks, subtasks, lists, status tracking (TODO, IN_PROGRESS, DONE), priority levels, due dates, assignments, and tags. Includes an "Inbox" concept for tasks without a specific list.
+- **Task Management**: CRUD for tasks, subtasks, lists, status tracking (TODO, IN_PROGRESS, DONE), priority levels, due dates, task assignment to workspace members, and tags. Includes an "Inbox" concept for tasks without a specific list. Full assignment UI in TaskDetailsDrawer with member selection dropdown.
 - **Workspaces**: Multi-tenant workspace support with owner/member management, roles, and granular permissions.
 - **Notifications**: Real-time notification system for user-specific events.
 - **Advanced Search & Filtering**: Comprehensive search with filters.

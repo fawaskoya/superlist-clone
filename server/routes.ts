@@ -191,6 +191,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Add creator as workspace member with OWNER role
+      await prisma.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: req.userId!,
+          role: 'OWNER',
+        },
+      });
+
       await prisma.list.create({
         data: {
           name: 'Inbox',
@@ -235,6 +244,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Workspace Member & Permission Routes
   app.get('/api/workspaces/:id/members', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Auto-fix: Check if workspace owner is missing as a member
+      const workspace = await prisma.workspace.findUnique({
+        where: { id: req.params.id },
+        select: { ownerId: true },
+      });
+
+      if (workspace) {
+        const ownerMember = await prisma.workspaceMember.findFirst({
+          where: {
+            workspaceId: req.params.id,
+            userId: workspace.ownerId,
+          },
+        });
+
+        // If owner is not a member, add them automatically
+        if (!ownerMember) {
+          await prisma.workspaceMember.create({
+            data: {
+              workspaceId: req.params.id,
+              userId: workspace.ownerId,
+              role: 'OWNER',
+            },
+          });
+        }
+      }
+
       const members = await prisma.workspaceMember.findMany({
         where: { workspaceId: req.params.id },
         include: {
@@ -1514,6 +1549,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json({ success: true });
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Fix endpoint: Add owner as member to workspaces that are missing it
+  app.post('/api/admin/fix-workspace-members', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      // Find all workspaces where the owner is not a member
+      const workspaces = await prisma.workspace.findMany({
+        where: {
+          ownerId: req.userId!,
+        },
+        include: {
+          members: {
+            where: {
+              userId: req.userId!,
+            },
+          },
+        },
+      });
+
+      const fixed: string[] = [];
+      for (const workspace of workspaces) {
+        if (workspace.members.length === 0) {
+          // Owner is not a member, add them
+          await prisma.workspaceMember.create({
+            data: {
+              workspaceId: workspace.id,
+              userId: req.userId!,
+              role: 'OWNER',
+            },
+          });
+          fixed.push(workspace.id);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Fixed ${fixed.length} workspace(s)`,
+        fixedWorkspaces: fixed,
+      });
     } catch (error: any) {
       next(error);
     }

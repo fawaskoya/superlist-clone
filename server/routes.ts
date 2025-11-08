@@ -64,6 +64,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Add user as workspace member with OWNER role
+      await prisma.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: user.id,
+          role: 'OWNER',
+        },
+      });
+
       const inboxList = await prisma.list.create({
         data: {
           name: 'Inbox',
@@ -262,6 +271,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }
 
+      // Get requester's member record to check their role
+      const requesterMember = await prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.workspaceId,
+            userId: req.userId!,
+          },
+        },
+      });
+
+      if (!requesterMember) {
+        return res.status(403).json({ message: 'You are not a member of this workspace' });
+      }
+
+      // Get current member to check their role
+      const currentMember = await prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.workspaceId,
+            userId: req.params.userId,
+          },
+        },
+      });
+
+      if (!currentMember) {
+        return res.status(404).json({ message: 'Member not found' });
+      }
+
+      // Only OWNERS can grant or revoke OWNER role
+      if (role && (role === 'OWNER' || currentMember.role === 'OWNER')) {
+        if (requesterMember.role !== 'OWNER') {
+          return res.status(403).json({ 
+            message: 'Only workspace owners can grant or revoke owner role' 
+          });
+        }
+      }
+
+      // If changing role from OWNER, ensure there's at least one other OWNER
+      if (role && currentMember.role === 'OWNER' && role !== 'OWNER') {
+        const ownerCount = await prisma.workspaceMember.count({
+          where: {
+            workspaceId: req.params.workspaceId,
+            role: 'OWNER',
+          },
+        });
+
+        if (ownerCount <= 1) {
+          return res.status(403).json({ 
+            message: 'Cannot demote the sole owner. Assign another owner first.' 
+          });
+        }
+      }
+
+      // Prevent self-demotion if you're the sole owner
+      if (role && req.userId === req.params.userId && currentMember.role === 'OWNER' && role !== 'OWNER') {
+        const ownerCount = await prisma.workspaceMember.count({
+          where: {
+            workspaceId: req.params.workspaceId,
+            role: 'OWNER',
+          },
+        });
+
+        if (ownerCount <= 1) {
+          return res.status(403).json({ 
+            message: 'Cannot demote yourself as the sole owner. Assign another owner first.' 
+          });
+        }
+      }
+
       const updateData: any = {};
       if (role) updateData.role = role;
       if (permissions) updateData.permissions = JSON.stringify(permissions);
@@ -282,6 +360,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(member);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.delete('/api/workspaces/:workspaceId/members/:userId', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      // Check if requester has MANAGE_MEMBERS permission
+      const permissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
+      if (!permissions.includes('MANAGE_MEMBERS' as any)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      // Cannot remove workspace owner
+      const memberToRemove = await prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.workspaceId,
+            userId: req.params.userId,
+          },
+        },
+      });
+
+      if (memberToRemove?.role === 'OWNER') {
+        return res.status(403).json({ message: 'Cannot remove workspace owner' });
+      }
+
+      await prisma.workspaceMember.delete({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.workspaceId,
+            userId: req.params.userId,
+          },
+        },
+      });
+
+      res.json({ message: 'Member removed successfully' });
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.post('/api/workspaces/:id/invitations', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { email, role } = req.body;
+
+      // Check if requester has MANAGE_MEMBERS permission
+      const permissions = await getUserWorkspacePermissions(req.userId!, req.params.id);
+      if (!permissions.includes('MANAGE_MEMBERS' as any)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      // Find user by email
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found. They need to register first.' });
+      }
+
+      // Check if user is already a member
+      const existingMember = await prisma.workspaceMember.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId: req.params.id,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (existingMember) {
+        return res.status(400).json({ message: 'User is already a member of this workspace' });
+      }
+
+      // Add user to workspace
+      const member = await prisma.workspaceMember.create({
+        data: {
+          workspaceId: req.params.id,
+          userId: user.id,
+          role: role || 'MEMBER',
+        },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      res.status(201).json(member);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.patch('/api/workspaces/:id', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      const { name } = req.body;
+
+      // Check if requester has MANAGE_WORKSPACE permission
+      const permissions = await getUserWorkspacePermissions(req.userId!, req.params.id);
+      if (!permissions.includes('MANAGE_WORKSPACE' as any)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      const workspace = await prisma.workspace.update({
+        where: { id: req.params.id },
+        data: { name },
+      });
+
+      res.json(workspace);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  app.delete('/api/workspaces/:id', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      // Check if requester has MANAGE_WORKSPACE permission
+      const permissions = await getUserWorkspacePermissions(req.userId!, req.params.id);
+      if (!permissions.includes('MANAGE_WORKSPACE' as any)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      // Delete workspace (this will cascade delete all related data)
+      await prisma.workspace.delete({
+        where: { id: req.params.id },
+      });
+
+      res.json({ message: 'Workspace deleted successfully' });
     } catch (error: any) {
       next(error);
     }
@@ -670,6 +878,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = insertTaskSchema.parse(req.body);
 
+      // Get the list to retrieve workspaceId
+      const list = await prisma.list.findUnique({
+        where: { id: req.params.listId },
+        select: { workspaceId: true },
+      });
+
+      if (!list) {
+        return res.status(404).json({ message: 'List not found' });
+      }
+
       const maxOrder = await prisma.task.findFirst({
         where: { listId: req.params.listId, parentId: data.parentId || null },
         orderBy: { orderIndex: 'desc' },
@@ -686,6 +904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           assignedToId: data.assignedToId,
           parentId: data.parentId,
           listId: req.params.listId,
+          workspaceId: list.workspaceId,
           createdById: req.userId!,
           orderIndex: (maxOrder?.orderIndex || 0) + 1,
         },
@@ -699,6 +918,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           list: {
             select: {
+              id: true,
+              name: true,
               workspaceId: true,
             },
           },
@@ -714,7 +935,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Broadcast to workspace
-      wsManager.broadcastTaskCreated(task.list.workspaceId, task, req.userId);
+      if (task.list) {
+        wsManager.broadcastTaskCreated(task.list.workspaceId, task, req.userId);
+      }
 
       res.status(201).json(task);
     } catch (error: any) {
@@ -768,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const targetListId = listId || currentTask.listId;
-      const workspaceId = currentTask.list.workspaceId;
+      const workspaceId = currentTask.list?.workspaceId || currentTask.workspaceId;
 
       // Get all tasks in the target list
       const tasksInList = await prisma.task.findMany({

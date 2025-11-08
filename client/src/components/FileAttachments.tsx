@@ -68,7 +68,7 @@ export function FileAttachments({ taskId }: FileAttachmentsProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (attachmentId: string) => {
-      return apiRequest(`/api/attachments/${attachmentId}`, { method: 'DELETE' });
+      return apiRequest('DELETE', `/api/attachments/${attachmentId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', taskId, 'attachments'] });

@@ -74,57 +74,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      const workspace = await prisma.workspace.create({
-        data: {
-          name: 'My Workspace',
-          slug: 'my-workspace',
-          ownerId: user.id,
+      // Check if user has any pending invitations
+      const pendingInvitations = await prisma.workspaceInvitation.findMany({
+        where: {
+          email: data.email.toLowerCase(),
+          expiresAt: {
+            gte: new Date(),
+          },
         },
       });
 
-      // Add user as workspace member with OWNER role
-      await prisma.workspaceMember.create({
-        data: {
-          workspaceId: workspace.id,
-          userId: user.id,
-          role: 'OWNER',
-        },
-      });
+      // Only create default workspace if user has NO pending invitations
+      if (pendingInvitations.length === 0) {
+        const workspace = await prisma.workspace.create({
+          data: {
+            name: 'My Workspace',
+            slug: 'my-workspace',
+            ownerId: user.id,
+          },
+        });
 
-      const inboxList = await prisma.list.create({
-        data: {
-          name: 'Inbox',
-          description: 'Your default task list',
-          workspaceId: workspace.id,
-          createdById: user.id,
-          isPersonal: false,
-        },
-      });
+        // Add user as workspace member with OWNER role
+        await prisma.workspaceMember.create({
+          data: {
+            workspaceId: workspace.id,
+            userId: user.id,
+            role: 'OWNER',
+          },
+        });
 
-      await prisma.task.createMany({
-        data: [
-          {
-            title: 'Welcome to TaskFlow!',
-            description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
-            listId: inboxList.id,
+        const inboxList = await prisma.list.create({
+          data: {
+            name: 'Inbox',
+            description: 'Your default task list',
             workspaceId: workspace.id,
             createdById: user.id,
-            status: 'TODO',
-            priority: 'MEDIUM',
-            orderIndex: 0,
+            isPersonal: false,
           },
-          {
-            title: 'Try the AI features',
-            description: 'Click on any task to open the details drawer, then use the AI buttons to summarize, generate subtasks, or get priority suggestions.',
-            listId: inboxList.id,
-            workspaceId: workspace.id,
-            createdById: user.id,
-            status: 'TODO',
-            priority: 'HIGH',
-            orderIndex: 1,
-          },
-        ],
-      });
+        });
+
+        await prisma.task.createMany({
+          data: [
+            {
+              title: 'Welcome to TaskFlow!',
+              description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
+              listId: inboxList.id,
+              workspaceId: workspace.id,
+              createdById: user.id,
+              status: 'TODO',
+              priority: 'MEDIUM',
+              orderIndex: 0,
+            },
+            {
+              title: 'Try the AI features',
+              description: 'Click on any task to open the details drawer, then use the AI buttons to summarize, generate subtasks, or get priority suggestions.',
+              listId: inboxList.id,
+              workspaceId: workspace.id,
+              createdById: user.id,
+              status: 'TODO',
+              priority: 'HIGH',
+              orderIndex: 1,
+            },
+          ],
+        });
+      }
 
       const tokens = generateTokens(user.id);
 

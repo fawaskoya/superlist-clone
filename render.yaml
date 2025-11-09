@@ -3,6 +3,7 @@ services:
     name: taskflow-app
     env: node
     plan: free
+    # Build command - database schema should be initialized before deployment (see FREE-DB-OPTIONS.md)
     buildCommand: npm install --include=dev && cp prisma/schema.postgresql.prisma prisma/schema.prisma && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
@@ -12,17 +13,19 @@ services:
         value: 10000
       - key: APP_URL
         sync: false
+        # Set this to your Render URL after deployment (e.g., https://taskflow-app-xxxx.onrender.com)
       - key: JWT_SECRET
         generateValue: true
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL
         sync: false
-        # Set this manually in Render dashboard to your Railway PostgreSQL connection string
+        # Set this manually in Render dashboard to your free PostgreSQL provider
+        # Options: Supabase, Neon, ElephantSQL (see FREE-DB-OPTIONS.md)
         # Format: postgresql://user:password@host:port/database
       - key: OPENAI_API_KEY
         sync: false
 
-# Database is now managed separately on Railway
-# See RAILWAY-DB-SETUP.md for instructions
+# Database is managed externally (Supabase/Neon/ElephantSQL)
+# See FREE-DB-OPTIONS.md for setup instructions
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { User } from '@shared/schema';
+import { queryClient } from '@/lib/queryClient';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (newUser: User, accessToken: string, refreshToken: string) => {
+    // CRITICAL: Clear all caches before setting new user to prevent data leakage
+    queryClient.clear();
+    
     setUser(newUser);
     setToken(accessToken);
     localStorage.setItem('accessToken', accessToken);
@@ -49,6 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Also clear legacy non-namespaced key
     localStorage.removeItem('currentWorkspaceId');
+    
+    // CRITICAL: Clear ALL React Query caches to prevent data leakage between users
+    queryClient.clear();
   };
 
   return (

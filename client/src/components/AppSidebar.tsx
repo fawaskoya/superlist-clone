@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
-import { Inbox, Calendar, Clock, User, List, Plus, ListCheck } from 'lucide-react';
+import { Inbox, Calendar, Clock, User, List, Plus, ListCheck, Settings } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -138,6 +138,27 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <div className="my-4 border-t border-sidebar-border" />
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  className={`h-9 px-3 ${location === '/settings' ? 'bg-sidebar-accent' : ''}`}
+                  data-testid="link-settings"
+                >
+                  <Link href="/settings">
+                    <Settings className="h-5 w-5" />
+                    <span>{t('sidebar.settings')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

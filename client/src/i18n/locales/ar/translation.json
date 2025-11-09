@@ -20,7 +20,8 @@
     "upcoming": "قادم",
     "assignedToMe": "المسندة إلي",
     "lists": "القوائم",
-    "newList": "قائمة جديدة"
+    "newList": "قائمة جديدة",
+    "settings": "الإعدادات"
   },
   "workspace": {
     "myWorkspace": "مساحة عملي",
@@ -79,7 +80,18 @@
       "admin": "يمكنه إدارة الأعضاء والإعدادات",
       "member": "يمكنه إنشاء وإدارة المهام",
       "viewer": "يمكنه العرض والتعليق فقط"
-    }
+    },
+    "settings": "إعدادات مساحة العمل",
+    "membersDescription": "إدارة من لديه صلاحية الوصول لمساحة العمل هذه",
+    "pendingInvitations": "الدعوات المعلقة",
+    "pendingInvitationsDescription": "الدعوات التي لم يتم قبولها بعد",
+    "noPendingInvitations": "لا توجد دعوات معلقة",
+    "invitationDeleted": "تم حذف الدعوة",
+    "invitationDeletedDescription": "تمت إزالة الدعوة",
+    "invitationSentDescription": "تم إنشاء رابط دعوة. شاركه مع زميلك.",
+    "memberRemovedDescription": "تمت إزالة العضو من مساحة العمل هذه",
+    "selectWorkspace": "يرجى اختيار مساحة عمل",
+    "copied": "تم النسخ!"
   },
   "list": {
     "createList": "إنشاء قائمة",
@@ -270,6 +282,7 @@
     "success": "نجح",
     "logout": "تسجيل الخروج",
     "settings": "الإعدادات",
-    "profile": "الملف الشخصي"
+    "profile": "الملف الشخصي",
+    "name": "الاسم"
   }
 }

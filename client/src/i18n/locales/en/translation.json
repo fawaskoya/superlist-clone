@@ -20,7 +20,8 @@
     "upcoming": "Upcoming",
     "assignedToMe": "Assigned to me",
     "lists": "Lists",
-    "newList": "New List"
+    "newList": "New List",
+    "settings": "Settings"
   },
   "workspace": {
     "myWorkspace": "My Workspace",
@@ -79,7 +80,18 @@
       "admin": "Can manage members and settings",
       "member": "Can create and manage tasks",
       "viewer": "Can only view and comment"
-    }
+    },
+    "settings": "Workspace Settings",
+    "membersDescription": "Manage who has access to this workspace",
+    "pendingInvitations": "Pending Invitations",
+    "pendingInvitationsDescription": "Invitations that haven't been accepted yet",
+    "noPendingInvitations": "No pending invitations",
+    "invitationDeleted": "Invitation deleted",
+    "invitationDeletedDescription": "The invitation has been removed",
+    "invitationSentDescription": "An invitation link has been created. Share it with your colleague.",
+    "memberRemovedDescription": "The member has been removed from this workspace",
+    "selectWorkspace": "Please select a workspace",
+    "copied": "Copied!"
   },
   "list": {
     "createList": "Create list",
@@ -270,6 +282,7 @@
     "success": "Success",
     "logout": "Logout",
     "settings": "Settings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "name": "Name"
   }
 }

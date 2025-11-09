@@ -19,6 +19,7 @@ import TodayPage from '@/pages/TodayPage';
 import UpcomingPage from '@/pages/UpcomingPage';
 import AssignedPage from '@/pages/AssignedPage';
 import AcceptInvitation from '@/pages/AcceptInvitation';
+import WorkspaceSettingsPage from '@/pages/WorkspaceSettingsPage';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Navbar } from '@/components/Navbar';
 import NotFound from '@/pages/not-found';
@@ -43,7 +44,7 @@ function AppContent() {
 
   // Check if current path is a private route
   // NOTE: When adding new private routes, make sure to add them to this list
-  const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list'];
+  const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list', '/settings'];
   const isPrivateRoute = privatePaths.some(path => location.startsWith(path));
 
   // If user is authenticated, show the app with persistent layout
@@ -73,6 +74,7 @@ function AppContent() {
                     <Route path="/today" component={TodayPage} />
                     <Route path="/upcoming" component={UpcomingPage} />
                     <Route path="/assigned" component={AssignedPage} />
+                    <Route path="/settings" component={WorkspaceSettingsPage} />
                     <Route path="/invite/:token" component={AcceptInvitation} />
                     <Route component={NotFound} />
                   </Switch>

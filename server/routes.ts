@@ -1768,6 +1768,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending invitations for a workspace
+  app.get('/api/workspaces/:workspaceId/invitations', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
+      // Check if user has MANAGE_MEMBERS permission
+      const userPermissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
+      if (!userPermissions.includes('MANAGE_MEMBERS')) {
+        return res.status(403).json({ message: 'You do not have permission to view invitations' });
+      }
+
+      const invitations = await prisma.workspaceInvitation.findMany({
+        where: { 
+          workspaceId: req.params.workspaceId,
+          expiresAt: {
+            gt: new Date(), // Only return non-expired invitations
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      res.json(invitations);
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
+  // Delete an invitation
+  app.delete('/api/workspaces/:workspaceId/invitations/:invitationId', authenticateToken, async (req: AuthRequest, res, next) => {
+    try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
+      // Check if user has MANAGE_MEMBERS permission
+      const userPermissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
+      if (!userPermissions.includes('MANAGE_MEMBERS')) {
+        return res.status(403).json({ message: 'You do not have permission to delete invitations' });
+      }
+
+      // Verify invitation belongs to this workspace
+      const invitation = await prisma.workspaceInvitation.findUnique({
+        where: { id: req.params.invitationId },
+      });
+
+      if (!invitation) {
+        return res.status(404).json({ message: 'Invitation not found' });
+      }
+
+      if (invitation.workspaceId !== req.params.workspaceId) {
+        return res.status(403).json({ message: 'Invitation does not belong to this workspace' });
+      }
+
+      await prisma.workspaceInvitation.delete({
+        where: { id: req.params.invitationId },
+      });
+
+      res.json({ message: 'Invitation deleted successfully' });
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
   // Accept invitation
   app.post('/api/invitations/:token/accept', authenticateToken, async (req: AuthRequest, res, next) => {
     try {

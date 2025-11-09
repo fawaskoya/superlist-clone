@@ -17,7 +17,10 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL
-        value: postgresql://postgres:Master123@db.mvudlnvicmikconnlrrb.supabase.co:5432/postgres
+        # Session Pooler connection string from Supabase
+        # Region: ap-southeast-1 (Asia Pacific Southeast)
+        # If connection fails, try changing port from 5432 to 6543
+        value: postgresql://postgres.mvudlnvicmikconnlrrb:Master123@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?pgbouncer=true
       - key: OPENAI_API_KEY
         sync: false
       - key: AI_INTEGRATIONS_OPENAI_API_KEY

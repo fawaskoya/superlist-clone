@@ -3,7 +3,7 @@ services:
     name: taskflow-app
     env: node
     plan: free
-    buildCommand: npm install && cp prisma/schema.postgresql.prisma prisma/schema.prisma && npx prisma generate && npm run build
+    buildCommand: npm install --include=dev && cp prisma/schema.postgresql.prisma prisma/schema.prisma && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

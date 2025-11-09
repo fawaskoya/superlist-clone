@@ -18,6 +18,7 @@ import ListPage from '@/pages/ListPage';
 import TodayPage from '@/pages/TodayPage';
 import UpcomingPage from '@/pages/UpcomingPage';
 import AssignedPage from '@/pages/AssignedPage';
+import AcceptInvitation from '@/pages/AcceptInvitation';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Navbar } from '@/components/Navbar';
 import NotFound from '@/pages/not-found';
@@ -72,6 +73,7 @@ function AppContent() {
                     <Route path="/today" component={TodayPage} />
                     <Route path="/upcoming" component={UpcomingPage} />
                     <Route path="/assigned" component={AssignedPage} />
+                    <Route path="/invite/:token" component={AcceptInvitation} />
                     <Route component={NotFound} />
                   </Switch>
                 </main>
@@ -95,6 +97,7 @@ function AppContent() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/invite/:token" component={AcceptInvitation} />
       <Route component={NotFound} />
     </Switch>
   );

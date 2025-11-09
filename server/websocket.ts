@@ -39,21 +39,21 @@ class WebSocketManager {
 
   initialize(server: Server) {
     try {
-      this.wss = new WebSocketServer({ server, path: '/ws' });
+    this.wss = new WebSocketServer({ server, path: '/ws' });
       log('WebSocket server initialized on path /ws');
 
-      this.wss.on('connection', (ws: AuthenticatedWebSocket, req) => {
+    this.wss.on('connection', (ws: AuthenticatedWebSocket, req) => {
         try {
-          const url = new URL(req.url || '', `http://${req.headers.host}`);
-          const token = url.searchParams.get('token');
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const token = url.searchParams.get('token');
 
-          if (!token) {
+      if (!token) {
             log('WebSocket connection rejected: No token provided', 'warn');
-            ws.close(1008, 'No token provided');
-            return;
-          }
+        ws.close(1008, 'No token provided');
+        return;
+      }
 
-          try {
+      try {
             const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
             
             if (!decoded.userId) {
@@ -62,22 +62,22 @@ class WebSocketManager {
               return;
             }
 
-            ws.userId = decoded.userId;
-            ws.workspaceIds = new Set();
+        ws.userId = decoded.userId;
+        ws.workspaceIds = new Set();
 
-            // Track user connection
-            if (!this.userClients.has(ws.userId)) {
-              this.userClients.set(ws.userId, new Set());
-            }
-            this.userClients.get(ws.userId)?.add(ws);
+        // Track user connection
+        if (!this.userClients.has(ws.userId)) {
+          this.userClients.set(ws.userId, new Set());
+        }
+        this.userClients.get(ws.userId)?.add(ws);
             log(`WebSocket client connected: userId=${ws.userId}`);
 
-            ws.on('message', (data: string) => {
-              try {
-                const message: WSMessage = JSON.parse(data.toString());
+        ws.on('message', (data: string) => {
+          try {
+            const message: WSMessage = JSON.parse(data.toString());
                 log(`Received message from ${ws.userId}: ${message.type}`);
-                this.handleMessage(ws, message);
-              } catch (error) {
+            this.handleMessage(ws, message);
+          } catch (error) {
                 log(`Error processing WebSocket message from ${ws.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
                 try {
                   ws.send(JSON.stringify({ 
@@ -86,32 +86,32 @@ class WebSocketManager {
                   }));
                 } catch (sendError) {
                   log(`Error sending error message: ${sendError instanceof Error ? sendError.message : 'Unknown error'}`, 'error');
-                }
+          }
               }
             });
 
             ws.on('error', (error) => {
               log(`WebSocket error for userId=${ws.userId}: ${error.message}`, 'error');
-            });
+        });
 
             ws.on('close', (code, reason) => {
-              if (ws.userId) {
+          if (ws.userId) {
                 log(`WebSocket client disconnected: userId=${ws.userId}, code=${code}, reason=${reason.toString()}`);
-                ws.workspaceIds?.forEach(workspaceId => {
-                  this.clients.get(workspaceId)?.delete(ws);
-                });
-                this.userClients.get(ws.userId)?.delete(ws);
-              }
+            ws.workspaceIds?.forEach(workspaceId => {
+              this.clients.get(workspaceId)?.delete(ws);
             });
+            this.userClients.get(ws.userId)?.delete(ws);
+          }
+        });
 
-            ws.send(JSON.stringify({ type: 'connected', payload: { userId: ws.userId } }));
-          } catch (error) {
+        ws.send(JSON.stringify({ type: 'connected', payload: { userId: ws.userId } }));
+      } catch (error) {
             if (error instanceof jwt.TokenExpiredError) {
               log('WebSocket connection rejected: Token expired', 'warn');
               ws.close(1008, 'Token expired');
             } else if (error instanceof jwt.JsonWebTokenError) {
               log(`WebSocket connection rejected: Invalid token - ${error.message}`, 'warn');
-              ws.close(1008, 'Invalid token');
+        ws.close(1008, 'Invalid token');
             } else {
               log(`WebSocket connection error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
               ws.close(1011, 'Internal server error');
@@ -134,8 +134,8 @@ class WebSocketManager {
 
   private handleMessage(ws: AuthenticatedWebSocket, message: WSMessage) {
     try {
-      switch (message.type) {
-        case 'subscribe':
+    switch (message.type) {
+      case 'subscribe':
           const workspaceId = message.payload?.workspaceId;
           if (!workspaceId) {
             log(`Subscribe message missing workspaceId from userId=${ws.userId}`, 'warn');
@@ -151,8 +151,8 @@ class WebSocketManager {
           }
           this.clients.get(workspaceId)?.add(ws);
           log(`User ${ws.userId} subscribed to workspace ${workspaceId}`);
-          break;
-        case 'unsubscribe':
+        break;
+      case 'unsubscribe':
           const wsId = message.payload?.workspaceId;
           if (!wsId) {
             log(`Unsubscribe message missing workspaceId from userId=${ws.userId}`, 'warn');
@@ -168,7 +168,7 @@ class WebSocketManager {
           break;
         default:
           log(`Unknown message type: ${message.type} from userId=${ws.userId}`, 'warn');
-      }
+        }
     } catch (error) {
       log(`Error handling message: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     }
@@ -176,24 +176,24 @@ class WebSocketManager {
 
   broadcast(workspaceId: string, message: WSMessage, excludeUserId?: string) {
     try {
-      const clients = this.clients.get(workspaceId);
+    const clients = this.clients.get(workspaceId);
       if (!clients || clients.size === 0) {
         log(`No clients subscribed to workspace ${workspaceId}`, 'info');
         return;
       }
 
-      const messageStr = JSON.stringify(message);
+    const messageStr = JSON.stringify(message);
       let sentCount = 0;
-      clients.forEach(client => {
+    clients.forEach(client => {
         try {
-          if (client.readyState === WebSocket.OPEN && client.userId !== excludeUserId) {
-            client.send(messageStr);
+      if (client.readyState === WebSocket.OPEN && client.userId !== excludeUserId) {
+        client.send(messageStr);
             sentCount++;
           }
         } catch (error) {
           log(`Error sending message to client ${client.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-        }
-      });
+      }
+    });
       log(`Broadcasted ${message.type} to ${sentCount} client(s) in workspace ${workspaceId}`);
     } catch (error) {
       log(`Error broadcasting message: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
@@ -252,24 +252,24 @@ class WebSocketManager {
   // Broadcast to a specific user
   broadcastToUser(userId: string, message: any) {
     try {
-      const clients = this.userClients.get(userId);
+    const clients = this.userClients.get(userId);
       if (!clients || clients.size === 0) {
         log(`No WebSocket clients found for user ${userId}`, 'info');
         return;
       }
 
-      const messageStr = JSON.stringify(message);
+    const messageStr = JSON.stringify(message);
       let sentCount = 0;
-      clients.forEach(client => {
+    clients.forEach(client => {
         try {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(messageStr);
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(messageStr);
             sentCount++;
           }
         } catch (error) {
           log(`Error sending message to user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-        }
-      });
+      }
+    });
       log(`Broadcasted to ${sentCount} client(s) for user ${userId}`);
     } catch (error) {
       log(`Error broadcasting to user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');

@@ -67,8 +67,8 @@ app.use((req, res, next) => {
       } else if (res.statusCode >= 400) {
         serverLog(logLine, 'warn');
       } else {
-        log(logLine);
-      }
+      log(logLine);
+    }
     }
   });
 
@@ -84,13 +84,13 @@ app.use((req, res, next) => {
   try {
     serverLog('Starting server initialization...');
     
-    const server = await registerRoutes(app);
+  const server = await registerRoutes(app);
     serverLog('Routes registered successfully');
 
     // Global error handler - must be after all routes
     app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
       const stack = process.env.NODE_ENV === 'development' ? err.stack : undefined;
 
       serverLog(`Error ${status} on ${req.method} ${req.path}: ${message}`, 'error');
@@ -114,41 +114,41 @@ app.use((req, res, next) => {
     }
 
     // Setup Vite in development or serve static files in production
-    if (app.get("env") === "development") {
+  if (app.get("env") === "development") {
       try {
-        await setupVite(app, server);
+    await setupVite(app, server);
         serverLog('Vite development server setup complete');
       } catch (error) {
         serverLog(`Failed to setup Vite: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
         throw error;
       }
-    } else {
+  } else {
       try {
-        serveStatic(app);
+    serveStatic(app);
         serverLog('Static file serving configured');
       } catch (error) {
         serverLog(`Failed to setup static file serving: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
         throw error;
       }
-    }
+  }
 
     // Get port from environment or use default
-    const port = parseInt(process.env.PORT || '5000', 10);
+  const port = parseInt(process.env.PORT || '5000', 10);
     
     if (isNaN(port) || port < 1 || port > 65535) {
       throw new Error(`Invalid port number: ${port}`);
     }
 
     // Start server
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
       serverLog(`Server started successfully on port ${port}`);
       serverLog(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      log(`serving on port ${port}`);
-    });
+    log(`serving on port ${port}`);
+  });
 
     // Handle server errors
     server.on('error', (error: NodeJS.ErrnoException) => {

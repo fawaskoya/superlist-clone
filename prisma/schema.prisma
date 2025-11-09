@@ -1,9 +1,13 @@
+// PostgreSQL schema for production
+// To use this schema, rename it to schema.prisma or update your DATABASE_URL to use PostgreSQL
+// This is a copy of the main schema with PostgreSQL as the provider
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -242,3 +246,4 @@ model FileAttachment {
 
   @@index([taskId])
 }
+

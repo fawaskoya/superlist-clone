@@ -131,7 +131,7 @@ export default function AcceptInvitation() {
           invitedEmail: invitation.email,
           yourEmail: user.email,
         }));
-      }
+    }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.email, invitation?.email, authLoading, hasAttemptedAutoAccept, acceptMutation.isPending, acceptMutation.isSuccess, emailMismatch, errorMessage]);
@@ -191,19 +191,19 @@ export default function AcceptInvitation() {
 
   // If user is not logged in, show invitation with login/register prompt
   if (!user && !authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-primary" />
-              <CardTitle>{t('workspace.workspaceInvitation')}</CardTitle>
-            </div>
-            <CardDescription>
-              {t('workspace.invitationDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-6 w-6 text-primary" />
+            <CardTitle>{t('workspace.workspaceInvitation')}</CardTitle>
+          </div>
+          <CardDescription>
+            {t('workspace.invitationDescription')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
             <Alert data-testid="alert-login-required">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>

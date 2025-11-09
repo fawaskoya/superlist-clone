@@ -39,11 +39,11 @@ export function generateTokens(userId: string) {
 
     log(`Generating tokens for user: ${userId}`);
     
-    const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-    const refreshToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
+  const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const refreshToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
     
     log(`Tokens generated successfully for user: ${userId}`);
-    return { accessToken, refreshToken };
+  return { accessToken, refreshToken };
   } catch (error) {
     log(`Error generating tokens for user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     throw error;

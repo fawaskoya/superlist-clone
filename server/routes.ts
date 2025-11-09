@@ -25,6 +25,41 @@ import {
 
 const prisma = new PrismaClient();
 
+// Enhanced logging function for routes
+function routeLog(message: string, level: 'info' | 'error' | 'warn' = 'info') {
+  const timestamp = new Date().toISOString();
+  const prefix = `[${timestamp}] [ROUTES]`;
+  const logMessage = `${prefix} ${message}`;
+  
+  switch (level) {
+    case 'error':
+      console.error(logMessage);
+      break;
+    case 'warn':
+      console.warn(logMessage);
+      break;
+    default:
+      console.log(logMessage);
+  }
+}
+
+// Helper function to handle Prisma errors
+function handlePrismaError(error: any, operation: string): Error {
+  if (error.code === 'P2002') {
+    routeLog(`${operation} failed: Unique constraint violation`, 'warn');
+    return new Error('A record with this value already exists');
+  } else if (error.code === 'P2025') {
+    routeLog(`${operation} failed: Record not found`, 'warn');
+    return new Error('Record not found');
+  } else if (error.code === 'P2003') {
+    routeLog(`${operation} failed: Foreign key constraint violation`, 'warn');
+    return new Error('Invalid reference to related record');
+  } else {
+    routeLog(`${operation} failed: ${error.message}`, 'error');
+    return error;
+  }
+}
+
 // Helper function to verify user has access to a workspace
 async function verifyWorkspaceAccess(userId: string, workspaceId: string): Promise<boolean> {
   const workspace = await prisma.workspace.findFirst({
@@ -44,9 +79,12 @@ async function verifyWorkspaceAccess(userId: string, workspaceId: string): Promi
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  routeLog('Registering routes...');
+  
   // Auth Routes
   app.post('/api/auth/register', async (req, res, next) => {
     try {
+      routeLog('Registration attempt');
       const data = insertUserSchema.parse(req.body);
       
       const existingUser = await prisma.user.findUnique({
@@ -54,6 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (existingUser) {
+        routeLog(`Registration failed: User already exists - ${data.email}`, 'warn');
         return res.status(400).json({ message: 'User already exists' });
       }
 
@@ -74,44 +113,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      routeLog(`User created: ${user.email} (${user.id})`);
+
       // ALWAYS create a default workspace for new users
       // They can still accept invitations to join other workspaces
       // Generate unique slug using user ID to avoid collisions
       const uniqueSlug = `my-workspace-${user.id.slice(0, 8)}`;
       
-      const workspace = await prisma.workspace.create({
-        data: {
-          name: 'My Workspace',
-          slug: uniqueSlug,
-          ownerId: user.id,
-        },
-      });
+      try {
+        const workspace = await prisma.workspace.create({
+          data: {
+            name: 'My Workspace',
+            slug: uniqueSlug,
+            ownerId: user.id,
+          },
+        });
 
-      // Add user as workspace member with OWNER role
-      await prisma.workspaceMember.create({
-        data: {
-          workspaceId: workspace.id,
-          userId: user.id,
-          role: 'OWNER',
-        },
-      });
+        routeLog(`Workspace created: ${workspace.id} for user ${user.id}`);
 
-      const inboxList = await prisma.list.create({
-        data: {
-          name: 'Inbox',
-          description: 'Your default task list',
-          workspaceId: workspace.id,
-          createdById: user.id,
-          isPersonal: false,
-        },
-      });
+        // Add user as workspace member with OWNER role
+        await prisma.workspaceMember.create({
+          data: {
+            workspaceId: workspace.id,
+            userId: user.id,
+            role: 'OWNER',
+          },
+        });
 
-      await prisma.task.createMany({
-        data: [
-          {
-            title: 'Welcome to TaskFlow!',
-            description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
-            listId: inboxList.id,
+        const inboxList = await prisma.list.create({
+          data: {
+            name: 'Inbox',
+            description: 'Your default task list',
+            workspaceId: workspace.id,
+            createdById: user.id,
+            isPersonal: false,
+          },
+        });
+
+        await prisma.task.createMany({
+          data: [
+            {
+              title: 'Welcome to TaskFlow!',
+              description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
+              listId: inboxList.id,
               workspaceId: workspace.id,
               createdById: user.id,
               status: 'TODO',
@@ -131,20 +175,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ],
         });
 
+        routeLog(`Default workspace and tasks created for user ${user.id}`);
+      } catch (workspaceError) {
+        routeLog(`Error creating workspace for user ${user.id}: ${workspaceError instanceof Error ? workspaceError.message : 'Unknown error'}`, 'error');
+        // Continue even if workspace creation fails - user is still created
+      }
+
       const tokens = generateTokens(user.id);
 
+      routeLog(`Registration successful for user: ${user.email}`);
       res.status(201).json({
         user,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
     } catch (error: any) {
-      next(error);
+      if (error.name === 'ZodError') {
+        routeLog(`Registration failed: Validation error - ${error.errors.map((e: any) => e.message).join(', ')}`, 'warn');
+        return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      }
+      const prismaError = handlePrismaError(error, 'User registration');
+      next(prismaError);
     }
   });
 
   app.post('/api/auth/login', async (req, res, next) => {
     try {
+      routeLog(`Login attempt for email: ${req.body.email}`);
       const data = loginSchema.parse(req.body);
 
       const user = await prisma.user.findUnique({
@@ -152,16 +209,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!user) {
+        routeLog(`Login failed: User not found - ${data.email}`, 'warn');
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
       const isValidPassword = await bcrypt.compare(data.password, user.passwordHash);
 
       if (!isValidPassword) {
+        routeLog(`Login failed: Invalid password for user - ${data.email}`, 'warn');
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
       const tokens = generateTokens(user.id);
+      routeLog(`Login successful for user: ${user.email}`);
 
       res.json({
         user: {
@@ -175,6 +235,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         refreshToken: tokens.refreshToken,
       });
     } catch (error: any) {
+      if (error.name === 'ZodError') {
+        routeLog(`Login failed: Validation error - ${error.errors.map((e: any) => e.message).join(', ')}`, 'warn');
+        return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      }
+      routeLog(`Login error: ${error.message}`, 'error');
       next(error);
     }
   });
@@ -1625,15 +1690,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Workspace Invitation Routes
   app.post('/api/workspaces/:workspaceId/invitations', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      routeLog(`Creating invitation for workspace ${req.params.workspaceId} by user ${req.userId}`);
+      
       // Verify workspace access
       const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
       if (!hasAccess) {
+        routeLog(`Access denied: User ${req.userId} does not have access to workspace ${req.params.workspaceId}`, 'warn');
         return res.status(403).json({ message: 'Access denied to this workspace' });
       }
 
       // Check if user has MANAGE_MEMBERS permission
       const userPermissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
+      routeLog(`User ${req.userId} permissions for workspace ${req.params.workspaceId}: ${userPermissions.join(', ')}`);
+      
       if (!userPermissions.includes('MANAGE_MEMBERS')) {
+        routeLog(`Permission denied: User ${req.userId} does not have MANAGE_MEMBERS permission`, 'warn');
         return res.status(403).json({ message: 'You do not have permission to invite members' });
       }
 
@@ -1641,6 +1712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate email
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        routeLog(`Invalid email provided: ${email}`, 'warn');
         return res.status(400).json({ message: 'Valid email is required' });
       }
 
@@ -1715,9 +1787,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      routeLog(`Invitation created successfully: ${invitation.id} for email ${email} to workspace ${req.params.workspaceId}`);
+
       // In a real app, send email here
       // For now, return the invitation link in the response
-      const invitationLink = `${req.protocol}://${req.get('host')}/invite/${token}`;
+      // Use APP_URL environment variable in production, otherwise use request headers
+      const appUrl = process.env.APP_URL;
+      let invitationLink: string;
+      
+      if (appUrl) {
+        // Production: use explicit APP_URL (e.g., https://yourdomain.com)
+        invitationLink = `${appUrl.replace(/\/$/, '')}/invite/${token}`;
+      } else {
+        // Development: use request headers
+        const host = req.get('host');
+        const protocol = req.protocol || (req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http'));
+        invitationLink = `${protocol}://${host}/invite/${token}`;
+      }
 
       res.status(201).json({
         message: 'Invitation created successfully',
@@ -1730,13 +1816,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error: any) {
-      next(error);
+      routeLog(`Error creating invitation: ${error.message}`, 'error');
+      const prismaError = handlePrismaError(error, 'Create invitation');
+      next(prismaError);
     }
   });
 
   // Get invitation details (public endpoint for invitation page)
   app.get('/api/invitations/:token', async (req, res, next) => {
     try {
+      routeLog(`Fetching invitation details for token: ${req.params.token}`);
+      
       const invitation = await prisma.workspaceInvitation.findUnique({
         where: { token: req.params.token },
         include: {
@@ -1750,13 +1840,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!invitation) {
+        routeLog(`Invitation not found: ${req.params.token}`, 'warn');
         return res.status(404).json({ message: 'Invitation not found' });
       }
 
       if (invitation.expiresAt < new Date()) {
+        routeLog(`Invitation expired: ${req.params.token}`, 'warn');
         return res.status(410).json({ message: 'Invitation has expired' });
       }
 
+      routeLog(`Invitation found for email: ${invitation.email}, workspace: ${invitation.workspace.name}`);
+      
       res.json({
         email: invitation.email,
         role: invitation.role,
@@ -1764,22 +1858,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt: invitation.expiresAt,
       });
     } catch (error: any) {
-      next(error);
+      routeLog(`Error fetching invitation: ${error.message}`, 'error');
+      const prismaError = handlePrismaError(error, 'Fetch invitation');
+      next(prismaError);
     }
   });
 
   // Get pending invitations for a workspace
   app.get('/api/workspaces/:workspaceId/invitations', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      routeLog(`Fetching invitations for workspace ${req.params.workspaceId} by user ${req.userId}`);
+      
       // Verify workspace access
       const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
       if (!hasAccess) {
+        routeLog(`Access denied: User ${req.userId} does not have access to workspace ${req.params.workspaceId}`, 'warn');
         return res.status(403).json({ message: 'Access denied to this workspace' });
       }
 
       // Check if user has MANAGE_MEMBERS permission
       const userPermissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
       if (!userPermissions.includes('MANAGE_MEMBERS')) {
+        routeLog(`Permission denied: User ${req.userId} does not have MANAGE_MEMBERS permission`, 'warn');
         return res.status(403).json({ message: 'You do not have permission to view invitations' });
       }
 
@@ -1795,24 +1895,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      routeLog(`Found ${invitations.length} pending invitation(s) for workspace ${req.params.workspaceId}`);
       res.json(invitations);
     } catch (error: any) {
-      next(error);
+      routeLog(`Error fetching invitations: ${error.message}`, 'error');
+      const prismaError = handlePrismaError(error, 'Fetch invitations');
+      next(prismaError);
     }
   });
 
   // Delete an invitation
   app.delete('/api/workspaces/:workspaceId/invitations/:invitationId', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      routeLog(`Deleting invitation ${req.params.invitationId} from workspace ${req.params.workspaceId} by user ${req.userId}`);
+      
       // Verify workspace access
       const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
       if (!hasAccess) {
+        routeLog(`Access denied: User ${req.userId} does not have access to workspace ${req.params.workspaceId}`, 'warn');
         return res.status(403).json({ message: 'Access denied to this workspace' });
       }
 
       // Check if user has MANAGE_MEMBERS permission
       const userPermissions = await getUserWorkspacePermissions(req.userId!, req.params.workspaceId);
       if (!userPermissions.includes('MANAGE_MEMBERS')) {
+        routeLog(`Permission denied: User ${req.userId} does not have MANAGE_MEMBERS permission`, 'warn');
         return res.status(403).json({ message: 'You do not have permission to delete invitations' });
       }
 
@@ -1822,10 +1929,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!invitation) {
+        routeLog(`Invitation not found: ${req.params.invitationId}`, 'warn');
         return res.status(404).json({ message: 'Invitation not found' });
       }
 
       if (invitation.workspaceId !== req.params.workspaceId) {
+        routeLog(`Invitation ${req.params.invitationId} does not belong to workspace ${req.params.workspaceId}`, 'warn');
         return res.status(403).json({ message: 'Invitation does not belong to this workspace' });
       }
 
@@ -1833,24 +1942,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         where: { id: req.params.invitationId },
       });
 
+      routeLog(`Invitation ${req.params.invitationId} deleted successfully`);
       res.json({ message: 'Invitation deleted successfully' });
     } catch (error: any) {
-      next(error);
+      routeLog(`Error deleting invitation: ${error.message}`, 'error');
+      const prismaError = handlePrismaError(error, 'Delete invitation');
+      next(prismaError);
     }
   });
 
   // Accept invitation
   app.post('/api/invitations/:token/accept', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      routeLog(`Accepting invitation with token: ${req.params.token} by user ${req.userId}`);
+      
       const invitation = await prisma.workspaceInvitation.findUnique({
         where: { token: req.params.token },
       });
 
       if (!invitation) {
+        routeLog(`Invitation not found: ${req.params.token}`, 'warn');
         return res.status(404).json({ message: 'Invitation not found' });
       }
 
       if (invitation.expiresAt < new Date()) {
+        routeLog(`Invitation expired: ${req.params.token}`, 'warn');
         return res.status(410).json({ message: 'Invitation has expired' });
       }
 
@@ -1859,13 +1975,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!user) {
+        routeLog(`User not found: ${req.userId}`, 'error');
         return res.status(404).json({ message: 'User not found' });
       }
 
+      routeLog(`Checking email match: invitation=${invitation.email}, user=${user.email}`);
+
       // Verify email matches (case-insensitive)
       if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
+        routeLog(`Email mismatch: invitation=${invitation.email}, user=${user.email}`, 'warn');
         return res.status(403).json({ 
-          message: 'This invitation was sent to a different email address',
+          message: 'This invitation was sent to a different email address. Please sign in with the email address that received the invitation.',
           invitedEmail: invitation.email,
           yourEmail: user.email,
         });
@@ -1882,6 +2002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (existingMember) {
+        routeLog(`User ${user.id} is already a member of workspace ${invitation.workspaceId}`, 'info');
         // Delete invitation and return success
         await prisma.workspaceInvitation.delete({
           where: { id: invitation.id },
@@ -1901,17 +2022,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      routeLog(`User ${user.id} added as ${invitation.role} to workspace ${invitation.workspaceId}`);
+
       // Delete the invitation
       await prisma.workspaceInvitation.delete({
         where: { id: invitation.id },
       });
+
+      routeLog(`Invitation ${invitation.id} accepted and deleted successfully`);
 
       res.json({
         message: 'Invitation accepted successfully',
         workspaceId: invitation.workspaceId,
       });
     } catch (error: any) {
-      next(error);
+      routeLog(`Error accepting invitation: ${error.message}`, 'error');
+      const prismaError = handlePrismaError(error, 'Accept invitation');
+      next(prismaError);
     }
   });
 

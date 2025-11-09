@@ -42,10 +42,23 @@ function AppContent() {
     );
   }
 
+  // Check if current path is an invitation - always show without app layout
+  const isInvitationPage = location.startsWith('/invite/');
+
   // Check if current path is a private route
   // NOTE: When adding new private routes, make sure to add them to this list
   const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list', '/settings'];
   const isPrivateRoute = privatePaths.some(path => location.startsWith(path));
+
+  // Show invitation page without app layout (cleaner UX)
+  if (isInvitationPage) {
+    return (
+      <Switch>
+        <Route path="/invite/:token" component={AcceptInvitation} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
 
   // If user is authenticated, show the app with persistent layout
   if (user) {
@@ -75,7 +88,6 @@ function AppContent() {
                     <Route path="/upcoming" component={UpcomingPage} />
                     <Route path="/assigned" component={AssignedPage} />
                     <Route path="/settings" component={WorkspaceSettingsPage} />
-                    <Route path="/invite/:token" component={AcceptInvitation} />
                     <Route component={NotFound} />
                   </Switch>
                 </main>
@@ -99,7 +111,6 @@ function AppContent() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
-      <Route path="/invite/:token" component={AcceptInvitation} />
       <Route component={NotFound} />
     </Switch>
   );

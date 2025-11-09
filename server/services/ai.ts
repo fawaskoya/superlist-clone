@@ -1,12 +1,47 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+function log(message: string, level: 'info' | 'error' | 'warn' = 'info') {
+  const timestamp = new Date().toISOString();
+  const prefix = `[${timestamp}] [AI]`;
+  const logMessage = `${prefix} ${message}`;
+  
+  switch (level) {
+    case 'error':
+      console.error(logMessage);
+      break;
+    case 'warn':
+      console.warn(logMessage);
+      break;
+    default:
+      console.log(logMessage);
+  }
+}
+
+const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+
+if (!apiKey) {
+  log('Warning: OpenAI API key not found. AI features will not work.', 'warn');
+}
+
+const openai = apiKey ? new OpenAI({
+  apiKey,
+  baseURL,
+}) : null;
 
 export async function summarizeTask(title: string, description: string): Promise<string> {
+  if (!openai) {
+    log('summarizeTask called but OpenAI client is not initialized', 'warn');
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  if (!title || title.trim().length === 0) {
+    throw new Error('Task title is required');
+  }
+
   try {
+    log(`Summarizing task: ${title.substring(0, 50)}...`);
+    
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -23,15 +58,35 @@ export async function summarizeTask(title: string, description: string): Promise
       temperature: 0.7,
     });
 
-    return response.choices[0]?.message?.content || 'Unable to generate summary';
+    const summary = response.choices[0]?.message?.content || 'Unable to generate summary';
+    log(`Summary generated successfully`);
+    return summary;
   } catch (error) {
-    console.error('Error in summarizeTask:', error);
+    log(`Error in summarizeTask: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('Invalid OpenAI API key');
+      } else if (error.message.includes('rate limit')) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      }
+    }
     throw new Error('Failed to generate task summary');
   }
 }
 
 export async function generateSubtasks(title: string, description?: string): Promise<string[]> {
+  if (!openai) {
+    log('generateSubtasks called but OpenAI client is not initialized', 'warn');
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  if (!title || title.trim().length === 0) {
+    throw new Error('Task title is required');
+  }
+
   try {
+    log(`Generating subtasks for: ${title.substring(0, 50)}...`);
+    
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -53,16 +108,29 @@ export async function generateSubtasks(title: string, description?: string): Pro
     try {
       const subtasks = JSON.parse(content);
       if (Array.isArray(subtasks)) {
-        return subtasks.filter((s: any) => typeof s === 'string').slice(0, 5);
+        const filtered = subtasks.filter((s: any) => typeof s === 'string').slice(0, 5);
+        log(`Generated ${filtered.length} subtasks`);
+        return filtered;
       }
-    } catch {
+    } catch (parseError) {
+      log(`Failed to parse subtasks as JSON, trying line-based parsing: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`, 'warn');
       const lines = content.split('\n').filter(line => line.trim());
-      return lines.slice(0, 5);
+      const subtasks = lines.slice(0, 5);
+      log(`Generated ${subtasks.length} subtasks from lines`);
+      return subtasks;
     }
 
+    log('No subtasks generated', 'warn');
     return [];
   } catch (error) {
-    console.error('Error in generateSubtasks:', error);
+    log(`Error in generateSubtasks: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('Invalid OpenAI API key');
+      } else if (error.message.includes('rate limit')) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      }
+    }
     throw new Error('Failed to generate subtasks');
   }
 }
@@ -70,7 +138,23 @@ export async function generateSubtasks(title: string, description?: string): Pro
 export async function prioritizeTasks(
   tasks: Array<{ id: string; title: string; description?: string; priority?: string }>
 ): Promise<Array<{ id: string; suggestedPriority: 'LOW' | 'MEDIUM' | 'HIGH' }>> {
+  if (!openai) {
+    log('prioritizeTasks called but OpenAI client is not initialized', 'warn');
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  if (!tasks || tasks.length === 0) {
+    throw new Error('At least one task is required');
+  }
+
+  if (tasks.length > 50) {
+    log(`Warning: prioritizeTasks called with ${tasks.length} tasks, limiting to 50`, 'warn');
+    tasks = tasks.slice(0, 50);
+  }
+
   try {
+    log(`Prioritizing ${tasks.length} task(s)`);
+    
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -92,20 +176,31 @@ export async function prioritizeTasks(
     try {
       const priorities = JSON.parse(content);
       if (Array.isArray(priorities)) {
-        return priorities.map((p: any) => ({
+        const result = priorities.map((p: any) => ({
           id: p.id,
           suggestedPriority: ['LOW', 'MEDIUM', 'HIGH'].includes(p.suggestedPriority)
             ? p.suggestedPriority
             : 'MEDIUM',
         }));
+        log(`Prioritized ${result.length} task(s) successfully`);
+        return result;
       }
-    } catch {
+    } catch (parseError) {
+      log(`Failed to parse priorities as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}, returning default priorities`, 'warn');
       return tasks.map(t => ({ id: t.id, suggestedPriority: 'MEDIUM' as const }));
     }
 
+    log('No priorities generated, returning default', 'warn');
     return tasks.map(t => ({ id: t.id, suggestedPriority: 'MEDIUM' as const }));
   } catch (error) {
-    console.error('Error in prioritizeTasks:', error);
+    log(`Error in prioritizeTasks: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('Invalid OpenAI API key');
+      } else if (error.message.includes('rate limit')) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      }
+    }
     throw new Error('Failed to prioritize tasks');
   }
 }

@@ -24,16 +24,21 @@ import { CheckSquare } from 'lucide-react';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Get redirect and email parameters from URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirect = searchParams.get('redirect') || '/';
+  const emailParam = searchParams.get('email') || '';
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
       name: '',
-      email: '',
+      email: emailParam,
       password: '',
     },
   });
@@ -47,7 +52,8 @@ export default function RegisterPage() {
         data
       );
       login(response.user, response.accessToken, response.refreshToken);
-      setLocation('/');
+      // Redirect to the specified path or dashboard
+      setLocation(redirect);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -154,7 +160,11 @@ export default function RegisterPage() {
           <p className="text-muted-foreground">
             {t('auth.alreadyHaveAccount')}{' '}
             <button
-              onClick={() => setLocation('/login')}
+              onClick={() => {
+                const searchParams = new URLSearchParams(window.location.search);
+                const redirect = searchParams.get('redirect') || '/login';
+                setLocation(`/login?redirect=${encodeURIComponent(redirect)}`);
+              }}
               className="text-primary hover:underline"
               data-testid="link-login"
             >

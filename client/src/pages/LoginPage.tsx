@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -24,10 +24,17 @@ import { ArrowLeft, CheckSquare } from 'lucide-react';
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Get redirect parameter from URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirect = searchParams.get('redirect') || '/';
+  
+  // If redirect is an invitation, try to get email from invitation
+  const [prefillEmail, setPrefillEmail] = useState<string>('');
 
   const form = useForm<LoginUser>({
     resolver: zodResolver(loginSchema),
@@ -36,6 +43,31 @@ export default function LoginPage() {
       password: '',
     },
   });
+
+  useEffect(() => {
+    // If redirect contains /invite/, fetch invitation to pre-fill email
+    if (redirect.includes('/invite/')) {
+      const token = redirect.split('/invite/')[1];
+      if (token) {
+        fetch(`/api/invitations/${token}`)
+          .then(res => {
+            if (res.ok) {
+              return res.json();
+            }
+            return null;
+          })
+          .then(data => {
+            if (data?.email) {
+              setPrefillEmail(data.email);
+              form.setValue('email', data.email);
+            }
+          })
+          .catch(() => {
+            // Ignore errors - just don't pre-fill
+          });
+      }
+    }
+  }, [redirect, form]);
 
   const onSubmit = async (data: LoginUser) => {
     setIsLoading(true);
@@ -46,7 +78,8 @@ export default function LoginPage() {
         data
       );
       login(response.user, response.accessToken, response.refreshToken);
-      setLocation('/');
+      // Redirect to the specified path or dashboard
+      setLocation(redirect);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -136,7 +169,15 @@ export default function LoginPage() {
           <p className="text-muted-foreground">
             {t('auth.dontHaveAccount')}{' '}
             <button
-              onClick={() => setLocation('/register')}
+              onClick={() => {
+                const searchParams = new URLSearchParams(window.location.search);
+                const redirect = searchParams.get('redirect') || '/register';
+                const email = searchParams.get('email') || form.getValues('email') || '';
+                const params = new URLSearchParams();
+                if (redirect) params.set('redirect', redirect);
+                if (email) params.set('email', email);
+                setLocation(`/register${params.toString() ? `?${params.toString()}` : ''}`);
+              }}
               className="text-primary hover:underline"
               data-testid="link-register"
             >

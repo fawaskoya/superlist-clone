@@ -2,7 +2,30 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
+    // Don't redirect if we're on an invitation page - let it handle the error
+    const isInvitationPage = window.location.pathname.startsWith('/invite/');
+    
+    // Clone the response so we can read it without consuming it
+    const clonedRes = res.clone();
+    
+    // Try to parse JSON error message
+    let errorMessage = res.statusText;
+    try {
+      const text = await clonedRes.text();
+      if (text) {
+        try {
+          const json = JSON.parse(text);
+          errorMessage = json.message || json.error || text;
+        } catch {
+          errorMessage = text;
+        }
+      }
+    } catch {
+      // If we can't read the response, use statusText
+      errorMessage = res.statusText;
+    }
+    
+    if ((res.status === 401 || res.status === 403) && !isInvitationPage) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
@@ -10,8 +33,10 @@ async function throwIfResNotOk(res: Response) {
         window.location.href = '/login';
       }
     }
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    
+    const error = new Error(errorMessage);
+    (error as any).status = res.status;
+    throw error;
   }
 }
 

@@ -34,6 +34,22 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 };
 
 export async function getUserWorkspacePermissions(userId: string, workspaceId: string): Promise<Permission[]> {
+  // First check if user is the workspace owner
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    select: { ownerId: true },
+  });
+
+  if (!workspace) {
+    return [];
+  }
+
+  // If user is the workspace owner, they have all OWNER permissions
+  if (workspace.ownerId === userId) {
+    return ROLE_PERMISSIONS.OWNER;
+  }
+
+  // Otherwise, check if user is a member
   const member = await prisma.workspaceMember.findUnique({
     where: {
       workspaceId_userId: {

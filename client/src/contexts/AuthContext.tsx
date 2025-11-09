@@ -36,11 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    const userId = user?.id;
     setUser(null);
     setToken(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    
+    // Clear workspace selection for this user to prevent data leakage
+    if (userId) {
+      localStorage.removeItem(`currentWorkspaceId:${userId}`);
+    }
+    // Also clear legacy non-namespaced key
+    localStorage.removeItem('currentWorkspaceId');
   };
 
   return (

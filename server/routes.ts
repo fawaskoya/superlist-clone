@@ -25,6 +25,24 @@ import {
 
 const prisma = new PrismaClient();
 
+// Helper function to verify user has access to a workspace
+async function verifyWorkspaceAccess(userId: string, workspaceId: string): Promise<boolean> {
+  const workspace = await prisma.workspace.findFirst({
+    where: {
+      id: workspaceId,
+      OR: [
+        { ownerId: userId },
+        {
+          members: {
+            some: { userId },
+          },
+        },
+      ],
+    },
+  });
+  return !!workspace;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth Routes
   app.post('/api/auth/register', async (req, res, next) => {
@@ -244,6 +262,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Workspace Member & Permission Routes
   app.get('/api/workspaces/:id/members', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access FIRST before any operations
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.id);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Auto-fix: Check if workspace owner is missing as a member
       const workspace = await prisma.workspace.findUnique({
         where: { id: req.params.id },
@@ -533,6 +557,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // List Routes
   app.get('/api/workspaces/:workspaceId/lists', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const lists = await prisma.list.findMany({
         where: { workspaceId: req.params.workspaceId },
         orderBy: { createdAt: 'asc' },
@@ -554,6 +584,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'List not found' });
       }
 
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, list.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       res.json(list);
     } catch (error: any) {
       next(error);
@@ -562,6 +598,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/workspaces/:workspaceId/lists', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const data = insertListSchema.parse(req.body);
 
       const list = await prisma.list.create({
@@ -583,6 +625,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quick View Routes
   app.get('/api/workspaces/:workspaceId/tasks/today', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
@@ -623,6 +671,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/workspaces/:workspaceId/tasks/upcoming', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
@@ -661,6 +715,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/workspaces/:workspaceId/tasks/assigned', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const tasks = await prisma.task.findMany({
         where: {
           workspaceId: req.params.workspaceId,
@@ -694,6 +754,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get inbox tasks (tasks without a list)
   app.get('/api/workspaces/:workspaceId/tasks/inbox', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const tasks = await prisma.task.findMany({
         where: {
           workspaceId: req.params.workspaceId,
@@ -721,6 +787,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tasks in workspace (for global Tasks view)
   app.get('/api/workspaces/:workspaceId/tasks/all', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const { status, listId, priority } = req.query;
       
       const where: any = {
@@ -772,6 +844,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create inbox task (no list assignment)
   app.post('/api/workspaces/:workspaceId/tasks', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, req.params.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const data = insertTaskSchema.parse(req.body);
 
       const maxOrder = await prisma.task.findFirst({
@@ -886,6 +964,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task Routes
   app.get('/api/lists/:listId/tasks', authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+      // Get list to verify workspace access
+      const list = await prisma.list.findUnique({
+        where: { id: req.params.listId },
+        select: { workspaceId: true },
+      });
+
+      if (!list) {
+        return res.status(404).json({ message: 'List not found' });
+      }
+
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, list.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       const tasks = await prisma.task.findMany({
         where: {
           listId: req.params.listId,
@@ -913,7 +1007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = insertTaskSchema.parse(req.body);
 
-      // Get the list to retrieve workspaceId
+      // Get the list to retrieve workspaceId and verify access
       const list = await prisma.list.findUnique({
         where: { id: req.params.listId },
         select: { workspaceId: true },
@@ -921,6 +1015,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!list) {
         return res.status(404).json({ message: 'List not found' });
+      }
+
+      // Verify workspace access
+      const hasAccess = await verifyWorkspaceAccess(req.userId!, list.workspaceId);
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
       }
 
       const maxOrder = await prisma.task.findFirst({

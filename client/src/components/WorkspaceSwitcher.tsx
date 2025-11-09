@@ -58,7 +58,32 @@ export function WorkspaceSwitcher() {
     createMutation.mutate(newWorkspace);
   };
 
-  if (isLoading || !currentWorkspace) {
+  // Only show loading during initial fetch, not when workspace is being set
+  if (isLoading) {
+    return (
+      <Button variant="ghost" className="h-9 px-3" disabled>
+        <span className="text-sm font-medium">{t('common.loading')}</span>
+      </Button>
+    );
+  }
+
+  // If no workspaces at all after loading, show empty state
+  if (!currentWorkspace && workspaces.length === 0) {
+    return (
+      <Button
+        variant="ghost"
+        className="h-9 px-3"
+        onClick={() => setDialogOpen(true)}
+        data-testid="button-create-first-workspace"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        <span className="text-sm font-medium">Create Workspace</span>
+      </Button>
+    );
+  }
+
+  // If workspaces exist but currentWorkspace not set yet (transient state), wait
+  if (!currentWorkspace) {
     return (
       <Button variant="ghost" className="h-9 px-3" disabled>
         <span className="text-sm font-medium">{t('common.loading')}</span>

@@ -74,55 +74,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Check if user has any pending invitations (case-insensitive email match)
-      const pendingInvitations = await prisma.workspaceInvitation.findMany({
-        where: {
-          expiresAt: {
-            gte: new Date(),
-          },
+      // ALWAYS create a default workspace for new users
+      // They can still accept invitations to join other workspaces
+      // Generate unique slug using user ID to avoid collisions
+      const uniqueSlug = `my-workspace-${user.id.slice(0, 8)}`;
+      
+      const workspace = await prisma.workspace.create({
+        data: {
+          name: 'My Workspace',
+          slug: uniqueSlug,
+          ownerId: user.id,
         },
       });
 
-      // Filter by email case-insensitively since Prisma doesn't support case-insensitive queries on all databases
-      const userPendingInvitations = pendingInvitations.filter(
-        inv => inv.email.toLowerCase() === data.email.toLowerCase()
-      );
+      // Add user as workspace member with OWNER role
+      await prisma.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: user.id,
+          role: 'OWNER',
+        },
+      });
 
-      // Only create default workspace if user has NO pending invitations
-      if (userPendingInvitations.length === 0) {
-        const workspace = await prisma.workspace.create({
-          data: {
-            name: 'My Workspace',
-            slug: 'my-workspace',
-            ownerId: user.id,
-          },
-        });
+      const inboxList = await prisma.list.create({
+        data: {
+          name: 'Inbox',
+          description: 'Your default task list',
+          workspaceId: workspace.id,
+          createdById: user.id,
+          isPersonal: false,
+        },
+      });
 
-        // Add user as workspace member with OWNER role
-        await prisma.workspaceMember.create({
-          data: {
-            workspaceId: workspace.id,
-            userId: user.id,
-            role: 'OWNER',
-          },
-        });
-
-        const inboxList = await prisma.list.create({
-          data: {
-            name: 'Inbox',
-            description: 'Your default task list',
-            workspaceId: workspace.id,
-            createdById: user.id,
-            isPersonal: false,
-          },
-        });
-
-        await prisma.task.createMany({
-          data: [
-            {
-              title: 'Welcome to TaskFlow!',
-              description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
-              listId: inboxList.id,
+      await prisma.task.createMany({
+        data: [
+          {
+            title: 'Welcome to TaskFlow!',
+            description: 'This is your first task. Try creating more tasks, adding subtasks, and using AI features.',
+            listId: inboxList.id,
               workspaceId: workspace.id,
               createdById: user.id,
               status: 'TODO',
@@ -141,7 +130,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
           ],
         });
-      }
 
       const tokens = generateTokens(user.id);
 

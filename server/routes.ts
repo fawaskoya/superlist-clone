@@ -74,18 +74,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Check if user has any pending invitations
+      // Check if user has any pending invitations (case-insensitive email match)
       const pendingInvitations = await prisma.workspaceInvitation.findMany({
         where: {
-          email: data.email.toLowerCase(),
           expiresAt: {
             gte: new Date(),
           },
         },
       });
 
+      // Filter by email case-insensitively since Prisma doesn't support case-insensitive queries on all databases
+      const userPendingInvitations = pendingInvitations.filter(
+        inv => inv.email.toLowerCase() === data.email.toLowerCase()
+      );
+
       // Only create default workspace if user has NO pending invitations
-      if (pendingInvitations.length === 0) {
+      if (userPendingInvitations.length === 0) {
         const workspace = await prisma.workspace.create({
           data: {
             name: 'My Workspace',
@@ -201,10 +205,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
           ],
         },
+        include: {
+          members: {
+            where: { userId: req.userId },
+            select: { role: true, permissions: true },
+          },
+        },
         orderBy: { createdAt: 'asc' },
       });
 
-      res.json(workspaces);
+      // Attach user's role to each workspace
+      const workspacesWithRole = workspaces.map(workspace => ({
+        ...workspace,
+        userRole: workspace.members[0]?.role || (workspace.ownerId === req.userId ? 'OWNER' : null),
+        userPermissions: workspace.members[0]?.permissions,
+        members: undefined, // Remove members array from response
+      }));
+
+      res.json(workspacesWithRole);
     } catch (error: any) {
       next(error);
     }

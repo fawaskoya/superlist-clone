@@ -19,13 +19,17 @@ import { NotificationBell } from './NotificationBell';
 import { WorkspaceSettingsDialog } from './WorkspaceSettingsDialog';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useLocation } from 'wouter';
 
 export function Navbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { hasPermission } = useWorkspace();
   const [, setLocation] = useLocation();
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
+  
+  const canManageWorkspace = hasPermission('MANAGE_WORKSPACE');
 
   const handleLogout = () => {
     logout();
@@ -49,15 +53,17 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowWorkspaceSettings(true)}
-            className="h-9 w-9"
-            data-testid="button-workspace-settings"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          {canManageWorkspace && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowWorkspaceSettings(true)}
+              className="h-9 w-9"
+              data-testid="button-workspace-settings"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          )}
           <NotificationBell />
           <ThemeToggle />
           <LanguageSwitcher />

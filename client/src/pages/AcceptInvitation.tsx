@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
@@ -39,11 +39,14 @@ export default function AcceptInvitation() {
   // Accept invitation mutation
   const acceptMutation = useMutation({
     mutationFn: () => apiRequest('POST', `/api/invitations/${token}/accept`, {}),
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       toast({
         title: t('workspace.invitationAccepted'),
         description: t('workspace.invitationAcceptedDescription'),
       });
+      
+      // Invalidate workspaces query to refetch the list
+      await queryClient.invalidateQueries({ queryKey: ['/api/workspaces'] });
       
       // Switch to the new workspace
       if (data.workspaceId) {
@@ -53,7 +56,7 @@ export default function AcceptInvitation() {
       // Redirect to dashboard
       setTimeout(() => {
         setLocation('/dashboard');
-      }, 1000);
+      }, 1500);
     },
     onError: (error: any) => {
       if (error.message?.includes('different email')) {

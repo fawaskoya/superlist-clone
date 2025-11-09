@@ -34,11 +34,12 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  members WorkspaceMember[]
-  lists   List[]
-  tags    Tag[]
-  tasks   Task[]
+  owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
+  lists       List[]
+  tags        Tag[]
+  tasks       Task[]
 
   @@unique([ownerId, slug])
 }
@@ -73,6 +74,21 @@ model WorkspaceMember {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
+}
+
+model WorkspaceInvitation {
+  id          String   @id @default(cuid())
+  workspaceId String
+  email       String
+  role        Role     @default(MEMBER)
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, email])
+  @@index([token])
 }
 
 model List {

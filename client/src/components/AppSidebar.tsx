@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 import { Inbox, Calendar, Clock, User, List, Plus, ListCheck, Settings } from 'lucide-react';
@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +37,7 @@ export function AppSidebar() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
+  const { setOpenMobile } = useSidebar();
 
   const { data: lists } = useQuery<ListType[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
@@ -77,6 +79,11 @@ export function AppSidebar() {
     { title: t('sidebar.upcoming'), icon: Clock, path: '/upcoming', testId: 'link-upcoming' },
     { title: t('sidebar.assignedToMe'), icon: User, path: '/assigned', testId: 'link-assigned' },
   ];
+
+  useEffect(() => {
+    // Close mobile sidebar after navigation
+    setOpenMobile(false);
+  }, [location, setOpenMobile]);
 
   return (
     <Sidebar>

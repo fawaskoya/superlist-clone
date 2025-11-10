@@ -160,6 +160,11 @@ function TasksPageContent() {
   const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  // Debug selectedTask changes
+  useEffect(() => {
+    console.log('TasksPage: selectedTask changed:', selectedTask?.id || 'null');
+  }, [selectedTask]);
   const [, setLocation] = useLocation();
   const [sortOption, setSortOption] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 

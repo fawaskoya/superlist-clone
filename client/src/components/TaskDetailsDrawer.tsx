@@ -245,6 +245,8 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
     setSelectedSubtasks(new Set());
   };
 
+  console.log('TaskDetailsDrawer: Rendering with task:', task?.id || 'null');
+
   if (!task) return null;
 
   return (

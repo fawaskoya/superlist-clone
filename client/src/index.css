@@ -819,8 +819,9 @@
   display: none;
 }
 
-/* Reduce motion for mobile performance */
+/* Mobile Optimizations for Better UX */
 @media (max-width: 768px) {
+  /* Reduce animation complexity on mobile for better performance */
   .animate-float,
   .animate-float-subtle {
     animation-duration: 12s;
@@ -830,5 +831,80 @@
   .backdrop-blur-xl {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Ensure minimum touch targets */
+  .task-item-interactive,
+  .card-creative,
+  button,
+  .cursor-pointer {
+    min-height: 44px;
+  }
+
+  /* Better text scaling on mobile */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Improve tap targets for mobile */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Better spacing for mobile cards */
+  .card-creative {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+  }
+
+  /* Mobile navigation improvements */
+  .mobile-nav-link {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-link:hover {
+    background-color: hsl(var(--accent) / 0.1);
+  }
+
+  /* Floating notification cards mobile optimization */
+  .floating-notification {
+    max-width: calc(100vw - 2rem);
+    margin: 0 1rem;
+  }
+
+  /* Mobile drawer improvements */
+  [data-radix-portal] [data-radix-content] {
+    max-height: 85vh;
+  }
+
+  /* Better mobile form elements */
+  .mobile-form-input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* Mobile card spacing */
+  .mobile-card {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  /* Mobile button sizing */
+  .mobile-btn {
+    min-height: 44px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Mobile safe area */
+  .mobile-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

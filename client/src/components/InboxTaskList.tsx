@@ -135,24 +135,6 @@ export function InboxTaskList() {
         <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full -translate-y-12 translate-x-12 sm:-translate-y-16 sm:translate-x-16 animate-float-subtle" />
         <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-full translate-y-8 -translate-x-8 animate-float-subtle" style={{ animationDelay: '1s' }} />
 
-        {/* Header section with enhanced styling */}
-        <div className="relative px-6 py-5 border-b border-border/50 bg-gradient-to-r from-background/80 to-background/60 backdrop-blur-sm">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-foreground text-sm truncate">Add a new task</h3>
-              <p className="text-xs text-muted-foreground hidden sm:block">Press Enter or click Add to create</p>
-            </div>
-            {/* Hide hint on mobile for cleaner look */}
-            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
-              <Lightbulb className="w-3 h-3" />
-              <span>Quick capture</span>
-            </div>
-          </div>
-        </div>
-
         {/* Enhanced input section with homepage styling */}
         <div className="relative px-6 py-6">
           <div className="flex gap-4 items-start">
@@ -164,11 +146,11 @@ export function InboxTaskList() {
             {/* Enhanced input field */}
             <div className="flex-1 w-full relative group">
               <Input
-                placeholder="What needs to be done?"
+                placeholder="Add a task..."
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyDown={handleAddTask}
-                className="border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/60 bg-transparent font-medium focus:placeholder:text-primary/50 transition-colors"
+                className="border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/80 bg-transparent font-medium focus:placeholder:text-primary transition-colors"
                 data-testid="input-add-task"
                 data-inbox-add-task
               />
@@ -177,8 +159,8 @@ export function InboxTaskList() {
 
               {/* Hint text with enhanced styling */}
               {!newTaskTitle && (
-                <div className="absolute left-0 top-full mt-2 text-xs text-muted-foreground/60 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
+                <div className="absolute left-0 top-full mt-2 text-xs text-foreground/70 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-primary/70" />
                   <span>Type your task and press Enter</span>
                 </div>
               )}

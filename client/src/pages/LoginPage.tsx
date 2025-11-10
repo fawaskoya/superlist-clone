@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { ArrowLeft, CheckSquare } from 'lucide-react';
 
 export default function LoginPage() {
@@ -92,29 +93,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Navigation Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors" data-testid="link-home">
-            <CheckSquare className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-lg">{t('appName')}</span>
-          </Link>
-          
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <LanguageSwitcher />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden">
+      <AnimatedBackground />
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-semibold">{t('appName')}</CardTitle>
-          <CardDescription>{t('auth.login')}</CardDescription>
-        </CardHeader>
+      <div className="relative z-10">
+        {/* Navigation Header */}
+        <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors group" data-testid="link-home">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-lg blur-md opacity-75 group-hover:opacity-100 transition-opacity" />
+                <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-lg p-1.5">
+                  <CheckSquare className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <span className="font-semibold text-lg bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                {t('appName')}
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageSwitcher />
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="flex-1 flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
+          <div className="relative group w-full max-w-md">
+            <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-300 from-primary/20 to-purple-500/10 rounded-lg pointer-events-none" />
+            <Card className="w-full relative border border-border/50 bg-gradient-to-br from-card via-card/50 to-card/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
+            <CardHeader className="space-y-2 relative">
+              <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">{t('appName')}</CardTitle>
+              <CardDescription>{t('auth.login')}</CardDescription>
+            </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -156,7 +169,7 @@ export default function LoginPage() {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-[1.02]"
                 disabled={isLoading}
                 data-testid="button-login"
               >
@@ -186,6 +199,8 @@ export default function LoginPage() {
           </p>
         </CardFooter>
         </Card>
+            </div>
+      </div>
       </div>
     </div>
   );

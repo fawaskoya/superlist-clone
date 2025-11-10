@@ -423,53 +423,52 @@ export default function Landing() {
         </nav>
 
         {/* Hero Section */}
-        <section id="home" className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-8 sm:pb-12">
+        <section id="home" className="relative min-h-[90vh] sm:min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-6 sm:pb-12">
           <div className="max-w-7xl mx-auto text-center space-y-6 sm:space-y-8">
-            {/* Floating Notification Cards */}
-            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex flex-col gap-2 sm:gap-3 pointer-events-none">
-              <FloatingCard delay={0.2}>
-                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-foreground/90">Task completed!</span>
+            {/* Floating Notification Cards - Positioned Higher on Mobile */}
+            <FloatingCard delay={0.2}>
+              <div className="absolute -top-12 -left-2 sm:-top-10 sm:-left-6 bg-card/90 backdrop-blur-xl border border-border/50 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-lg max-w-[140px] sm:max-w-xs">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                   </div>
+                  <span className="text-[10px] sm:text-xs font-medium text-foreground/90">Task completed!</span>
                 </div>
-              </FloatingCard>
+              </div>
+            </FloatingCard>
 
-              <FloatingCard delay={0.8}>
-                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs ml-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Target className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-foreground/90">New project started</span>
+            <FloatingCard delay={0.8}>
+              <div className="absolute -top-10 -right-2 sm:-top-8 sm:-right-4 bg-card/90 backdrop-blur-xl border border-border/50 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-lg max-w-[140px] sm:max-w-xs">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Target className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                   </div>
+                  <span className="text-[10px] sm:text-xs font-medium text-foreground/90">New project started</span>
                 </div>
-              </FloatingCard>
+              </div>
+            </FloatingCard>
 
-              <FloatingCard delay={1.4}>
-                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs ml-12">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Brain className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-foreground/90">AI insights ready</span>
+            <FloatingCard delay={1.4}>
+              <div className="absolute top-1/4 -left-3 sm:top-2/3 sm:-left-8 bg-card/90 backdrop-blur-xl border border-border/50 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-lg max-w-[140px] sm:max-w-xs">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                   </div>
+                  <span className="text-[10px] sm:text-xs font-medium text-foreground/90">AI insights ready</span>
                 </div>
-              </FloatingCard>
-            </div>
+              </div>
+            </FloatingCard>
 
             {/* Main Hero Content */}
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
-                <Sparkles className="h-4 w-4" />
-                <span>✨ AI-Powered Task Management</span>
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <div className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary">
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">✨ AI-Powered Task Management</span>
+                <span className="sm:hidden">✨ AI Tasks</span>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full animate-pulse" />
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[0.9] mt-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold tracking-tight leading-[0.95] sm:leading-[0.9] mt-1 sm:mt-2">
                 <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent">
                   Manage Tasks
                 </span>
@@ -479,12 +478,12 @@ export default function Landing() {
                     </span>
                   </h1>
                   
-              <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mt-2">
+              <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-2xl sm:max-w-3xl mx-auto leading-relaxed mt-1 sm:mt-2 px-2 sm:px-0">
                 Transform your productivity with AI-powered task management that adapts to your workflow.
-                Intelligent suggestions, seamless collaboration, and beautiful design.
+                <span className="hidden sm:inline"> Intelligent suggestions, seamless collaboration, and beautiful design.</span>
                   </p>
                 </div>
-                
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 px-4 sm:px-0">
               <Link href="/register" className="w-full sm:w-auto">
@@ -534,19 +533,20 @@ export default function Landing() {
         </section>
 
         {/* Interactive Demo Section */}
-        <section id="demo" className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <section id="demo" className="relative pt-8 sm:pt-12 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center space-y-8 mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-full text-sm font-medium text-blue-600 dark:text-blue-400">
-                <Layers className="h-4 w-4" />
-                Interactive Demo
+            <div className="text-center space-y-6 sm:space-y-8 mb-8 sm:mb-16">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-full text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400">
+                <Layers className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Interactive Demo</span>
+                <span className="sm:hidden">Demo</span>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight">
                 See TaskFlow in Action
               </h2>
 
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-xl sm:max-w-2xl mx-auto px-2 sm:px-0">
                 Experience the power of intelligent task management with our interactive demo
               </p>
             </div>

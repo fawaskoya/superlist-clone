@@ -98,21 +98,6 @@ function TaskGroup({ title, tasks, icon, description, onSelect }: TaskGroupProps
     return null;
   }
 
-  const getGroupStyles = (title: string) => {
-    switch (title.toLowerCase()) {
-      case 'overdue':
-        return 'border-l-4 border-l-red-500';
-      case 'today':
-        return 'border-l-4 border-l-blue-500';
-      case 'tomorrow':
-        return 'border-l-4 border-l-orange-500';
-      case 'upcoming':
-        return 'border-l-4 border-l-green-500';
-      default:
-        return 'border-l-4 border-l-gray-500';
-    }
-  };
-
   return (
     <div key={title} className="mb-4 animate-in slide-in-from-bottom-4 duration-500" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
       <div className="flex items-center justify-between mb-3">
@@ -131,7 +116,7 @@ function TaskGroup({ title, tasks, icon, description, onSelect }: TaskGroupProps
           {tasks.length}
         </Badge>
       </div>
-      <div className={`rounded-lg overflow-hidden ${getGroupStyles(title)}`}>
+      <div className="rounded-lg overflow-hidden">
         <div className="divide-y divide-border/30 bg-card/30">
           {tasks.map((task, index) => {
             return (

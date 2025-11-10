@@ -56,31 +56,33 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/90 to-background/80"></div>
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent"></div>
-        <div className="relative flex h-16 items-center gap-3 px-4 sm:px-6">
-          <div className="flex items-center gap-3 min-w-0">
-            <SidebarTrigger
-              data-testid="button-sidebar-toggle"
-              className="h-9 w-9 rounded-lg hover:bg-accent/50 transition-colors duration-200 group"
-            />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors duration-200">
-                <CheckSquare className="w-4 h-4 text-primary" />
+      <header className="border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <SidebarTrigger
+                data-testid="button-sidebar-toggle"
+                className="h-9 w-9 rounded-lg hover:bg-accent/50 transition-colors duration-200 group"
+              />
+              <div className="flex items-center gap-2 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-xl p-2">
+                    <CheckSquare className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                  {t('appName')}
+                </span>
               </div>
-              <h1 className="text-lg font-bold tracking-tight sm:text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                {t('appName')}
-              </h1>
             </div>
-          </div>
-          <div className="hidden md:flex">
-            <WorkspaceSwitcher />
-          </div>
-          <div className="hidden lg:flex flex-1 px-4">
-            <SearchBar />
-          </div>
-          <div className="ml-auto flex items-center gap-1 md:gap-2">
+            <div className="hidden md:flex">
+              <WorkspaceSwitcher />
+            </div>
+            <div className="hidden lg:flex flex-1 px-4">
+              <SearchBar />
+            </div>
+            <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
@@ -117,6 +119,28 @@ export function Navbar() {
             <NotificationBell />
             <div className="hidden sm:inline-flex items-center">
               <ThemeToggle />
+            </div>
+
+            {/* Mobile theme toggle in user menu */}
+            <div className="sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-lg hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group hover:scale-105"
+                  >
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-300"></div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuLabel className="text-center">Theme</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="p-2">
+                    <ThemeToggle />
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="hidden md:inline-flex items-center">
               <LanguageSwitcher />
@@ -167,6 +191,7 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>

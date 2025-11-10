@@ -252,25 +252,27 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
         className={cn(
-          'p-4 sm:p-6 overflow-y-auto z-[100]',
-          isMobile ? 'w-full max-h-[85vh] rounded-t-3xl fixed inset-x-0 bottom-0' : 'w-full sm:w-96'
+          'overflow-hidden border border-border/50 bg-gradient-to-br from-background via-background/95 to-background backdrop-blur-xl z-[200] p-4 sm:p-6 overflow-y-auto',
+          isMobile ? 'w-full max-h-[85vh] rounded-t-3xl' : 'w-full sm:w-96'
         )}
         data-testid="drawer-task-details"
-        style={{ zIndex: 100 }}
       >
+        {/* Gradient overlay for hover effect */}
+        <div className="absolute inset-0 bg-gradient-to-br opacity-5 from-primary/20 to-purple-500/10 pointer-events-none" />
         <SheetHeader className="mb-6">
           <SheetTitle className="sr-only">{t('task.taskDetails')}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-6">
-          <div>
+          <div className="relative group">
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={() => handleUpdate('title', title)}
-              className="text-xl font-semibold border-0 shadow-none px-0 focus-visible:ring-0"
+              className="text-xl font-semibold border-0 shadow-none px-0 focus-visible:ring-0 bg-transparent focus:placeholder:text-primary/50 transition-colors relative z-10"
               data-testid="input-task-title"
             />
+            <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-purple-500 transition-all duration-300 group-focus-within:w-full" />
           </div>
 
           <div className="space-y-3">

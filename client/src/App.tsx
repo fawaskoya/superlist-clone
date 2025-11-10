@@ -1,4 +1,5 @@
 import { Switch, Route, Redirect, useLocation } from 'wouter';
+import { useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -28,6 +29,11 @@ import '@/i18n/i18n';
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
+
+  // Scroll to top on route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   const sidebarStyle = {
     '--sidebar-width': '16rem',

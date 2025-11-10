@@ -1,9 +1,15 @@
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import { Inbox, Zap } from 'lucide-react';
 import { InboxTaskList } from '@/components/InboxTaskList';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="max-w-5xl mx-auto page-enter">

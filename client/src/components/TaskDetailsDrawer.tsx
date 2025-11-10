@@ -382,10 +382,10 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
                   handleUpdate('status', value);
                 }}
               >
-                <SelectTrigger data-testid="select-task-status">
+                <SelectTrigger data-testid="select-task-status" className="relative z-10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[9999]" position="popper" sideOffset={5}>
                   <SelectItem value="TODO">{t('status.TODO')}</SelectItem>
                   <SelectItem value="IN_PROGRESS">{t('status.IN_PROGRESS')}</SelectItem>
                   <SelectItem value="DONE">{t('status.DONE')}</SelectItem>
@@ -402,10 +402,10 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
                   handleUpdate('priority', value);
                 }}
               >
-                <SelectTrigger data-testid="select-task-priority">
+                <SelectTrigger data-testid="select-task-priority" className="relative z-10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[9999]" position="popper" sideOffset={5}>
                   <SelectItem value="LOW">{t('priority.LOW')}</SelectItem>
                   <SelectItem value="MEDIUM">{t('priority.MEDIUM')}</SelectItem>
                   <SelectItem value="HIGH">{t('priority.HIGH')}</SelectItem>
@@ -437,10 +437,10 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
                 handleUpdate('assignedToId', newAssignee);
               }}
             >
-              <SelectTrigger data-testid="select-assignee">
+              <SelectTrigger data-testid="select-assignee" className="relative z-10">
                 <SelectValue placeholder={t('task.assigneePlaceholder')} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999]" position="popper" sideOffset={5}>
                 <SelectItem value="unassigned" data-testid="select-item-assignee-unassigned">
                   {t('task.unassigned')}
                 </SelectItem>

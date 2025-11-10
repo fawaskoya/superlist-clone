@@ -910,17 +910,25 @@
 
   /* Select dropdown z-index fix for sheets */
   [data-radix-select-content] {
-    z-index: 2000 !important;
+    z-index: 9999 !important;
     position: fixed !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
   }
 
   /* Ensure dropdowns in sheets can escape boundaries */
   [data-radix-portal] {
-    z-index: 2000 !important;
+    z-index: 9999 !important;
   }
 
   /* Force select triggers to be clickable */
   [data-radix-select-trigger] {
     pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* Ensure sheet content allows overflow for dropdowns */
+  [data-radix-dialog-content] {
+    overflow: visible !important;
   }
 }

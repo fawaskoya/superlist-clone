@@ -181,7 +181,7 @@ export function InboxTaskList() {
               size="sm"
               onClick={handleAddTaskClick}
               disabled={!newTaskTitle.trim() || createMutation.isPending}
-              className={`btn-creative scale-hover px-3 sm:px-6 py-2 sm:py-3 h-auto font-medium transition-all duration-200 w-full sm:w-auto ${
+              className={`btn-creative scale-hover px-3 sm:px-6 py-2 sm:py-3 h-auto font-medium transition-all duration-200 w-auto ${
                 newTaskTitle.trim() ? 'shadow-md hover:shadow-lg' : 'opacity-60'
               }`}
               data-testid="button-add-task"

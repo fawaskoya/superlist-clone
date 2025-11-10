@@ -38,6 +38,7 @@ import { Loader2, UserPlus, Trash2, Copy, Check, Settings, Users, Clock, Shield,
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import type { Task } from '@shared/schema';
 
 interface WorkspaceMember {
   id: string;
@@ -80,7 +81,7 @@ export default function WorkspaceSettingsPage() {
   });
 
   // Fetch all tasks to calculate active projects
-  const { data: allTasks = [] } = useQuery({
+  const { data: allTasks = [] } = useQuery<Task[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'all'],
     enabled: !!currentWorkspace?.id,
   });
@@ -209,7 +210,7 @@ export default function WorkspaceSettingsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 page-enter">
       {/* Creative Settings Header */}
-      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="relative">
             <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/10 border border-purple-200/50 dark:border-purple-800/30 flex items-center justify-center shadow-sm">
@@ -246,7 +247,7 @@ export default function WorkspaceSettingsPage() {
       {/* Workspace Info Card */}
       <Card className="card-creative mb-6">
         <div className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
                 <Shield className="w-6 h-6 text-primary" />
@@ -307,7 +308,7 @@ export default function WorkspaceSettingsPage() {
           {/* Members Section */}
           <Card className="card-creative">
             <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/10 border border-green-200/50 dark:border-green-800/30 flex items-center justify-center">
                     <UserCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -425,11 +426,11 @@ export default function WorkspaceSettingsPage() {
                   {members.map((member, index) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
                       style={{ animationDelay: `${index * 100}ms` }}
                       data-testid={`row-member-${member.id}`}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
                         <Avatar className="h-10 w-10 ring-2 ring-primary/10">
                           <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
                             {getInitials(member.user.name)}
@@ -444,7 +445,7 @@ export default function WorkspaceSettingsPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <Badge
                           variant={getRoleBadgeVariant(member.role)}
                           className="rounded-full px-3 py-1 font-medium"
@@ -516,11 +517,11 @@ export default function WorkspaceSettingsPage() {
                   {invitations.map((invitation, index) => (
                     <div
                       key={invitation.id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
                       style={{ animationDelay: `${index * 100}ms` }}
                       data-testid={`row-invitation-${invitation.id}`}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-950/20 dark:to-blue-950/10 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
                           <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
@@ -534,7 +535,7 @@ export default function WorkspaceSettingsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <Badge variant="outline" className="rounded-full px-3 py-1" data-testid={`badge-invitation-role-${invitation.id}`}>
                           {t(`workspace.roles.${invitation.role.toLowerCase()}`)}
                         </Badge>

@@ -133,7 +133,7 @@ export function InboxTaskList() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
 
         {/* Header with icon and hint */}
-        <div className="relative px-6 py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
+        <div className="relative px-4 sm:px-6 py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -150,15 +150,15 @@ export function InboxTaskList() {
         </div>
 
         {/* Input section */}
-        <div className="relative px-6 py-5">
-          <div className="flex items-center gap-4">
+        <div className="relative px-4 sm:px-6 py-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {/* Creative bullet point */}
             <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
               <div className="w-2 h-2 rounded-full bg-white/90"></div>
             </div>
 
             {/* Input field with enhanced styling */}
-            <div className="flex-1 relative">
+            <div className="flex-1 w-full relative">
               <Input
                 placeholder="What needs to be done?"
                 value={newTaskTitle}
@@ -182,7 +182,7 @@ export function InboxTaskList() {
               size="lg"
               onClick={handleAddTaskClick}
               disabled={!newTaskTitle.trim() || createMutation.isPending}
-              className={`btn-creative scale-hover px-6 py-3 h-auto font-medium transition-all duration-200 ${
+              className={`btn-creative scale-hover px-6 py-3 h-auto font-medium transition-all duration-200 w-full sm:w-auto ${
                 newTaskTitle.trim() ? 'shadow-md hover:shadow-lg' : 'opacity-60'
               }`}
               data-testid="button-add-task"

@@ -38,7 +38,7 @@ function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
       </h2>
       <Card className="overflow-hidden">
         {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} onSelect={onSelect} />
+          <TaskItem key={task.id} task={task} onSelect={() => {}} />
         ))}
       </Card>
     </div>
@@ -241,13 +241,14 @@ export default function TasksPage() {
         )}
       </div>
 
-      {selectedTask && (
+      {/* Temporarily commented out to debug React error #300 */}
+      {/* {selectedTask && (
         <TaskDetailsDrawer
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
           listId={selectedTask.listId}
         />
-      )}
+      )} */}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
@@ -18,6 +18,71 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+  errorInfo?: ErrorInfo;
+}
+
+class TasksErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('TasksPage Error Boundary caught an error:', error);
+    console.error('Error Info:', errorInfo);
+    console.error('Component Stack:', errorInfo.componentStack);
+
+    this.setState({
+      error,
+      errorInfo
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen p-8">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-red-600">Something went wrong</h1>
+            <p className="text-muted-foreground">
+              The tasks page encountered an error. Check the console for details.
+            </p>
+            <div className="text-left bg-red-50 dark:bg-red-900/20 p-4 rounded-lg max-w-2xl">
+              <h3 className="font-semibold mb-2">Error Details:</h3>
+              <pre className="text-sm overflow-auto">
+                {this.state.error?.toString()}
+              </pre>
+              {this.state.errorInfo && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer font-semibold">Component Stack</summary>
+                  <pre className="text-sm mt-2 overflow-auto">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                </details>
+              )}
+            </div>
+            <Button
+              onClick={() => window.location.reload()}
+              className="mt-4"
+            >
+              Reload Page
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 interface TaskGroupProps {
   title: string;
   tasks: Task[];
@@ -26,9 +91,16 @@ interface TaskGroupProps {
 }
 
 function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
+  console.log(`TaskGroup: Rendering ${title} with ${tasks.length} tasks`);
+
   const { t } = useTranslation();
 
-  if (tasks.length === 0) return null;
+  if (tasks.length === 0) {
+    console.log(`TaskGroup: ${title} has no tasks, returning null`);
+    return null;
+  }
+
+  console.log(`TaskGroup: Rendering ${tasks.length} tasks for ${title}`);
 
   return (
     <div key={title} className="mb-6" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -37,25 +109,43 @@ function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
         {title} ({tasks.length})
       </h2>
       <Card className="overflow-hidden">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} onSelect={() => {}} />
-        ))}
+        {tasks.map((task) => {
+          console.log(`TaskGroup: Rendering task ${task.id} in ${title}`);
+          return <TaskItem key={task.id} task={task} onSelect={() => {}} />;
+        })}
       </Card>
     </div>
   );
 }
 
-export default function TasksPage() {
+function TasksPageContent() {
   const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [, setLocation] = useLocation();
   const [sortOption, setSortOption] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 
-  const { data: tasks, isLoading } = useQuery<Task[]>({
+  console.log('TasksPage: Rendering with currentWorkspace:', currentWorkspace?.id);
+
+  const { data: tasks, isLoading, error } = useQuery<Task[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'all'],
     enabled: !!currentWorkspace?.id,
   });
+
+  console.log('TasksPage: Query result - isLoading:', isLoading, 'tasks length:', tasks?.length, 'error:', error);
+
+  useEffect(() => {
+    console.log('TasksPage: Component mounted/updated');
+    return () => console.log('TasksPage: Component unmounting');
+  }, []);
+
+  useEffect(() => {
+    console.log('TasksPage: selectedTask changed:', selectedTask?.id);
+  }, [selectedTask]);
+
+  useEffect(() => {
+    console.log('TasksPage: currentWorkspace changed:', currentWorkspace?.id);
+  }, [currentWorkspace]);
 
   if (isLoading) {
     return (
@@ -66,58 +156,86 @@ export default function TasksPage() {
   }
 
   const groupedTasks = useMemo(() => {
-    if (!tasks) return {
-      overdue: [],
-      today: [],
-      tomorrow: [],
-      upcoming: [],
-      noDueDate: [],
-    };
+    console.log('useMemo: Computing groupedTasks with tasks:', tasks?.length, 'sortOption:', sortOption);
 
-    // Sort tasks first
-    const sorted = [...tasks];
-    if (sortOption === 'priority') {
-      const priorityOrder: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-      sorted.sort((a, b) => (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3));
-    } else if (sortOption === 'dueDate') {
-      sorted.sort((a, b) => {
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      });
-    } else {
-      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (!tasks) {
+      console.log('useMemo: No tasks, returning empty groups');
+      return {
+        overdue: [],
+        today: [],
+        tomorrow: [],
+        upcoming: [],
+        noDueDate: [],
+      };
     }
 
-    // Group tasks by due date
-    const grouped: Record<string, Task[]> = {
-      overdue: [],
-      today: [],
-      tomorrow: [],
-      upcoming: [],
-      noDueDate: [],
-    };
-
-    sorted.forEach((task) => {
-      if (!task.dueDate) {
-        grouped.noDueDate.push(task);
+    try {
+      // Sort tasks first
+      const sorted = [...tasks];
+      if (sortOption === 'priority') {
+        const priorityOrder: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+        sorted.sort((a, b) => (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3));
+      } else if (sortOption === 'dueDate') {
+        sorted.sort((a, b) => {
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        });
       } else {
-        const dueDate = new Date(task.dueDate);
-        if (isPast(dueDate) && !isToday(dueDate) && task.status !== 'DONE') {
-          grouped.overdue.push(task);
-        } else if (isToday(dueDate)) {
-          grouped.today.push(task);
-        } else if (isTomorrow(dueDate)) {
-          grouped.tomorrow.push(task);
-        } else if (isFuture(dueDate)) {
-          grouped.upcoming.push(task);
-        }
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
-    });
 
-    return grouped;
+      console.log('useMemo: Tasks sorted, now grouping');
+
+      // Group tasks by due date
+      const grouped: Record<string, Task[]> = {
+        overdue: [],
+        today: [],
+        tomorrow: [],
+        upcoming: [],
+        noDueDate: [],
+      };
+
+      sorted.forEach((task) => {
+        if (!task.dueDate) {
+          grouped.noDueDate.push(task);
+        } else {
+          const dueDate = new Date(task.dueDate);
+          if (isPast(dueDate) && !isToday(dueDate) && task.status !== 'DONE') {
+            grouped.overdue.push(task);
+          } else if (isToday(dueDate)) {
+            grouped.today.push(task);
+          } else if (isTomorrow(dueDate)) {
+            grouped.tomorrow.push(task);
+          } else if (isFuture(dueDate)) {
+            grouped.upcoming.push(task);
+          }
+        }
+      });
+
+      console.log('useMemo: Grouping complete:', {
+        overdue: grouped.overdue.length,
+        today: grouped.today.length,
+        tomorrow: grouped.tomorrow.length,
+        upcoming: grouped.upcoming.length,
+        noDueDate: grouped.noDueDate.length
+      });
+
+      return grouped;
+    } catch (error) {
+      console.error('useMemo: Error in groupedTasks computation:', error);
+      return {
+        overdue: [],
+        today: [],
+        tomorrow: [],
+        upcoming: [],
+        noDueDate: [],
+      };
+    }
   }, [tasks, sortOption]);
 
+
+  console.log('TasksPage: Starting render with groupedTasks:', Object.keys(groupedTasks));
 
   return (
     <>
@@ -250,5 +368,14 @@ export default function TasksPage() {
         />
       )} */}
     </>
+  );
+}
+
+export default function TasksPage() {
+  console.log('TasksPage: Error boundary wrapper rendering');
+  return (
+    <TasksErrorBoundary>
+      <TasksPageContent />
+    </TasksErrorBoundary>
   );
 }

@@ -38,8 +38,31 @@ export default function TasksPage() {
     );
   }
 
-  // Group tasks by due date
-  const groupTasksByDate = (tasks: Task[]) => {
+  const groupedTasks = useMemo(() => {
+    if (!tasks) return {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      upcoming: [],
+      noDueDate: [],
+    };
+
+    // Sort tasks first
+    const sorted = [...tasks];
+    if (sortOption === 'priority') {
+      const priorityOrder: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+      sorted.sort((a, b) => (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3));
+    } else if (sortOption === 'dueDate') {
+      sorted.sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
+    } else {
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    // Group tasks by due date
     const grouped: Record<string, Task[]> = {
       overdue: [],
       today: [],
@@ -48,7 +71,7 @@ export default function TasksPage() {
       noDueDate: [],
     };
 
-    tasks?.forEach((task) => {
+    sorted.forEach((task) => {
       if (!task.dueDate) {
         grouped.noDueDate.push(task);
       } else {
@@ -66,27 +89,7 @@ export default function TasksPage() {
     });
 
     return grouped;
-  };
-
-  const groupedTasks = groupTasksByDate(
-    useMemo(() => {
-      if (!tasks) return [];
-      const sorted = [...tasks];
-      if (sortOption === 'priority') {
-        const priorityOrder: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-        sorted.sort((a, b) => (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3));
-      } else if (sortOption === 'dueDate') {
-        sorted.sort((a, b) => {
-          if (!a.dueDate) return 1;
-          if (!b.dueDate) return -1;
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        });
-      } else {
-        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-      return sorted;
-    }, [tasks, sortOption])
-  );
+  }, [tasks, sortOption]);
 
   const renderTaskGroup = (title: string, tasks: Task[], icon?: string) => {
     if (tasks.length === 0) return null;

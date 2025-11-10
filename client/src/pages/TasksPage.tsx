@@ -389,14 +389,13 @@ function TasksPageContent() {
         )}
       </div>
 
-      {/* Temporarily commented out to debug React error #300 */}
-      {/* {selectedTask && (
+      {selectedTask && (
         <TaskDetailsDrawer
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
           listId={selectedTask.listId}
         />
-      )} */}
+      )}
     </>
   );
 }

@@ -16,7 +16,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Plus } from 'lucide-react';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useLocation } from 'wouter';
 
 export default function TasksPage() {
@@ -24,7 +23,6 @@ export default function TasksPage() {
   const { currentWorkspace } = useWorkspace();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [, setLocation] = useLocation();
-  const { setOpenMobile } = useSidebar();
   const [sortOption, setSortOption] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 
   const { data: tasks, isLoading } = useQuery<Task[]>({
@@ -178,7 +176,6 @@ export default function TasksPage() {
                 className="gap-2 rounded-full px-4"
                 onClick={() => {
                   setLocation('/dashboard');
-                  setOpenMobile(false);
                   setTimeout(() => {
                     const inboxInput = document.querySelector<HTMLInputElement>('[data-inbox-add-task]');
                     inboxInput?.focus();

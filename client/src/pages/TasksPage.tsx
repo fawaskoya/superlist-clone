@@ -92,16 +92,11 @@ interface TaskGroupProps {
 }
 
 function TaskGroup({ title, tasks, icon, description, onSelect }: TaskGroupProps) {
-  console.log(`TaskGroup: Rendering ${title} with ${tasks.length} tasks`);
-
   const { t } = useTranslation();
 
   if (tasks.length === 0) {
-    console.log(`TaskGroup: ${title} has no tasks, returning null`);
     return null;
   }
-
-  console.log(`TaskGroup: Rendering ${tasks.length} tasks for ${title}`);
 
   const getGroupStyles = (title: string) => {
     switch (title.toLowerCase()) {
@@ -163,33 +158,25 @@ function TasksPageContent() {
   const [, setLocation] = useLocation();
   const [sortOption, setSortOption] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 
-  console.log('TasksPage: Rendering with currentWorkspace:', currentWorkspace?.id);
 
   const { data: tasks, isLoading, error } = useQuery<Task[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'all'],
     enabled: !!currentWorkspace?.id,
   });
 
-  console.log('TasksPage: Query result - isLoading:', isLoading, 'tasks length:', tasks?.length, 'error:', error);
 
   useEffect(() => {
-    console.log('TasksPage: Component mounted/updated');
-    return () => console.log('TasksPage: Component unmounting');
   }, []);
 
   useEffect(() => {
-    console.log('TasksPage: selectedTask changed:', selectedTask?.id);
   }, [selectedTask]);
 
   useEffect(() => {
-    console.log('TasksPage: currentWorkspace changed:', currentWorkspace?.id);
   }, [currentWorkspace]);
 
   const groupedTasks = useMemo(() => {
-    console.log('useMemo: Computing groupedTasks with tasks:', tasks?.length, 'sortOption:', sortOption);
 
     if (!tasks) {
-      console.log('useMemo: No tasks, returning empty groups');
       return {
         overdue: [],
         today: [],
@@ -215,7 +202,6 @@ function TasksPageContent() {
         sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
 
-      console.log('useMemo: Tasks sorted, now grouping');
 
       // Group tasks by due date
       const grouped: Record<string, Task[]> = {
@@ -243,15 +229,13 @@ function TasksPageContent() {
         }
       });
 
-      console.log('useMemo: Grouping complete:', {
+      return {
         overdue: grouped.overdue.length,
         today: grouped.today.length,
         tomorrow: grouped.tomorrow.length,
         upcoming: grouped.upcoming.length,
         noDueDate: grouped.noDueDate.length
-      });
-
-      return grouped;
+      };
     } catch (error) {
       console.error('useMemo: Error in groupedTasks computation:', error);
       return {
@@ -264,7 +248,6 @@ function TasksPageContent() {
     }
   }, [tasks, sortOption]);
 
-  console.log('TasksPage: Starting render with groupedTasks:', Object.keys(groupedTasks));
 
   if (isLoading) {
     return (
@@ -401,7 +384,6 @@ function TasksPageContent() {
 }
 
 export default function TasksPage() {
-  console.log('TasksPage: Error boundary wrapper rendering');
   return (
     <TasksErrorBoundary>
       <TasksPageContent />

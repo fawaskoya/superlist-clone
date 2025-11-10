@@ -126,35 +126,35 @@ export function InboxTaskList() {
 
   return (
     <>
-      {/* Creative Add Task Card */}
-      <Card className="relative overflow-hidden card-creative mb-6">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+      {/* Mobile-Optimized Add Task Card */}
+      <Card className="relative overflow-hidden card-creative mb-4 sm:mb-6">
+        {/* Simplified background for mobile */}
+        <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-full -translate-y-10 translate-x-10 sm:-translate-y-16 sm:translate-x-16"></div>
 
-        {/* Header with icon and hint */}
-        <div className="relative px-4 sm:px-6 py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary" />
+        {/* Simplified header for mobile */}
+        <div className="relative px-4 py-3 sm:px-6 sm:py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-foreground text-sm">Add a new task</h3>
-              <p className="text-xs text-muted-foreground">Press Enter or click Add to create</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-foreground text-sm truncate">Add a new task</h3>
+              <p className="text-xs text-muted-foreground hidden sm:block">Press Enter or click Add to create</p>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            {/* Hide hint on mobile for cleaner look */}
+            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
               <Lightbulb className="w-3 h-3" />
               <span>Quick capture</span>
             </div>
           </div>
         </div>
 
-        {/* Input section */}
-        <div className="relative px-4 sm:px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            {/* Creative bullet point */}
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-              <div className="w-2 h-2 rounded-full bg-white/90"></div>
+        {/* Mobile-optimized input section */}
+        <div className="relative px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex gap-3">
+            {/* Simplified bullet point */}
+            <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm mt-0.5">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/90"></div>
             </div>
 
             {/* Input field with enhanced styling */}
@@ -164,25 +164,24 @@ export function InboxTaskList() {
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyDown={handleAddTask}
-                className="input-enhanced border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/60 bg-transparent"
+                className="input-enhanced border-0 shadow-none focus-visible:ring-0 px-0 py-2 sm:py-3 text-sm sm:text-base placeholder:text-muted-foreground/60 bg-transparent"
                 data-testid="input-add-task"
                 data-inbox-add-task
               />
-              {/* Subtle hint text */}
+              {/* Hint text - only show on larger screens */}
               {!newTaskTitle && (
-                <div className="absolute left-0 top-full mt-1 text-xs text-muted-foreground/50 flex items-center gap-1">
-                  <span>💡</span>
-                  <span>Type your task and press Enter</span>
+                <div className="hidden sm:block absolute left-0 top-full mt-1 text-xs text-muted-foreground/50">
+                  💡 Type your task and press Enter
                 </div>
               )}
             </div>
 
-            {/* Enhanced Add button */}
+            {/* Compact Add button */}
             <Button
-              size="lg"
+              size="sm"
               onClick={handleAddTaskClick}
               disabled={!newTaskTitle.trim() || createMutation.isPending}
-              className={`btn-creative scale-hover px-6 py-3 h-auto font-medium transition-all duration-200 w-full sm:w-auto ${
+              className={`btn-creative scale-hover px-3 sm:px-6 py-2 sm:py-3 h-auto font-medium transition-all duration-200 w-full sm:w-auto ${
                 newTaskTitle.trim() ? 'shadow-md hover:shadow-lg' : 'opacity-60'
               }`}
               data-testid="button-add-task"

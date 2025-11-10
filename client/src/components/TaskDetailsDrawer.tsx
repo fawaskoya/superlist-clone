@@ -252,8 +252,8 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
         className={cn(
-          'p-4 sm:p-6 overflow-y-auto',
-          isMobile ? 'w-full max-h-[85vh] rounded-t-3xl' : 'w-96'
+          'p-4 sm:p-6 overflow-y-auto z-[100]',
+          isMobile ? 'w-full max-h-[85vh] rounded-t-3xl fixed inset-x-0 bottom-0' : 'w-full sm:w-96'
         )}
         data-testid="drawer-task-details"
       >

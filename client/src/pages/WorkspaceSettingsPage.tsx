@@ -245,20 +245,20 @@ export default function WorkspaceSettingsPage() {
       </div>
 
       {/* Workspace Info Card */}
-      <Card className="card-creative mb-6">
-        <div className="p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-primary" />
+      <Card className="card-creative mb-4 sm:mb-6">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">{currentWorkspace.name}</h3>
-                <p className="text-sm text-muted-foreground">Workspace • Created recently</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{currentWorkspace.name}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Workspace • Created recently</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="rounded-full px-3 py-1">
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <Badge variant="secondary" className="rounded-full px-2.5 sm:px-3 py-1 text-xs">
                 <Crown className="w-3 h-3 mr-1" />
                 Owner
               </Badge>
@@ -266,21 +266,21 @@ export default function WorkspaceSettingsPage() {
           </div>
 
           {/* Progress/Stats */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 rounded-lg bg-gradient-secondary/50">
-              <div className="text-2xl font-bold text-foreground">{members.length}</div>
-              <div className="text-sm text-muted-foreground">Team Members</div>
-              <Progress value={(members.length / 10) * 100} className="mt-2 h-2" />
+          <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gradient-secondary/50">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{members.length}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Team Members</div>
+              <Progress value={(members.length / 10) * 100} className="mt-2 h-1.5 sm:h-2" />
             </div>
-            <div className="text-center p-4 rounded-lg bg-gradient-accent/50">
-              <div className="text-2xl font-bold text-foreground">{activeProjectsCount}</div>
-              <div className="text-sm text-muted-foreground">Active Projects</div>
-              <Progress value={Math.min((activeProjectsCount / 10) * 100, 100)} className="mt-2 h-2" />
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gradient-accent/50">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{activeProjectsCount}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Active Projects</div>
+              <Progress value={Math.min((activeProjectsCount / 10) * 100, 100)} className="mt-2 h-1.5 sm:h-2" />
             </div>
-            <div className="text-center p-4 rounded-lg bg-gradient-primary/10">
-              <div className="text-2xl font-bold text-foreground">{invitations.length}</div>
-              <div className="text-sm text-muted-foreground">Pending Invites</div>
-              <Progress value={(invitations.length / 5) * 100} className="mt-2 h-2" />
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gradient-primary/10">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{invitations.length}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Pending Invites</div>
+              <Progress value={(invitations.length / 5) * 100} className="mt-2 h-1.5 sm:h-2" />
             </div>
           </div>
         </div>
@@ -288,16 +288,18 @@ export default function WorkspaceSettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="members" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Team Members
+        <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-auto p-1">
+          <TabsTrigger value="members" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5 sm:py-3">
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">Team Members</span>
+            <span className="xs:hidden">Members</span>
           </TabsTrigger>
-          <TabsTrigger value="invitations" className="flex items-center gap-2">
-            <Mail className="w-4 h-4" />
-            Invitations
+          <TabsTrigger value="invitations" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5 sm:py-3">
+            <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">Invitations</span>
+            <span className="xs:hidden">Invites</span>
             {invitations.length > 0 && (
-              <Badge variant="secondary" className="ml-2 rounded-full px-2 py-0 text-xs">
+              <Badge variant="secondary" className="ml-1 sm:ml-2 rounded-full px-1.5 sm:px-2 py-0 text-xs">
                 {invitations.length}
               </Badge>
             )}

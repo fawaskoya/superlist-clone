@@ -907,4 +907,20 @@
   .mobile-safe-area {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  /* Select dropdown z-index fix for sheets */
+  [data-radix-select-content] {
+    z-index: 2000 !important;
+    position: fixed !important;
+  }
+
+  /* Ensure dropdowns in sheets can escape boundaries */
+  [data-radix-portal] {
+    z-index: 2000 !important;
+  }
+
+  /* Force select triggers to be clickable */
+  [data-radix-select-trigger] {
+    pointer-events: auto !important;
+  }
 }

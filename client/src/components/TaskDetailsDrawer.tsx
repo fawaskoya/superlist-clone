@@ -256,6 +256,7 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
           isMobile ? 'w-full max-h-[85vh] rounded-t-3xl fixed inset-x-0 bottom-0' : 'w-full sm:w-96'
         )}
         data-testid="drawer-task-details"
+        style={{ zIndex: 100 }}
       >
         <SheetHeader className="mb-6">
           <SheetTitle className="sr-only">{t('task.taskDetails')}</SheetTitle>

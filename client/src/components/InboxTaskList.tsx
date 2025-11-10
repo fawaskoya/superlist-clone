@@ -126,13 +126,17 @@ export function InboxTaskList() {
 
   return (
     <>
-      {/* Mobile-Optimized Add Task Card */}
-      <Card className="relative overflow-hidden card-creative mb-4 sm:mb-6">
-        {/* Simplified background for mobile */}
-        <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-full -translate-y-10 translate-x-10 sm:-translate-y-16 sm:translate-x-16"></div>
+      {/* Beautiful Add Task Card - Matching Homepage Design */}
+      <Card className="relative overflow-hidden border border-border/50 bg-gradient-to-br from-card via-card/50 to-card/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 mb-4 sm:mb-6 group">
+        {/* Animated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Simplified header for mobile */}
-        <div className="relative px-4 py-3 sm:px-6 sm:py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
+        {/* Floating background elements */}
+        <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full -translate-y-12 translate-x-12 sm:-translate-y-16 sm:translate-x-16 animate-float-subtle" />
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-full translate-y-8 -translate-x-8 animate-float-subtle" style={{ animationDelay: '1s' }} />
+
+        {/* Header section with enhanced styling */}
+        <div className="relative px-6 py-5 border-b border-border/50 bg-gradient-to-r from-background/80 to-background/60 backdrop-blur-sm">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
@@ -149,52 +153,56 @@ export function InboxTaskList() {
           </div>
         </div>
 
-        {/* Mobile-optimized input section */}
-        <div className="relative px-4 py-4 sm:px-6 sm:py-5">
-          <div className="flex gap-3">
-            {/* Simplified bullet point */}
-            <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm mt-0.5">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/90"></div>
+        {/* Enhanced input section with homepage styling */}
+        <div className="relative px-6 py-6">
+          <div className="flex gap-4 items-start">
+            {/* Beautiful bullet point with gradient */}
+            <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-primary via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-primary/25 mt-1">
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-white animate-pulse"></div>
             </div>
 
-            {/* Input field with enhanced styling */}
-            <div className="flex-1 w-full relative">
+            {/* Enhanced input field */}
+            <div className="flex-1 w-full relative group">
               <Input
                 placeholder="What needs to be done?"
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyDown={handleAddTask}
-                className="input-enhanced border-0 shadow-none focus-visible:ring-0 px-0 py-2 sm:py-3 text-sm sm:text-base placeholder:text-muted-foreground/60 bg-transparent"
+                className="border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/60 bg-transparent font-medium focus:placeholder:text-primary/50 transition-colors"
                 data-testid="input-add-task"
                 data-inbox-add-task
               />
-              {/* Hint text - only show on larger screens */}
+              {/* Animated underline */}
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-purple-600 group-focus-within:w-full transition-all duration-300" />
+
+              {/* Hint text with enhanced styling */}
               {!newTaskTitle && (
-                <div className="hidden sm:block absolute left-0 top-full mt-1 text-xs text-muted-foreground/50">
-                  💡 Type your task and press Enter
+                <div className="absolute left-0 top-full mt-2 text-xs text-muted-foreground/60 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Type your task and press Enter</span>
                 </div>
               )}
             </div>
 
-            {/* Compact Add button */}
+            {/* Beautiful Add button matching homepage style */}
             <Button
-              size="sm"
+              size="lg"
               onClick={handleAddTaskClick}
               disabled={!newTaskTitle.trim() || createMutation.isPending}
-              className={`btn-creative scale-hover px-3 sm:px-6 py-2 sm:py-3 h-auto font-medium transition-all duration-200 w-auto ${
-                newTaskTitle.trim() ? 'shadow-md hover:shadow-lg' : 'opacity-60'
+              className={`bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 px-6 py-3 h-auto font-semibold rounded-xl ${
+                newTaskTitle.trim() ? 'opacity-100' : 'opacity-60'
               }`}
               data-testid="button-add-task"
             >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span className="text-sm">Adding...</span>
+                  <span>Adding...</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Plus className="h-4 w-4 icon-interactive" />
-                  <span className="text-sm font-medium">Add Task</span>
+                <div className="flex items-center gap-3">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Task</span>
                 </div>
               )}
             </Button>

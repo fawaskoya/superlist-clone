@@ -60,77 +60,99 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 task-item-interactive cursor-pointer ${
+      className={`group relative overflow-hidden border border-border/50 bg-gradient-to-br from-card via-card/50 to-card/80 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer rounded-lg mx-1 my-1 ${
         isDone ? 'opacity-60' : ''
-      } ${isDragging ? 'opacity-50' : ''} ${isOverdue ? 'ring-1 ring-red-200 dark:ring-red-800' : ''}`}
+      } ${isDragging ? 'opacity-50 shadow-2xl' : ''} ${isOverdue ? 'ring-1 ring-red-200/50 dark:ring-red-800/50' : ''}`}
       onClick={() => onSelect(task)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-testid={`task-item-${task.id}`}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <Checkbox
-        checked={isDone}
-        onCheckedChange={handleCheckboxChange}
-        onClick={(e) => e.stopPropagation()}
-        className="h-5 w-5 rounded-md"
-        data-testid={`checkbox-task-${task.id}`}
-      />
+      {/* Gradient overlay for hover effect */}
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-300 ${
+        isOverdue ? 'from-red-500/20 to-red-500/10' : 'from-primary/20 to-purple-500/10'
+      }`} />
 
-      <div className="flex-1 min-w-0">
-        <div className={`font-medium text-sm truncate ${isDone ? 'line-through' : ''}`}>
-          {task.title}
+      <div className="relative flex items-center gap-4 p-4">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-primary"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-4 w-4" />
         </div>
-        {task.description && (
-          <div className="text-xs text-muted-foreground truncate mt-0.5">
-            {task.description}
+
+        <Checkbox
+          checked={isDone}
+          onCheckedChange={handleCheckboxChange}
+          onClick={(e) => e.stopPropagation()}
+          className="h-5 w-5 rounded-md border-2 hover:border-primary/50 transition-colors"
+          data-testid={`checkbox-task-${task.id}`}
+        />
+
+        <div className="flex-1 min-w-0">
+          <div className={`font-semibold text-sm leading-tight ${isDone ? 'line-through text-muted-foreground' : 'text-foreground group-hover:text-primary transition-colors duration-300'}`}>
+            {task.title}
+          </div>
+          {task.description && (
+            <div className="text-xs text-muted-foreground truncate mt-1 leading-relaxed">
+              {task.description}
+            </div>
+          )}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {task.priority !== 'MEDIUM' && (
+              <Badge
+                variant="secondary"
+                className={`h-5 text-xs gap-1 px-2 py-0.5 font-medium transition-all duration-300 ${
+                  task.priority === 'HIGH'
+                    ? 'bg-red-100/80 text-red-700 border-red-200/50 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800/50'
+                    : task.priority === 'LOW'
+                    ? 'bg-blue-100/80 text-blue-700 border-blue-200/50 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/50'
+                    : ''
+                }`}
+              >
+                <Flag className={`h-3 w-3 ${priorityColors[task.priority]}`} />
+                <span>{t(`priority.${task.priority}`)}</span>
+              </Badge>
+            )}
+            {task.dueDate && (
+              <Badge
+                variant="secondary"
+                className={`h-5 text-xs gap-1 px-2 py-0.5 font-medium transition-all duration-300 ${
+                  isOverdue
+                    ? 'bg-red-100/80 text-red-700 border-red-200/50 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800/50'
+                    : isDueToday
+                    ? 'bg-primary/10 text-primary border-primary/20 dark:bg-primary/5 dark:border-primary/20'
+                    : 'bg-muted/50 text-muted-foreground border-border/50'
+                }`}
+              >
+                <Calendar className="h-3 w-3" />
+                <span>{format(new Date(task.dueDate), 'MMM d')}</span>
+              </Badge>
+            )}
+            {task.assignedTo && (
+              <Badge
+                variant="secondary"
+                className="h-5 text-xs gap-1 px-2 py-0.5 font-medium bg-purple-100/80 text-purple-700 border-purple-200/50 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800/50"
+              >
+                <User className="h-3 w-3" />
+                <span>{task.assignedTo.name}</span>
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {task.assignedTo && (
+          <div className="relative">
+            <Avatar className="h-8 w-8 ring-2 ring-background shadow-sm">
+              <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-primary to-purple-600 text-white">
+                {task.assignedTo.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
           </div>
         )}
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          {task.priority !== 'MEDIUM' && (
-            <Badge variant="outline" className="h-5 text-xs gap-1 px-1.5">
-              <Flag className={`h-3 w-3 ${priorityColors[task.priority]}`} />
-              <span className="text-muted-foreground">{t(`priority.${task.priority}`)}</span>
-            </Badge>
-          )}
-          {task.dueDate && (
-            <Badge
-              variant="outline"
-              className={`h-5 text-xs gap-1 px-1.5 ${
-                isOverdue
-                  ? 'border-destructive text-destructive'
-                  : isDueToday
-                  ? 'border-primary text-primary'
-                  : ''
-              }`}
-            >
-              <Calendar className="h-3 w-3" />
-              <span>{format(new Date(task.dueDate), 'MMM d')}</span>
-            </Badge>
-          )}
-          {task.assignedTo && (
-            <Badge variant="outline" className="h-5 text-xs gap-1 px-1.5">
-              <User className="h-3 w-3" />
-              <span className="text-muted-foreground">{task.assignedTo.name}</span>
-            </Badge>
-          )}
-        </div>
       </div>
-
-      {task.assignedTo && (
-        <Avatar className="h-6 w-6">
-          <AvatarFallback className="text-[10px]">
-            {task.assignedTo.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
     </div>
   );
 }

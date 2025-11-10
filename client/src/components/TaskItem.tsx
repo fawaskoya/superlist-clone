@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useWorkspace } from '@/contexts/WorkspaceContext';
 
 interface TaskItemProps {
   task: Task & { assignedTo?: { name: string } };
@@ -18,6 +19,7 @@ interface TaskItemProps {
 
 export function TaskItem({ task, onSelect }: TaskItemProps) {
   const { t } = useTranslation();
+  const { currentWorkspace } = useWorkspace();
   const [isHovered, setIsHovered] = useState(false);
 
   const {
@@ -38,7 +40,14 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
     mutationFn: (status: TaskStatus) =>
       apiRequest('PATCH', `/api/tasks/${task.id}`, { status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/lists', task.listId, 'tasks'] });
+      // Invalidate the correct query based on whether task is in a list or inbox
+      if (task.listId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/lists', task.listId, 'tasks'] });
+      } else {
+        // Task is in inbox
+        queryClient.invalidateQueries({ queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'inbox'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'all'] });
+      }
     },
   });
 

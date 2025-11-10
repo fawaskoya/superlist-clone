@@ -23,6 +23,7 @@ import AcceptInvitation from '@/pages/AcceptInvitation';
 import WorkspaceSettingsPage from '@/pages/WorkspaceSettingsPage';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Navbar } from '@/components/Navbar';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import NotFound from '@/pages/not-found';
 import '@/i18n/i18n';
 
@@ -73,7 +74,8 @@ function AppContent() {
       <WorkspaceProvider>
         <WebSocketProvider>
           <SidebarProvider style={sidebarStyle}>
-            <div className="flex h-screen w-full">
+            <AnimatedBackground />
+            <div className="flex h-screen w-full relative z-10">
               <AppSidebar />
               <div className="flex flex-col flex-1 min-w-0">
                 <Navbar />

@@ -85,20 +85,20 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setMobileSearchOpen(true)}
-              className="inline-flex h-9 w-9 md:hidden rounded-lg hover:bg-accent/50 transition-all duration-200 group"
+              className="inline-flex h-9 w-9 md:hidden rounded-lg hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group hover:scale-105"
               data-testid="button-mobile-search"
             >
-              <Search className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+              <Search className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
               <span className="sr-only">{t('search.placeholder')}</span>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setMobileWorkspaceOpen(true)}
-              className="inline-flex h-9 w-9 md:hidden rounded-lg hover:bg-accent/50 transition-all duration-200 group"
+              className="inline-flex h-9 w-9 md:hidden rounded-lg hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group hover:scale-105"
               data-testid="button-mobile-workspaces"
             >
-              <Briefcase className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+              <Briefcase className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
               <span className="sr-only">
                 {t('workspace.switchWorkspace', { defaultValue: 'Switch workspace' })}
               </span>
@@ -108,10 +108,10 @@ export function Navbar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowWorkspaceSettings(true)}
-                className="hidden lg:inline-flex h-9 w-9 rounded-lg hover:bg-accent/50 transition-all duration-200 group"
+                className="hidden lg:inline-flex h-9 w-9 rounded-lg hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group hover:scale-105"
                 data-testid="button-workspace-settings"
               >
-                <Settings className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                <Settings className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
               </Button>
             )}
             <NotificationBell />
@@ -125,7 +125,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-9 w-9 rounded-full p-0 hover:bg-accent/50 transition-all duration-200 group relative"
+                  className="h-9 w-9 rounded-full p-0 hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group relative hover:scale-105"
                   data-testid="button-user-menu"
                 >
                   <div className="relative">

@@ -102,24 +102,29 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     className={cn(
-                      'relative h-11 px-4 rounded-xl transition-all duration-200 group',
+                      'relative h-11 px-4 rounded-xl transition-all duration-300 group overflow-hidden',
                       location === item.path
-                        ? 'bg-gradient-accent shadow-sm after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-primary'
-                        : 'hover:bg-gradient-accent/50 hover:shadow-md hover:scale-105'
+                        ? 'bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/5 shadow-lg shadow-primary/25 after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-gradient-to-b after:from-primary after:to-purple-600'
+                        : 'hover:bg-gradient-to-br hover:from-primary/10 hover:via-purple-500/5 hover:to-pink-500/5 hover:shadow-xl hover:shadow-primary/10 hover:scale-105'
                     )}
                     data-testid={item.testId}
                     onMouseEnter={() => setHoveredItem(item.path)}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
                     <Link href={item.path} className="flex items-center gap-3">
-                      <item.icon className={cn(
-                        "h-5 w-5 transition-all duration-200",
-                        location === item.path
-                          ? "text-primary"
-                          : hoveredItem === item.path
-                          ? "text-primary scale-110"
-                          : "text-primary/70"
-                      )} />
+                      <div className="relative">
+                        <item.icon className={cn(
+                          "h-5 w-5 transition-all duration-300 relative z-10",
+                          location === item.path
+                            ? "text-primary"
+                            : hoveredItem === item.path
+                            ? "text-primary scale-110"
+                            : "text-primary/70"
+                        )} />
+                        {(location === item.path || hoveredItem === item.path) && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-sm scale-150 animate-pulse" />
+                        )}
+                      </div>
                       <span className={cn(
                         "font-medium transition-all duration-200",
                         location === item.path && "text-primary font-semibold"
@@ -161,8 +166,8 @@ export function AppSidebar() {
                     className={cn(
                       'relative h-10 px-4 rounded-xl transition-all duration-200 group',
                       location === `/list/${list.id}`
-                        ? 'bg-gradient-secondary shadow-sm after:absolute after:right-2 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
-                        : 'hover:bg-gradient-secondary/50 hover:shadow-md hover:scale-105'
+                        ? 'bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/5 shadow-lg shadow-primary/25 after:absolute after:right-2 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-gradient-to-b after:from-primary after:to-purple-600'
+                        : 'hover:bg-gradient-to-br hover:from-primary/10 hover:via-purple-500/5 hover:to-pink-500/5 hover:shadow-xl hover:shadow-primary/10 hover:scale-105'
                     )}
                     data-testid={`link-list-${list.id}`}
                     onMouseEnter={() => setHoveredItem(`list-${list.id}`)}
@@ -200,8 +205,8 @@ export function AppSidebar() {
                   className={cn(
                     'relative h-11 px-4 rounded-xl transition-all duration-200 group',
                       location === '/settings'
-                        ? 'bg-gradient-accent shadow-sm after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-primary'
-                        : 'hover:bg-gradient-accent/50 hover:shadow-md hover:scale-105'
+                        ? 'bg-gradient-to-br from-primary/20 via-purple-500/10 to-pink-500/5 shadow-lg shadow-primary/25 after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-gradient-to-b after:from-primary after:to-purple-600'
+                        : 'hover:bg-gradient-to-br hover:from-primary/10 hover:via-purple-500/5 hover:to-pink-500/5 hover:shadow-xl hover:shadow-primary/10 hover:scale-105'
                   )}
                   data-testid="link-settings"
                   onMouseEnter={() => setHoveredItem('/settings')}

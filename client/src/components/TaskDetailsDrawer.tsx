@@ -403,12 +403,34 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
                 }}
               >
                 <SelectTrigger data-testid="select-task-priority" className="relative z-10">
-                  <SelectValue />
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      priority === 'HIGH' ? 'bg-red-500' :
+                      priority === 'MEDIUM' ? 'bg-orange-500' :
+                      'bg-blue-500'
+                    }`} />
+                    <SelectValue />
+                  </div>
                 </SelectTrigger>
                 <SelectContent className="z-[9999]" position="popper" sideOffset={5}>
-                  <SelectItem value="LOW">{t('priority.LOW')}</SelectItem>
-                  <SelectItem value="MEDIUM">{t('priority.MEDIUM')}</SelectItem>
-                  <SelectItem value="HIGH">{t('priority.HIGH')}</SelectItem>
+                  <SelectItem value="LOW">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500" />
+                      {t('priority.LOW')}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="MEDIUM">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      {t('priority.MEDIUM')}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="HIGH">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      {t('priority.HIGH')}
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

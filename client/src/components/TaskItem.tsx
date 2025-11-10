@@ -65,11 +65,47 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
   const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && !isDone;
   const isDueToday = task.dueDate && isToday(new Date(task.dueDate));
 
+  // Priority-based styling
+  const getPriorityStyles = () => {
+    switch (task.priority) {
+      case 'HIGH':
+        return {
+          border: 'border-l-red-500',
+          background: 'bg-gradient-to-r from-red-50/30 to-transparent dark:from-red-950/10',
+          accent: 'shadow-red-500/10',
+          indicator: 'bg-red-500'
+        };
+      case 'MEDIUM':
+        return {
+          border: 'border-l-orange-500',
+          background: 'bg-gradient-to-r from-orange-50/30 to-transparent dark:from-orange-950/10',
+          accent: 'shadow-orange-500/10',
+          indicator: 'bg-orange-500'
+        };
+      case 'LOW':
+        return {
+          border: 'border-l-blue-500',
+          background: 'bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-950/10',
+          accent: 'shadow-blue-500/10',
+          indicator: 'bg-blue-500'
+        };
+      default:
+        return {
+          border: 'border-l-gray-500',
+          background: 'bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-950/10',
+          accent: 'shadow-gray-500/10',
+          indicator: 'bg-gray-500'
+        };
+    }
+  };
+
+  const priorityStyles = getPriorityStyles();
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative overflow-hidden border border-border/50 bg-gradient-to-br from-card via-card/50 to-card/80 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer rounded-lg mx-1 my-1 ${
+      className={`group relative overflow-hidden border-l-4 ${priorityStyles.border} border-t border-r border-b border-border/50 ${priorityStyles.background} backdrop-blur-sm hover:shadow-xl hover:${priorityStyles.accent} transition-all duration-300 hover:-translate-y-0.5 cursor-pointer rounded-lg mx-1 my-1 ${
         isDone ? 'opacity-60' : ''
       } ${isDragging ? 'opacity-50 shadow-2xl' : ''} ${isOverdue ? 'ring-1 ring-red-200/50 dark:ring-red-800/50' : ''}`}
       onClick={() => onSelect(task)}
@@ -110,21 +146,20 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
             </div>
           )}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            {task.priority !== 'MEDIUM' && (
-              <Badge
-                variant="secondary"
-                className={`h-5 text-xs gap-1 px-2 py-0.5 font-medium transition-all duration-300 ${
-                  task.priority === 'HIGH'
-                    ? 'bg-red-100/80 text-red-700 border-red-200/50 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800/50'
-                    : task.priority === 'LOW'
-                    ? 'bg-blue-100/80 text-blue-700 border-blue-200/50 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/50'
-                    : ''
-                }`}
-              >
-                <Flag className={`h-3 w-3 ${priorityColors[task.priority]}`} />
-                <span>{t(`priority.${task.priority}`)}</span>
-              </Badge>
-            )}
+            <Badge
+              variant="secondary"
+              className={`h-5 text-xs gap-1 px-2 py-0.5 font-medium transition-all duration-300 ${
+                task.priority === 'HIGH'
+                  ? 'bg-red-100/80 text-red-700 border-red-200/50 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800/50'
+                  : task.priority === 'MEDIUM'
+                  ? 'bg-orange-100/80 text-orange-700 border-orange-200/50 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800/50'
+                  : 'bg-blue-100/80 text-blue-700 border-blue-200/50 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800/50'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${priorityStyles.indicator} mr-1`} />
+              <Flag className={`h-3 w-3 ${priorityColors[task.priority]}`} />
+              <span>{t(`priority.${task.priority}`)}</span>
+            </Badge>
             {task.dueDate && (
               <Badge
                 variant="secondary"

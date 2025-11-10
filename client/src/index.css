@@ -908,6 +908,45 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Priority-based task styling */
+  .task-priority-high {
+    border-left-color: rgb(239 68 68); /* red-500 */
+  }
+
+  .task-priority-medium {
+    border-left-color: rgb(249 115 22); /* orange-500 */
+  }
+
+  .task-priority-low {
+    border-left-color: rgb(59 130 246); /* blue-500 */
+  }
+
+  .task-bg-priority-high {
+    background: linear-gradient(90deg, rgba(254, 202, 202, 0.3) 0%, transparent 100%);
+  }
+
+  .task-bg-priority-medium {
+    background: linear-gradient(90deg, rgba(255, 237, 213, 0.3) 0%, transparent 100%);
+  }
+
+  .task-bg-priority-low {
+    background: linear-gradient(90deg, rgba(219, 234, 254, 0.3) 0%, transparent 100%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .task-bg-priority-high {
+      background: linear-gradient(90deg, rgba(127, 29, 29, 0.15) 0%, transparent 100%);
+    }
+
+    .task-bg-priority-medium {
+      background: linear-gradient(90deg, rgba(154, 52, 18, 0.15) 0%, transparent 100%);
+    }
+
+    .task-bg-priority-low {
+      background: linear-gradient(90deg, rgba(30, 58, 138, 0.15) 0%, transparent 100%);
+    }
+  }
+
   /* Select dropdown z-index fix for sheets */
   [data-radix-select-content] {
     z-index: 9999 !important;

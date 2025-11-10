@@ -40,6 +40,7 @@ export function AppSidebar() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const { setOpenMobile } = useSidebar();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const { data: lists } = useQuery<ListType[]>({
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'lists'],
@@ -95,22 +96,37 @@ export function AppSidebar() {
             {t('sidebar.myDay')}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1 stagger-children">
               {quickViews.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
                     className={cn(
-                      'relative h-10 px-3 rounded-md transition-colors',
+                      'relative h-11 px-4 rounded-xl transition-all duration-200 group',
                       location === item.path
-                        ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
-                        : 'hover:bg-sidebar-accent/60'
+                        ? 'bg-gradient-accent shadow-sm after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-primary'
+                        : 'hover:bg-gradient-accent/50 hover:shadow-md hover:scale-105'
                     )}
                     data-testid={item.testId}
+                    onMouseEnter={() => setHoveredItem(item.path)}
+                    onMouseLeave={() => setHoveredItem(null)}
                   >
-                    <Link href={item.path}>
-                      <item.icon className="h-5 w-5 text-primary" />
-                      <span>{item.title}</span>
+                    <Link href={item.path} className="flex items-center gap-3">
+                      <item.icon className={cn(
+                        "h-5 w-5 transition-all duration-200",
+                        location === item.path
+                          ? "text-primary"
+                          : hoveredItem === item.path
+                          ? "text-primary scale-110"
+                          : "text-primary/70"
+                      )} />
+                      <span className={cn(
+                        "font-medium transition-all duration-200",
+                        location === item.path && "text-primary font-semibold"
+                      )}>{item.title}</span>
+                      {location === item.path && (
+                        <div className="ml-auto w-2 h-2 rounded-full bg-primary"></div>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -129,30 +145,42 @@ export function AppSidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-6 w-6 scale-hover"
               onClick={() => setDialogOpen(true)}
               data-testid="button-create-list"
             >
-              <Plus className="h-4 w-4 text-primary" />
+              <Plus className="h-4 w-4 text-primary icon-interactive" />
             </Button>
           </div>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1 stagger-children">
               {lists?.map((list) => (
                 <SidebarMenuItem key={list.id}>
                   <SidebarMenuButton
                     asChild
                     className={cn(
-                      'relative h-10 px-3 rounded-md transition-colors',
+                      'relative h-10 px-4 rounded-xl transition-all duration-200 group',
                       location === `/list/${list.id}`
-                        ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
-                        : 'hover:bg-sidebar-accent/60'
+                        ? 'bg-gradient-secondary shadow-sm after:absolute after:right-2 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
+                        : 'hover:bg-gradient-secondary/50 hover:shadow-md hover:scale-105'
                     )}
                     data-testid={`link-list-${list.id}`}
+                    onMouseEnter={() => setHoveredItem(`list-${list.id}`)}
+                    onMouseLeave={() => setHoveredItem(null)}
                   >
-                    <Link href={`/list/${list.id}`}>
-                      <List className="h-5 w-5 text-primary" />
-                      <span>{list.name}</span>
+                    <Link href={`/list/${list.id}`} className="flex items-center gap-3">
+                      <List className={cn(
+                        "h-4 w-4 transition-all duration-200",
+                        location === `/list/${list.id}`
+                          ? "text-primary"
+                          : hoveredItem === `list-${list.id}`
+                          ? "text-primary scale-110"
+                          : "text-primary/70"
+                      )} />
+                      <span className={cn(
+                        "font-medium transition-all duration-200 truncate",
+                        location === `/list/${list.id}` && "text-primary font-semibold"
+                      )}>{list.name}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -170,16 +198,28 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   className={cn(
-                    'relative h-10 px-3 rounded-md transition-colors',
-                    location === '/settings'
-                      ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
-                      : 'hover:bg-sidebar-accent/60'
+                    'relative h-11 px-4 rounded-xl transition-all duration-200 group',
+                      location === '/settings'
+                        ? 'bg-gradient-accent shadow-sm after:absolute after:right-2 after:top-3 after:bottom-3 after:w-[3px] after:rounded-l-full after:bg-primary'
+                        : 'hover:bg-gradient-accent/50 hover:shadow-md hover:scale-105'
                   )}
                   data-testid="link-settings"
+                  onMouseEnter={() => setHoveredItem('/settings')}
+                  onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <Link href="/settings">
-                    <Settings className="h-5 w-5 text-primary" />
-                    <span>{t('sidebar.settings')}</span>
+                  <Link href="/settings" className="flex items-center gap-3">
+                    <Settings className={cn(
+                      "h-5 w-5 transition-all duration-200",
+                        location === '/settings'
+                          ? "text-primary"
+                          : hoveredItem === '/settings'
+                        ? "text-primary scale-110"
+                        : "text-primary/70"
+                    )} />
+                    <span className={cn(
+                      "font-medium transition-all duration-200",
+                      location === '/settings' && "text-primary font-semibold"
+                    )}>{t('sidebar.settings')}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -191,10 +231,15 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <Button
           variant="outline"
-          className="w-full h-11 rounded-2xl font-medium"
+          className="w-full h-12 rounded-2xl font-semibold btn-creative scale-hover focus-ring-enhanced shadow-lg border-primary/30 hover:border-primary/50 group"
           onClick={() => window.open('https://superlist.com', '_blank')}
         >
-          ⚡ <span className="ml-2">Upgrade</span>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg group-hover:scale-110 transition-transform duration-200">⚡</span>
+            <span className="text-foreground font-semibold group-hover:text-foreground/90 transition-colors duration-200">
+              Upgrade to Pro
+            </span>
+          </div>
         </Button>
       </SidebarFooter>
 

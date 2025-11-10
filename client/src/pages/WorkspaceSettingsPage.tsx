@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
@@ -34,8 +34,10 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Loader2, UserPlus, Trash2, Copy, Check } from 'lucide-react';
+import { Loader2, UserPlus, Trash2, Copy, Check, Settings, Users, Clock, Shield, Crown, UserCheck, Mail, Calendar } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 
 interface WorkspaceMember {
   id: string;
@@ -63,6 +65,7 @@ export default function WorkspaceSettingsPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'ADMIN' | 'MEMBER' | 'VIEWER'>('MEMBER');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('members');
 
   // Fetch workspace members
   const { data: members = [], isLoading: membersLoading } = useQuery<WorkspaceMember[]>({
@@ -75,6 +78,22 @@ export default function WorkspaceSettingsPage() {
     queryKey: ['/api/workspaces', currentWorkspace?.id, 'invitations'],
     enabled: !!currentWorkspace?.id,
   });
+
+  // Fetch all tasks to calculate active projects
+  const { data: allTasks = [] } = useQuery({
+    queryKey: ['/api/workspaces', currentWorkspace?.id, 'tasks', 'all'],
+    enabled: !!currentWorkspace?.id,
+  });
+
+  // Calculate active projects (lists with at least one non-completed task)
+  const activeProjectsCount = useMemo(() => {
+    const activeTaskLists = new Set(
+      allTasks
+        .filter((task: any) => task.status !== 'DONE' && task.listId)
+        .map((task: any) => task.listId)
+    );
+    return activeTaskLists.size;
+  }, [allTasks]);
 
   // Create invitation mutation
   const createInvitationMutation = useMutation({
@@ -188,60 +207,178 @@ export default function WorkspaceSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold" data-testid="heading-workspace-settings">
-          {t('workspace.settings')}
-        </h1>
-        <p className="text-muted-foreground mt-1">{currentWorkspace.name}</p>
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 page-enter">
+      {/* Creative Settings Header */}
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="relative">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/10 border border-purple-200/50 dark:border-purple-800/30 flex items-center justify-center shadow-sm">
+              <Settings className="w-5 h-5 sm:w-7 sm:h-7 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full animate-pulse"></div>
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+              {t('workspace.settings')}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your workspace and team
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-purple/10 border border-purple-200/30 dark:border-purple-800/20">
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 dark:text-purple-400" />
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+              {members.length} {members.length === 1 ? 'member' : 'members'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-blue/10 border border-blue-200/30 dark:border-blue-800/20">
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+              {invitations.length} pending
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Members Section */}
-      <Card>
-        <CardHeader>
+      {/* Workspace Info Card */}
+      <Card className="card-creative mb-6">
+        <div className="p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle data-testid="heading-members">{t('workspace.members')}</CardTitle>
-              <CardDescription>{t('workspace.membersDescription')}</CardDescription>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">{currentWorkspace.name}</h3>
+                <p className="text-sm text-muted-foreground">Workspace • Created recently</p>
+              </div>
             </div>
-            <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="button-invite-member">
-                  <UserPlus className="h-4 w-4 ltr:mr-2 rtl:ml-2" />
-                  {t('workspace.inviteMember')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t('workspace.inviteMember')}</DialogTitle>
-                  <DialogDescription>{t('workspace.inviteMemberDescription')}</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">{t('common.email')}</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="colleague@example.com"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      data-testid="input-invite-email"
-                    />
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="rounded-full px-3 py-1">
+                <Crown className="w-3 h-3 mr-1" />
+                Owner
+              </Badge>
+            </div>
+          </div>
+
+          {/* Progress/Stats */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 rounded-lg bg-gradient-secondary/50">
+              <div className="text-2xl font-bold text-foreground">{members.length}</div>
+              <div className="text-sm text-muted-foreground">Team Members</div>
+              <Progress value={(members.length / 10) * 100} className="mt-2 h-2" />
+            </div>
+            <div className="text-center p-4 rounded-lg bg-gradient-accent/50">
+              <div className="text-2xl font-bold text-foreground">{activeProjectsCount}</div>
+              <div className="text-sm text-muted-foreground">Active Projects</div>
+              <Progress value={Math.min((activeProjectsCount / 10) * 100, 100)} className="mt-2 h-2" />
+            </div>
+            <div className="text-center p-4 rounded-lg bg-gradient-primary/10">
+              <div className="text-2xl font-bold text-foreground">{invitations.length}</div>
+              <div className="text-sm text-muted-foreground">Pending Invites</div>
+              <Progress value={(invitations.length / 5) * 100} className="mt-2 h-2" />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Settings Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="members" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Team Members
+          </TabsTrigger>
+          <TabsTrigger value="invitations" className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            Invitations
+            {invitations.length > 0 && (
+              <Badge variant="secondary" className="ml-2 rounded-full px-2 py-0 text-xs">
+                {invitations.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members">
+          {/* Members Section */}
+          <Card className="card-creative">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/10 border border-green-200/50 dark:border-green-800/30 flex items-center justify-center">
+                    <UserCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">{t('workspace.role')}</Label>
-                    <Select value={inviteRole} onValueChange={(value: any) => setInviteRole(value)}>
-                      <SelectTrigger data-testid="select-invite-role">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ADMIN">{t('workspace.roles.admin')}</SelectItem>
-                        <SelectItem value="MEMBER">{t('workspace.roles.member')}</SelectItem>
-                        <SelectItem value="VIEWER">{t('workspace.roles.viewer')}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div>
+                    <CardTitle data-testid="heading-members" className="text-lg">{t('workspace.members')}</CardTitle>
+                    <CardDescription className="text-sm">{t('workspace.membersDescription')}</CardDescription>
                   </div>
                 </div>
+                <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="btn-creative scale-hover" data-testid="button-invite-member">
+                      <UserPlus className="h-4 w-4 icon-interactive" />
+                      {t('workspace.inviteMember')}
+                    </Button>
+                  </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
+                        <UserPlus className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <DialogTitle className="text-lg">{t('workspace.inviteMember')}</DialogTitle>
+                        <DialogDescription className="text-sm">
+                          {t('workspace.inviteMemberDescription')}
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  <div className="space-y-5 py-2">
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-sm font-medium">{t('common.email')}</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="colleague@company.com"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        className="input-enhanced h-11"
+                        data-testid="input-invite-email"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="role" className="text-sm font-medium">{t('workspace.role')}</Label>
+                      <Select value={inviteRole} onValueChange={(value: any) => setInviteRole(value)}>
+                        <SelectTrigger className="h-11 focus-ring-enhanced" data-testid="select-invite-role">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MEMBER" className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                            {t('workspace.roles.member')} - Can create and edit tasks
+                          </SelectItem>
+                          <SelectItem value="ADMIN" className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                            {t('workspace.roles.admin')} - Full workspace access
+                          </SelectItem>
+                          <SelectItem value="VIEWER" className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                            {t('workspace.roles.viewer')} - Read-only access
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        {inviteRole === 'MEMBER' && 'Can create tasks, edit their own, and comment'}
+                        {inviteRole === 'ADMIN' && 'Can manage members, settings, and all workspace content'}
+                        {inviteRole === 'VIEWER' && 'Can view all content but cannot make changes'}
+                      </p>
+                    </div>
+                  </div>
                 <DialogFooter>
                   <Button
                     variant="outline"
@@ -265,134 +402,176 @@ export default function WorkspaceSettingsPage() {
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent>
-          {membersLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('common.name')}</TableHead>
-                  <TableHead>{t('common.email')}</TableHead>
-                  <TableHead>{t('workspace.role')}</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map((member) => (
-                  <TableRow key={member.id} data-testid={`row-member-${member.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{getInitials(member.user.name)}</AvatarFallback>
+            <CardContent className="pt-0">
+              {membersLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mb-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Loading team members...</p>
+                </div>
+              ) : members.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mb-4">
+                    <Users className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">No team members yet</h3>
+                  <p className="text-sm text-muted-foreground/70 max-w-xs">
+                    Invite your first team member to get started collaborating!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {members.map((member, index) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                      data-testid={`row-member-${member.id}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-10 w-10 ring-2 ring-primary/10">
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                            {getInitials(member.user.name)}
+                          </AvatarFallback>
                         </Avatar>
-                        <span data-testid={`text-member-name-${member.id}`}>{member.user.name}</span>
+                        <div>
+                          <p className="font-medium text-foreground" data-testid={`text-member-name-${member.id}`}>
+                            {member.user.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground" data-testid={`text-member-email-${member.id}`}>
+                            {member.user.email}
+                          </p>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell data-testid={`text-member-email-${member.id}`}>
-                      {member.user.email}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(member.role)} data-testid={`badge-role-${member.id}`}>
-                        {t(`workspace.roles.${member.role.toLowerCase()}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {member.role !== 'OWNER' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeMemberMutation.mutate(member.user.id)}
-                          disabled={removeMemberMutation.isPending}
-                          data-testid={`button-remove-member-${member.id}`}
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant={getRoleBadgeVariant(member.role)}
+                          className="rounded-full px-3 py-1 font-medium"
+                          data-testid={`badge-role-${member.id}`}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                          {member.role === 'OWNER' && <Crown className="w-3 h-3 mr-1" />}
+                          {member.role === 'ADMIN' && <Shield className="w-3 h-3 mr-1" />}
+                          {t(`workspace.roles.${member.role.toLowerCase()}`)}
+                        </Badge>
+                        {member.role !== 'OWNER' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeMemberMutation.mutate(member.user.id)}
+                            disabled={removeMemberMutation.isPending}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 scale-hover"
+                            data-testid={`button-remove-member-${member.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Pending Invitations Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle data-testid="heading-pending-invitations">
-            {t('workspace.pendingInvitations')}
-          </CardTitle>
-          <CardDescription>{t('workspace.pendingInvitationsDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {invitationsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : invitations.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8" data-testid="text-no-invitations">
-              {t('workspace.noPendingInvitations')}
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('common.email')}</TableHead>
-                  <TableHead>{t('workspace.role')}</TableHead>
-                  <TableHead>{t('common.expiresAt')}</TableHead>
-                  <TableHead className="w-[150px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.map((invitation) => (
-                  <TableRow key={invitation.id} data-testid={`row-invitation-${invitation.id}`}>
-                    <TableCell data-testid={`text-invitation-email-${invitation.id}`}>
-                      {invitation.email}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" data-testid={`badge-invitation-role-${invitation.id}`}>
-                        {t(`workspace.roles.${invitation.role.toLowerCase()}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell data-testid={`text-invitation-expires-${invitation.id}`}>
-                      {new Date(invitation.expiresAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleCopyLink(invitation.token)}
-                          data-testid={`button-copy-link-${invitation.id}`}
-                        >
-                          {copiedToken === invitation.token ? (
-                            <Check className="h-4 w-4" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteInvitationMutation.mutate(invitation.id)}
-                          disabled={deleteInvitationMutation.isPending}
-                          data-testid={`button-delete-invitation-${invitation.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+        <TabsContent value="invitations">
+          {/* Pending Invitations Section */}
+          <Card className="card-creative">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/10 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
+                  <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle data-testid="heading-pending-invitations" className="text-lg">
+                    {t('workspace.pendingInvitations')}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {t('workspace.pendingInvitationsDescription')}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {invitationsLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mb-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Loading invitations...</p>
+                </div>
+              ) : invitations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mb-4">
+                    <Mail className="w-8 h-8 text-muted-foreground/50" />
+                  </div>
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">No pending invitations</h3>
+                  <p className="text-sm text-muted-foreground/70 max-w-xs">
+                    All invitations have been accepted or expired. Send new invites to grow your team!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {invitations.map((invitation, index) => (
+                    <div
+                      key={invitation.id}
+                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-all duration-200 animate-in slide-in-from-left-4"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                      data-testid={`row-invitation-${invitation.id}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-950/20 dark:to-blue-950/10 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
+                          <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground" data-testid={`text-invitation-email-${invitation.id}`}>
+                            {invitation.email}
+                          </p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            <span>Expires {new Date(invitation.expiresAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="rounded-full px-3 py-1" data-testid={`badge-invitation-role-${invitation.id}`}>
+                          {t(`workspace.roles.${invitation.role.toLowerCase()}`)}
+                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCopyLink(invitation.token)}
+                            className="h-8 w-8 scale-hover focus-ring-enhanced"
+                            data-testid={`button-copy-link-${invitation.id}`}
+                          >
+                            {copiedToken === invitation.token ? (
+                              <Check className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteInvitationMutation.mutate(invitation.id)}
+                            disabled={deleteInvitationMutation.isPending}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 scale-hover"
+                            data-testid={`button-delete-invitation-${invitation.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

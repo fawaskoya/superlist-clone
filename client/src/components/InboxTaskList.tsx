@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles, Lightbulb } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -126,26 +126,82 @@ export function InboxTaskList() {
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-          <Input
-            placeholder={t('task.addTask')}
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={handleAddTask}
-            className="border-0 shadow-none focus-visible:ring-0 px-0 min-h-10 flex-1"
-            data-testid="input-add-task"
-          />
-          <Button
-            size="lg"
-            onClick={handleAddTaskClick}
-            disabled={!newTaskTitle.trim() || createMutation.isPending}
-            data-testid="button-add-task"
-          >
-            {createMutation.isPending ? t('common.loading') : t('common.add')}
-          </Button>
+      {/* Creative Add Task Card */}
+      <Card className="relative overflow-hidden card-creative mb-6">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+
+        {/* Header with icon and hint */}
+        <div className="relative px-6 py-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground text-sm">Add a new task</h3>
+              <p className="text-xs text-muted-foreground">Press Enter or click Add to create</p>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Lightbulb className="w-3 h-3" />
+              <span>Quick capture</span>
+            </div>
+          </div>
         </div>
+
+        {/* Input section */}
+        <div className="relative px-6 py-5">
+          <div className="flex items-center gap-4">
+            {/* Creative bullet point */}
+            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-white/90"></div>
+            </div>
+
+            {/* Input field with enhanced styling */}
+            <div className="flex-1 relative">
+              <Input
+                placeholder="What needs to be done?"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onKeyDown={handleAddTask}
+                className="input-enhanced border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/60 bg-transparent"
+                data-testid="input-add-task"
+                data-inbox-add-task
+              />
+              {/* Subtle hint text */}
+              {!newTaskTitle && (
+                <div className="absolute left-0 top-full mt-1 text-xs text-muted-foreground/50 flex items-center gap-1">
+                  <span>💡</span>
+                  <span>Type your task and press Enter</span>
+                </div>
+              )}
+            </div>
+
+            {/* Enhanced Add button */}
+            <Button
+              size="lg"
+              onClick={handleAddTaskClick}
+              disabled={!newTaskTitle.trim() || createMutation.isPending}
+              className={`btn-creative scale-hover px-6 py-3 h-auto font-medium transition-all duration-200 ${
+                newTaskTitle.trim() ? 'shadow-md hover:shadow-lg' : 'opacity-60'
+              }`}
+              data-testid="button-add-task"
+            >
+              {createMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span className="text-sm">Adding...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Plus className="h-4 w-4 icon-interactive" />
+                  <span className="text-sm font-medium">Add Task</span>
+                </div>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Card>
         {sortedTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="text-muted-foreground text-sm">{t('task.noTasks')}</div>
@@ -153,13 +209,20 @@ export function InboxTaskList() {
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sortedTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-              {sortedTasks.map((task) => (
-                <TaskItem key={task.id} task={task} onSelect={setSelectedTask} />
-              ))}
+              <div className="space-y-2">
+                {sortedTasks.map((task, index) => (
+                  <div
+                    key={task.id}
+                    className="card-creative rounded-lg"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <TaskItem task={task} onSelect={setSelectedTask} />
+                  </div>
+                ))}
+              </div>
             </SortableContext>
           </DndContext>
         )}
-      </Card>
 
       {selectedTask && (
         <TaskDetailsDrawer

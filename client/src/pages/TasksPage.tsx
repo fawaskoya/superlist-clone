@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, Plus } from 'lucide-react';
+import { ArrowUpRight, Plus, CheckSquare, Calendar } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface ErrorBoundaryState {
@@ -87,10 +87,11 @@ interface TaskGroupProps {
   title: string;
   tasks: Task[];
   icon?: string;
+  description?: string;
   onSelect: (task: Task) => void;
 }
 
-function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
+function TaskGroup({ title, tasks, icon, description, onSelect }: TaskGroupProps) {
   console.log(`TaskGroup: Rendering ${title} with ${tasks.length} tasks`);
 
   const { t } = useTranslation();
@@ -102,18 +103,55 @@ function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
 
   console.log(`TaskGroup: Rendering ${tasks.length} tasks for ${title}`);
 
+  const getGroupStyles = (title: string) => {
+    switch (title.toLowerCase()) {
+      case 'overdue':
+        return 'border-l-4 border-l-red-500';
+      case 'today':
+        return 'border-l-4 border-l-blue-500';
+      case 'tomorrow':
+        return 'border-l-4 border-l-orange-500';
+      case 'upcoming':
+        return 'border-l-4 border-l-green-500';
+      default:
+        return 'border-l-4 border-l-gray-500';
+    }
+  };
+
   return (
-    <div key={title} className="mb-6" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-      <h2 className="text-sm font-semibold text-muted-foreground mb-3 px-1">
-        {icon && <span className="mr-2">{icon}</span>}
-        {title} ({tasks.length})
-      </h2>
-      <Card className="overflow-hidden">
-        {tasks.map((task) => {
-          console.log(`TaskGroup: Rendering task ${task.id} in ${title}`);
-          return <TaskItem key={task.id} task={task} onSelect={() => {}} />;
-        })}
-      </Card>
+    <div key={title} className="mb-4 animate-in slide-in-from-bottom-4 duration-500" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          {icon && <span className="text-base sm:text-lg flex-shrink-0">{icon}</span>}
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
+              {title}
+            </h2>
+            {description && (
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">{description}</p>
+            )}
+          </div>
+        </div>
+        <Badge variant="secondary" className="rounded-full px-2 sm:px-3 py-1 text-xs font-medium scale-hover flex-shrink-0 ml-2">
+          {tasks.length}
+        </Badge>
+      </div>
+      <div className={`rounded-lg overflow-hidden ${getGroupStyles(title)}`}>
+        <div className="divide-y divide-border/30 bg-card/30">
+          {tasks.map((task, index) => {
+            console.log(`TaskGroup: Rendering task ${task.id} in ${title}`);
+            return (
+              <div
+                key={task.id}
+                className="animate-in slide-in-from-left-4 duration-300"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <TaskItem task={task} onSelect={() => {}} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -146,14 +184,6 @@ function TasksPageContent() {
   useEffect(() => {
     console.log('TasksPage: currentWorkspace changed:', currentWorkspace?.id);
   }, [currentWorkspace]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">{t('common.loading')}</div>
-      </div>
-    );
-  }
 
   const groupedTasks = useMemo(() => {
     console.log('useMemo: Computing groupedTasks with tasks:', tasks?.length, 'sortOption:', sortOption);
@@ -234,90 +264,84 @@ function TasksPageContent() {
     }
   }, [tasks, sortOption]);
 
-
   console.log('TasksPage: Starting render with groupedTasks:', Object.keys(groupedTasks));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-muted-foreground">{t('common.loading')}</div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 space-y-6">
-        <div className="flex flex-col gap-4">
-          <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="rounded-full px-4 py-2 text-xs uppercase tracking-wide">
-                  {t('tasks.badge', { defaultValue: 'Tasks for me' })}
-                </Badge>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 page-enter">
+        {/* Compact Tasks Header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight">
-                  {t('tasks.title', { defaultValue: 'Tasks' })}
-                </h1>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span>
-                    {t('tasks.subtitleLabel', {
-                      defaultValue: 'View, sort, and access all of your tasks in one place.',
-                    })}
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-primary rounded-full animate-pulse"></div>
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-semibold text-foreground">
+                {t('tasks.title', { defaultValue: 'Tasks' })}
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                All tasks • Organized view
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="rounded-full px-3 sm:px-4 py-2 scale-hover focus-ring-enhanced bg-gradient-secondary/50 border-primary/20 w-full sm:w-auto">
+                  <span className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="truncate">
+                      {t(`tasks.sort.${sortOption}`, {
+                        defaultValue:
+                          sortOption === 'createdAt'
+                            ? 'Created'
+                            : sortOption === 'dueDate'
+                            ? 'Due date'
+                            : 'Priority',
+                      })}
+                    </span>
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
-                  >
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
-                  >
-                    ×
-                  </Button>
-                </div>
-              </div>
-            </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem onSelect={() => setSortOption('createdAt')} className="cursor-pointer">
+                  {t('tasks.sort.createdAt', { defaultValue: 'Creation date' })}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSortOption('dueDate')} className="cursor-pointer">
+                  {t('tasks.sort.dueDate', { defaultValue: 'Due date' })}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSortOption('priority')} className="cursor-pointer">
+                  {t('tasks.sort.priority', { defaultValue: 'Priority' })}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <div className="flex items-center gap-3 self-end md:self-auto">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-full px-4">
-                    {t(`tasks.sort.${sortOption}`, {
-                      defaultValue:
-                        sortOption === 'createdAt'
-                          ? 'Creation date'
-                          : sortOption === 'dueDate'
-                          ? 'Due date'
-                          : 'Priority',
-                    })}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem onSelect={() => setSortOption('createdAt')} className="cursor-pointer">
-                    {t('tasks.sort.createdAt', { defaultValue: 'Creation date' })}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setSortOption('dueDate')} className="cursor-pointer">
-                    {t('tasks.sort.dueDate', { defaultValue: 'Due date' })}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setSortOption('priority')} className="cursor-pointer">
-                    {t('tasks.sort.priority', { defaultValue: 'Priority' })}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button
-                className="gap-2 rounded-full px-4"
-                onClick={() => {
-                  setLocation('/dashboard');
-                  setTimeout(() => {
-                    const inboxInput = document.querySelector<HTMLInputElement>('[data-inbox-add-task]');
-                    inboxInput?.focus();
-                  }, 300);
-                }}
-              >
-                <Plus className="h-4 w-4" />
-                {t('tasks.newTask', { defaultValue: 'New task' })}
-              </Button>
-            </div>
-          </header>
+            <Button
+              className="gap-2 rounded-full px-3 sm:px-4 py-2 btn-creative scale-hover focus-ring-enhanced w-full sm:w-auto"
+              onClick={() => {
+                setLocation('/dashboard');
+                setTimeout(() => {
+                  const inboxInput = document.querySelector<HTMLInputElement>('[data-inbox-add-task]');
+                  inboxInput?.focus();
+                }, 300);
+              }}
+            >
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 icon-interactive" />
+              <span className="text-sm">{t('tasks.newTask', { defaultValue: 'New task' })}</span>
+            </Button>
+          </div>
         </div>
 
         {tasks && tasks.length === 0 ? (
@@ -325,34 +349,40 @@ function TasksPageContent() {
             <div className="text-muted-foreground text-sm">{t('task.noTasks')}</div>
           </div>
         ) : (
-          <div className="space-y-6 rounded-2xl border border-border/40 bg-background/40 p-4 md:p-6 shadow-sm">
+          <div className="space-y-4">
             <TaskGroup
               title={t('tasks.overdue', { defaultValue: 'Overdue' })}
               tasks={groupedTasks.overdue}
               icon="⚠️"
+              description="Past due tasks"
               onSelect={setSelectedTask}
             />
             <TaskGroup
               title={t('tasks.today', { defaultValue: 'Today' })}
               tasks={groupedTasks.today}
               icon="📅"
+              description="Due today"
               onSelect={setSelectedTask}
             />
             <TaskGroup
               title={t('tasks.tomorrow', { defaultValue: 'Tomorrow' })}
               tasks={groupedTasks.tomorrow}
               icon="➡️"
+              description="Due tomorrow"
               onSelect={setSelectedTask}
             />
             <TaskGroup
               title={t('tasks.upcoming', { defaultValue: 'Upcoming' })}
               tasks={groupedTasks.upcoming}
               icon="📆"
+              description="Future tasks"
               onSelect={setSelectedTask}
             />
             <TaskGroup
               title={t('tasks.noDueDate', { defaultValue: 'No due date' })}
               tasks={groupedTasks.noDueDate}
+              icon="📝"
+              description="Unscheduled tasks"
               onSelect={setSelectedTask}
             />
           </div>

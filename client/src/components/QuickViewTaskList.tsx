@@ -32,19 +32,34 @@ export function QuickViewTaskList({ workspaceId, view }: QuickViewTaskListProps)
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden card-creative">
         {sortedTasks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="text-muted-foreground text-sm">{t('task.noTasks')}</div>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mb-4">
+              <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-muted-foreground/30"></div>
+              </div>
+            </div>
+            <h3 className="text-lg font-medium text-muted-foreground mb-2">No tasks yet</h3>
+            <p className="text-sm text-muted-foreground/70 max-w-xs">
+              {view === 'today' && "Great job! All today's tasks are complete."}
+              {view === 'upcoming' && "No upcoming tasks scheduled. Add some to stay ahead!"}
+              {view === 'assigned' && "No tasks assigned to you currently."}
+            </p>
           </div>
         ) : (
-          <div>
-            {sortedTasks.map((task) => (
-              <TaskItem
+          <div className="divide-y divide-border/50">
+            {sortedTasks.map((task, index) => (
+              <div
                 key={task.id}
-                task={task}
-                onSelect={setSelectedTask}
-              />
+                className="animate-in slide-in-from-left-4 duration-300"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <TaskItem
+                  task={task}
+                  onSelect={setSelectedTask}
+                />
+              </div>
             ))}
           </div>
         )}

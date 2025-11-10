@@ -31,6 +31,7 @@ function AppContent() {
 
   const sidebarStyle = {
     '--sidebar-width': '16rem',
+    '--sidebar-width-mobile': '18rem',
     '--sidebar-width-icon': '3rem',
   } as React.CSSProperties;
 
@@ -68,9 +69,9 @@ function AppContent() {
           <SidebarProvider style={sidebarStyle}>
             <div className="flex h-screen w-full">
               <AppSidebar />
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 min-w-0">
                 <Navbar />
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-auto scrollbar-thin px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                   <Switch>
                     <Route path="/">
                       <Redirect to="/dashboard" />

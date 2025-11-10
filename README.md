@@ -155,11 +155,66 @@ Create a `.env` file at the project root. The server (and Prisma) expect the fol
 
 ## Running the Application
 
-### Development (hot reload)
+### Development
+
+### Local Development with Auto-Restart
+
+The development server automatically restarts when you make changes to server files thanks to nodemon:
+
 ```bash
-npm run dev          # Starts Express API (tsx) + Vite client in development mode
+npm run dev
 ```
-Navigate to http://localhost:5000 (proxy to Vite dev server, with API served on the same origin).
+
+This will:
+- Start the server on `http://localhost:3001`
+- Automatically restart when you modify server files (`server/`, `shared/`, `.env`)
+- Watch for TypeScript and JavaScript file changes
+- Provide verbose logging for file changes
+
+### Manual Commands
+
+```bash
+# Start development server (with auto-restart)
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Type checking
+npm run check
+
+# Database commands
+npm run db:push      # Push schema to database
+npm run db:generate  # Generate Prisma client
+```
+
+### Development Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Access the app:**
+   - Frontend: `http://localhost:3001`
+   - Login with test account: `test@example.com` / `password123`
+
+### File Watching
+
+The development server watches these directories:
+- `server/` - Backend API files
+- `shared/` - Shared types and schemas
+- `.env` - Environment variables
+
+Changes to `client/` files are handled by Vite's hot module replacement.
 
 ### Production build
 ```bash

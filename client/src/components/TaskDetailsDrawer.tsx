@@ -246,7 +246,7 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
 
   return (
     <Sheet open={!!task} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-96 p-6 overflow-y-auto" data-testid="drawer-task-details">
+      <SheetContent className="w-full sm:w-96 p-4 sm:p-6 overflow-y-auto" data-testid="drawer-task-details">
         <SheetHeader className="mb-6">
           <SheetTitle className="sr-only">{t('task.taskDetails')}</SheetTitle>
         </SheetHeader>
@@ -263,39 +263,39 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
           </div>
 
           <div className="space-y-3">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => aiSummarizeMutation.mutate()}
                 disabled={aiSummarizeMutation.isPending}
-                className="gap-2"
+                className="gap-2 flex-1 min-w-0 sm:flex-initial"
                 data-testid="button-ai-summarize"
               >
-                <Sparkles className="h-4 w-4" />
-                {t('ai.summarize')}
+                <Sparkles className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{t('ai.summarize')}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => aiGenerateSubtasksMutation.mutate()}
                 disabled={aiGenerateSubtasksMutation.isPending}
-                className="gap-2"
+                className="gap-2 flex-1 min-w-0 sm:flex-initial"
                 data-testid="button-ai-generate-subtasks"
               >
-                <CheckSquare className="h-4 w-4" />
-                {t('ai.generateSubtasks')}
+                <CheckSquare className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{t('ai.generateSubtasks')}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => aiPrioritizeMutation.mutate()}
                 disabled={aiPrioritizeMutation.isPending}
-                className="gap-2"
+                className="gap-2 flex-1 min-w-0 sm:flex-initial"
                 data-testid="button-ai-prioritize"
               >
-                <Flag className="h-4 w-4" />
-                {t('ai.suggestPriority')}
+                <Flag className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{t('ai.suggestPriority')}</span>
               </Button>
             </div>
 
@@ -462,15 +462,16 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
             ) : (
               <div className="text-sm text-muted-foreground">{t('task.noSubtasks')}</div>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 placeholder={t('task.addSubtask')}
                 value={newSubtask}
                 onChange={(e) => setNewSubtask(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddSubtask()}
                 data-testid="input-add-subtask"
+                className="flex-1"
               />
-              <Button onClick={handleAddSubtask} size="sm">
+              <Button onClick={handleAddSubtask} size="sm" className="sm:w-auto w-full">
                 {t('common.create')}
               </Button>
             </div>
@@ -494,12 +495,12 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
             ) : (
               <div className="text-sm text-muted-foreground">{t('task.noComments')}</div>
             )}
-            <div className="flex gap-2">
+            <div className="w-full">
               <Textarea
                 placeholder={t('task.addComment')}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-20"
+                className="min-h-20 w-full"
                 data-testid="textarea-add-comment"
               />
             </div>

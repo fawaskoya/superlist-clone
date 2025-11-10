@@ -11,7 +11,7 @@ declare module 'http' {
   }
 }
 
-// Enhanced logging function
+// Enhanced logging function with auto-restart test
 function serverLog(message: string, level: 'info' | 'error' | 'warn' = 'info') {
   const timestamp = new Date().toISOString();
   const prefix = `[${timestamp}] [SERVER]`;

@@ -30,6 +30,7 @@ import { queryClient, apiRequest } from '@/lib/queryClient';
 import type { List as ListType, InsertList } from '@shared/schema';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
   const { t } = useTranslation();
@@ -99,7 +100,12 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-10 px-3 rounded-md ${location === item.path ? 'bg-sidebar-accent' : ''}`}
+                    className={cn(
+                      'relative h-10 px-3 rounded-md transition-colors',
+                      location === item.path
+                        ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
+                        : 'hover:bg-sidebar-accent/60'
+                    )}
                     data-testid={item.testId}
                   >
                     <Link href={item.path}>
@@ -136,7 +142,12 @@ export function AppSidebar() {
                 <SidebarMenuItem key={list.id}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-10 px-3 rounded-md ${location === `/list/${list.id}` ? 'bg-sidebar-accent' : ''}`}
+                    className={cn(
+                      'relative h-10 px-3 rounded-md transition-colors',
+                      location === `/list/${list.id}`
+                        ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
+                        : 'hover:bg-sidebar-accent/60'
+                    )}
                     data-testid={`link-list-${list.id}`}
                   >
                     <Link href={`/list/${list.id}`}>
@@ -158,7 +169,12 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  className={`h-10 px-3 rounded-md ${location === '/settings' ? 'bg-sidebar-accent' : ''}`}
+                  className={cn(
+                    'relative h-10 px-3 rounded-md transition-colors',
+                    location === '/settings'
+                      ? 'bg-sidebar-accent after:absolute after:right-0 after:top-2 after:bottom-2 after:w-[3px] after:rounded-l-full after:bg-primary'
+                      : 'hover:bg-sidebar-accent/60'
+                  )}
                   data-testid="link-settings"
                 >
                   <Link href="/settings">

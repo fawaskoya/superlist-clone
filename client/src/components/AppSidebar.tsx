@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -74,8 +75,8 @@ export function AppSidebar() {
 
   const quickViews = [
     { title: t('sidebar.inbox'), icon: Inbox, path: '/dashboard', testId: 'link-inbox' },
-    { title: t('sidebar.tasks', { defaultValue: 'Tasks' }), icon: ListCheck, path: '/tasks', testId: 'link-tasks' },
     { title: t('sidebar.today'), icon: Calendar, path: '/today', testId: 'link-today' },
+    { title: t('sidebar.tasks', { defaultValue: 'Tasks' }), icon: ListCheck, path: '/tasks', testId: 'link-tasks' },
     { title: t('sidebar.upcoming'), icon: Clock, path: '/upcoming', testId: 'link-upcoming' },
     { title: t('sidebar.assignedToMe'), icon: User, path: '/assigned', testId: 'link-assigned' },
   ];
@@ -87,7 +88,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 gap-2">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground mb-2">
             {t('sidebar.myDay')}
@@ -98,11 +99,11 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-9 px-3 ${location === item.path ? 'bg-sidebar-accent' : ''}`}
+                    className={`h-10 px-3 rounded-md ${location === item.path ? 'bg-sidebar-accent' : ''}`}
                     data-testid={item.testId}
                   >
                     <Link href={item.path}>
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-5 w-5 text-primary" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -126,7 +127,7 @@ export function AppSidebar() {
               onClick={() => setDialogOpen(true)}
               data-testid="button-create-list"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-primary" />
             </Button>
           </div>
           <SidebarGroupContent>
@@ -135,11 +136,11 @@ export function AppSidebar() {
                 <SidebarMenuItem key={list.id}>
                   <SidebarMenuButton
                     asChild
-                    className={`h-9 px-3 ${location === `/list/${list.id}` ? 'bg-sidebar-accent' : ''}`}
+                    className={`h-10 px-3 rounded-md ${location === `/list/${list.id}` ? 'bg-sidebar-accent' : ''}`}
                     data-testid={`link-list-${list.id}`}
                   >
                     <Link href={`/list/${list.id}`}>
-                      <List className="h-5 w-5" />
+                      <List className="h-5 w-5 text-primary" />
                       <span>{list.name}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -157,11 +158,11 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  className={`h-9 px-3 ${location === '/settings' ? 'bg-sidebar-accent' : ''}`}
+                  className={`h-10 px-3 rounded-md ${location === '/settings' ? 'bg-sidebar-accent' : ''}`}
                   data-testid="link-settings"
                 >
                   <Link href="/settings">
-                    <Settings className="h-5 w-5" />
+                    <Settings className="h-5 w-5 text-primary" />
                     <span>{t('sidebar.settings')}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -170,6 +171,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <Button
+          variant="outline"
+          className="w-full h-11 rounded-2xl font-medium"
+          onClick={() => window.open('https://superlist.com', '_blank')}
+        >
+          ⚡ <span className="ml-2">Upgrade</span>
+        </Button>
+      </SidebarFooter>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>

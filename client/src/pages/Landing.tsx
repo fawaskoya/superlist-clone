@@ -326,7 +326,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden">
       <AnimatedBackground />
-
+      
       <div className="relative z-10">
         {/* Navigation */}
         <nav className="border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -344,7 +344,7 @@ export default function Landing() {
                   TaskFlow
                 </span>
               </div>
-
+              
               {/* Navigation Links */}
               <div className="flex items-center gap-4 md:gap-6 flex-1 justify-center">
                 <a href="#home" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap relative group">
@@ -364,7 +364,7 @@ export default function Landing() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-purple-500 group-hover:w-full transition-all duration-300" />
                 </a>
               </div>
-
+              
               <div className="flex items-center gap-3">
                 <ThemeToggle />
                 <LanguageSwitcher />
@@ -406,7 +406,7 @@ export default function Landing() {
                   </Link>
                 </div>
               </div>
-
+              
               <div className="flex items-center gap-4 pb-2 overflow-x-auto">
                 <a href="#home" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Home</a>
                 <a href="#demo" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Demo</a>
@@ -420,91 +420,91 @@ export default function Landing() {
 
         {/* Hero Section */}
         <section id="home" className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-          <div className="max-w-7xl mx-auto text-center space-y-12">
-            {/* Floating Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="max-w-7xl mx-auto text-center space-y-8">
+            {/* Floating Notification Cards */}
+            <div className="absolute top-8 right-8 flex flex-col gap-3 pointer-events-none">
               <FloatingCard delay={0.2}>
-                <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-white" />
+                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
                     </div>
-                    <span className="text-sm font-medium">Task completed!</span>
+                    <span className="text-xs font-medium text-foreground/90">Task completed!</span>
                   </div>
                 </div>
               </FloatingCard>
 
               <FloatingCard delay={0.8}>
-                <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-xl ml-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <Target className="w-4 h-4 text-white" />
+                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs ml-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Target className="w-3 h-3 text-white" />
                     </div>
-                    <span className="text-sm font-medium">New project started</span>
+                    <span className="text-xs font-medium text-foreground/90">New project started</span>
                   </div>
                 </div>
               </FloatingCard>
 
               <FloatingCard delay={1.4}>
-                <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-xl -ml-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-white" />
+                <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs ml-12">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Brain className="w-3 h-3 text-white" />
                     </div>
-                    <span className="text-sm font-medium">AI insights ready</span>
+                    <span className="text-xs font-medium text-foreground/90">AI insights ready</span>
                   </div>
                 </div>
               </FloatingCard>
             </div>
 
             {/* Main Hero Content */}
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
                 <Sparkles className="h-4 w-4" />
                 <span>✨ AI-Powered Task Management</span>
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               </div>
 
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9] mt-2">
                 <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent">
                   Manage Tasks
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
                   Like a Pro
-                </span>
-              </h1>
-
-              <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    </span>
+                  </h1>
+                  
+              <p className="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mt-2">
                 Transform your productivity with AI-powered task management that adapts to your workflow.
                 Intelligent suggestions, seamless collaboration, and beautiful design.
-              </p>
-            </div>
-
+                  </p>
+                </div>
+                
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-              <Link href="/register">
-                <Button
-                  size="lg"
+                  <Link href="/register">
+                    <Button 
+                      size="lg" 
                   className="group w-full sm:w-auto text-lg h-14 px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-2xl shadow-primary/25 hover:shadow-3xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
-                >
+                    >
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </Button>
-              </Link>
+                    </Button>
+                  </Link>
 
-              <Button
-                size="lg"
-                variant="outline"
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
                 className="group w-full sm:w-auto text-lg h-14 px-8 border-2 border-border/50 hover:border-primary/50 transition-all duration-300 hover:bg-primary/5"
-              >
+                    >
                 <Play className="mr-2 h-5 w-5" />
                 Watch Demo
-              </Button>
+                    </Button>
             </div>
 
             {/* Social Proof */}
-            <div className="flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+            <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 mt-4">
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -588,7 +588,7 @@ export default function Landing() {
                   </div>
                 </div>
               </div>
-
+              
               <div className="relative">
                 <InteractiveDemo />
               </div>
@@ -624,16 +624,16 @@ export default function Landing() {
                       <div className={`relative h-16 w-16 rounded-2xl ${feature.iconBg} flex items-center justify-center ring-1 ring-border/50 group-hover:ring-primary/30 transition-all duration-300`}>
                         <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
                         <feature.icon className={`h-8 w-8 ${feature.iconColor} relative z-10 group-hover:scale-110 transition-transform duration-300`} />
-                      </div>
+                    </div>
 
                       <div className="space-y-3">
                         <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors duration-300">
                           {feature.title}
                         </h3>
                         <p className="text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300">
-                          {feature.description}
-                        </p>
-                      </div>
+                        {feature.description}
+                      </p>
+                    </div>
 
                       <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Learn more
@@ -689,8 +689,8 @@ export default function Landing() {
                           <div className="text-sm text-muted-foreground">{testimonial.role} at {testimonial.company}</div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                  </CardContent>
+                </Card>
                 </FloatingCard>
               ))}
             </div>
@@ -717,11 +717,11 @@ export default function Landing() {
                     Start your free trial today.
                   </p>
                 </div>
-
+                
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
                   <Link href="/register">
-                    <Button
-                      size="lg"
+                    <Button 
+                      size="lg" 
                       className="group w-full sm:w-auto text-lg h-14 px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
                     >
                       Start Free Trial

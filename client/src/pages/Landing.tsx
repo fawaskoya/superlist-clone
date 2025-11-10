@@ -39,11 +39,15 @@ function AnimatedBackground() {
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, size: number, delay: number}>>([]);
 
   useEffect(() => {
-    const newParticles = Array.from({ length: 50 }, (_, i) => ({
+    // Reduce particles on mobile for better performance
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 25 : 50;
+
+    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 4 + 1,
+      size: Math.random() * (isMobile ? 2 : 4) + 1,
       delay: Math.random() * 10,
     }));
     setParticles(newParticles);
@@ -384,45 +388,45 @@ export default function Landing() {
 
             {/* Mobile Navigation */}
             <div className="flex sm:hidden flex-col">
-              <div className="flex h-14 items-center justify-between">
+              <div className="flex h-12 items-center justify-between px-2">
                 <div className="flex items-center gap-2">
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-lg blur opacity-75" />
-                    <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-lg p-1.5">
-                      <CheckSquare className="h-5 w-5 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-md blur opacity-75" />
+                    <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-md p-1">
+                      <CheckSquare className="h-4 w-4 text-white" />
                     </div>
                   </div>
-                  <span className="text-lg font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                  <span className="text-base font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
                     TaskFlow
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <ThemeToggle />
                   <LanguageSwitcher />
                   <Link href="/register">
-                    <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600">
+                    <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 text-xs px-3">
                       Get Started
                     </Button>
                   </Link>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-4 pb-2 overflow-x-auto">
-                <a href="#home" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Home</a>
-                <a href="#demo" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Demo</a>
-                <a href="#features" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Features</a>
-                <a href="#testimonials" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Reviews</a>
-                <a href="/login" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap">Sign In</a>
+
+              <div className="flex items-center gap-3 pb-2 px-2 overflow-x-auto scrollbar-hide">
+                <a href="#home" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-md hover:bg-primary/5">Home</a>
+                <a href="#demo" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-md hover:bg-primary/5">Demo</a>
+                <a href="#features" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-md hover:bg-primary/5">Features</a>
+                <a href="#testimonials" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-md hover:bg-primary/5">Reviews</a>
+                <a href="/login" className="text-xs font-medium text-foreground/80 hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-md hover:bg-primary/5">Sign In</a>
               </div>
             </div>
           </div>
         </nav>
 
         {/* Hero Section */}
-        <section id="home" className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-          <div className="max-w-7xl mx-auto text-center space-y-8">
+        <section id="home" className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-8 sm:pb-12">
+          <div className="max-w-7xl mx-auto text-center space-y-6 sm:space-y-8">
             {/* Floating Notification Cards */}
-            <div className="absolute top-8 right-8 flex flex-col gap-3 pointer-events-none">
+            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex flex-col gap-2 sm:gap-3 pointer-events-none">
               <FloatingCard delay={0.2}>
                 <div className="bg-card/90 backdrop-blur-xl border border-border/50 rounded-xl px-3 py-2 shadow-lg max-w-xs">
                   <div className="flex items-center gap-2">
@@ -465,7 +469,7 @@ export default function Landing() {
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               </div>
 
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9] mt-2">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[0.9] mt-2">
                 <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent">
                   Manage Tasks
                 </span>
@@ -482,47 +486,47 @@ export default function Landing() {
                 </div>
                 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-                  <Link href="/register">
-                    <Button 
-                      size="lg" 
-                  className="group w-full sm:w-auto text-lg h-14 px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-2xl shadow-primary/25 hover:shadow-3xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
-                    >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 px-4 sm:px-0">
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="group w-full sm:w-auto text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-2xl shadow-primary/25 hover:shadow-3xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
+                >
                   Get Started
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-                    </Button>
-                  </Link>
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Button>
+              </Link>
 
-              <Link href="/login">
+              <Link href="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="group w-full sm:w-auto text-lg h-14 px-8 border-2 border-border/50 hover:border-primary/50 transition-all duration-300 hover:bg-primary/5"
+                  className="group w-full sm:w-auto text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8 border-2 border-border/50 hover:border-primary/50 transition-all duration-300 hover:bg-primary/5"
                 >
-                  <CheckCircle2 className="mr-2 h-5 w-5" />
+                  <CheckCircle2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Login
                 </Button>
               </Link>
             </div>
 
             {/* Social Proof */}
-            <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 mt-4">
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-col items-center gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 mt-4 px-4 sm:px-0">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">4.9/5</span>
                   <span>from 2,000+ users</span>
                 </div>
-                <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                <div className="hidden sm:block w-1 h-1 bg-muted-foreground rounded-full" />
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>10,000+ tasks managed daily</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
             </div>

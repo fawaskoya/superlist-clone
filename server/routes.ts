@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 import { createServer, type Server } from 'http';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './database.js';
 import bcrypt from 'bcryptjs';
 import { authenticateToken, generateTokens, type AuthRequest } from './middleware/auth';
 import { summarizeTask, generateSubtasks, prioritizeTasks } from './services/ai';
@@ -22,8 +22,6 @@ import {
   aiGenerateSubtasksSchema,
   aiPrioritizeTasksSchema,
 } from '../shared/schema';
-
-const prisma = new PrismaClient();
 
 // Enhanced logging function for routes
 function routeLog(message: string, level: 'info' | 'error' | 'warn' = 'info') {

@@ -1,6 +1,5 @@
-import { PrismaClient, ActivityType } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { ActivityType } from '@prisma/client';
+import { prisma } from './database.js';
 
 interface ActivityMetadata {
   oldValue?: any;

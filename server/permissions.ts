@@ -1,6 +1,5 @@
-import { PrismaClient, Role, Permission } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Role, Permission } from '@prisma/client';
+import { prisma } from './database.js';
 
 // Default permissions for each role
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {

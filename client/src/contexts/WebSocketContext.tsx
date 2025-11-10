@@ -33,7 +33,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     // Construct WebSocket URL properly for both local and Replit environments
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host; // This already includes the port if present
+    console.log('WebSocket: Constructing URL with protocol:', protocol, 'host:', host, 'location:', window.location);
     const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
+    console.log('WebSocket: Final URL:', wsUrl);
 
     try {
       const ws = new WebSocket(wsUrl);

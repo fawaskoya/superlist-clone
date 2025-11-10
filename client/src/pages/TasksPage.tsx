@@ -139,14 +139,13 @@ function TaskGroup({ title, tasks, icon, description, onSelect }: TaskGroupProps
       <div className={`rounded-lg overflow-hidden ${getGroupStyles(title)}`}>
         <div className="divide-y divide-border/30 bg-card/30">
           {tasks.map((task, index) => {
-            console.log(`TaskGroup: Rendering task ${task.id} in ${title}`);
             return (
               <div
                 key={task.id}
                 className="animate-in slide-in-from-left-4 duration-300"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <TaskItem task={task} onSelect={() => {}} />
+                <TaskItem task={task} onSelect={onSelect} />
               </div>
             );
           })}
@@ -161,10 +160,6 @@ function TasksPageContent() {
   const { currentWorkspace } = useWorkspace();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Debug selectedTask changes
-  useEffect(() => {
-    console.log('TasksPage: selectedTask changed:', selectedTask?.id || 'null');
-  }, [selectedTask]);
   const [, setLocation] = useLocation();
   const [sortOption, setSortOption] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 

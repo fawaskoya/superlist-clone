@@ -63,10 +63,7 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
       className={`group flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 task-item-interactive cursor-pointer ${
         isDone ? 'opacity-60' : ''
       } ${isDragging ? 'opacity-50' : ''} ${isOverdue ? 'ring-1 ring-red-200 dark:ring-red-800' : ''}`}
-      onClick={() => {
-        console.log('TaskItem clicked:', task.id);
-        onSelect(task);
-      }}
+      onClick={() => onSelect(task)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-testid={`task-item-${task.id}`}

@@ -18,6 +18,33 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
+interface TaskGroupProps {
+  title: string;
+  tasks: Task[];
+  icon?: string;
+  onSelect: (task: Task) => void;
+}
+
+function TaskGroup({ title, tasks, icon, onSelect }: TaskGroupProps) {
+  const { t } = useTranslation();
+
+  if (tasks.length === 0) return null;
+
+  return (
+    <div key={title} className="mb-6" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+      <h2 className="text-sm font-semibold text-muted-foreground mb-3 px-1">
+        {icon && <span className="mr-2">{icon}</span>}
+        {title} ({tasks.length})
+      </h2>
+      <Card className="overflow-hidden">
+        {tasks.map((task) => (
+          <TaskItem key={task.id} task={task} onSelect={onSelect} />
+        ))}
+      </Card>
+    </div>
+  );
+}
+
 export default function TasksPage() {
   const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
@@ -91,23 +118,6 @@ export default function TasksPage() {
     return grouped;
   }, [tasks, sortOption]);
 
-  const renderTaskGroup = (title: string, tasks: Task[], icon?: string) => {
-    if (tasks.length === 0) return null;
-
-    return (
-      <div key={title} className="mb-6" data-testid={`task-group-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3 px-1">
-          {icon && <span className="mr-2">{icon}</span>}
-          {title} ({tasks.length})
-        </h2>
-        <Card className="overflow-hidden">
-          {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} onSelect={setSelectedTask} />
-          ))}
-        </Card>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -198,11 +208,35 @@ export default function TasksPage() {
           </div>
         ) : (
           <div className="space-y-6 rounded-2xl border border-border/40 bg-background/40 p-4 md:p-6 shadow-sm">
-            {renderTaskGroup(t('tasks.overdue', { defaultValue: 'Overdue' }), groupedTasks.overdue, '⚠️')}
-            {renderTaskGroup(t('tasks.today', { defaultValue: 'Today' }), groupedTasks.today, '📅')}
-            {renderTaskGroup(t('tasks.tomorrow', { defaultValue: 'Tomorrow' }), groupedTasks.tomorrow, '➡️')}
-            {renderTaskGroup(t('tasks.upcoming', { defaultValue: 'Upcoming' }), groupedTasks.upcoming, '📆')}
-            {renderTaskGroup(t('tasks.noDueDate', { defaultValue: 'No due date' }), groupedTasks.noDueDate)}
+            <TaskGroup
+              title={t('tasks.overdue', { defaultValue: 'Overdue' })}
+              tasks={groupedTasks.overdue}
+              icon="⚠️"
+              onSelect={setSelectedTask}
+            />
+            <TaskGroup
+              title={t('tasks.today', { defaultValue: 'Today' })}
+              tasks={groupedTasks.today}
+              icon="📅"
+              onSelect={setSelectedTask}
+            />
+            <TaskGroup
+              title={t('tasks.tomorrow', { defaultValue: 'Tomorrow' })}
+              tasks={groupedTasks.tomorrow}
+              icon="➡️"
+              onSelect={setSelectedTask}
+            />
+            <TaskGroup
+              title={t('tasks.upcoming', { defaultValue: 'Upcoming' })}
+              tasks={groupedTasks.upcoming}
+              icon="📆"
+              onSelect={setSelectedTask}
+            />
+            <TaskGroup
+              title={t('tasks.noDueDate', { defaultValue: 'No due date' })}
+              tasks={groupedTasks.noDueDate}
+              onSelect={setSelectedTask}
+            />
           </div>
         )}
       </div>

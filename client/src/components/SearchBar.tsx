@@ -47,7 +47,12 @@ interface Task {
   };
 }
 
-export function SearchBar() {
+interface SearchBarProps {
+  onResultSelect?: () => void;
+  autoFocus?: boolean;
+}
+
+export function SearchBar({ onResultSelect, autoFocus = false }: SearchBarProps = {}) {
   const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [, setLocation] = useLocation();
@@ -106,6 +111,7 @@ export function SearchBar() {
     setShowResults(false);
     setSearchQuery('');
     setFilters({ q: '' });
+    onResultSelect?.();
   };
 
   return (
@@ -123,6 +129,7 @@ export function SearchBar() {
           }}
           onFocus={() => setShowResults(true)}
           className="pl-10 pr-20"
+          autoFocus={autoFocus}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           {searchQuery && (

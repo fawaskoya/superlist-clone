@@ -165,14 +165,6 @@ function TasksPageContent() {
   });
 
 
-  useEffect(() => {
-  }, []);
-
-  useEffect(() => {
-  }, [selectedTask]);
-
-  useEffect(() => {
-  }, [currentWorkspace]);
 
   const groupedTasks = useMemo(() => {
 
@@ -230,11 +222,11 @@ function TasksPageContent() {
       });
 
       return {
-        overdue: grouped.overdue.length,
-        today: grouped.today.length,
-        tomorrow: grouped.tomorrow.length,
-        upcoming: grouped.upcoming.length,
-        noDueDate: grouped.noDueDate.length
+        overdue: grouped.overdue,
+        today: grouped.today,
+        tomorrow: grouped.tomorrow,
+        upcoming: grouped.upcoming,
+        noDueDate: grouped.noDueDate
       };
     } catch (error) {
       console.error('useMemo: Error in groupedTasks computation:', error);

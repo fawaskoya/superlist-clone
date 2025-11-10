@@ -401,7 +401,7 @@ export default function Landing() {
                   <LanguageSwitcher />
                   <Link href="/register">
                     <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600">
-                      Start Free
+                      Get Started
                     </Button>
                   </Link>
                 </div>
@@ -488,19 +488,21 @@ export default function Landing() {
                       size="lg" 
                   className="group w-full sm:w-auto text-lg h-14 px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-2xl shadow-primary/25 hover:shadow-3xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
                     >
-                  Start Free Trial
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
                   </Link>
 
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                className="group w-full sm:w-auto text-lg h-14 px-8 border-2 border-border/50 hover:border-primary/50 transition-all duration-300 hover:bg-primary/5"
-                    >
-                <Play className="mr-2 h-5 w-5" />
-                Watch Demo
-                    </Button>
+              <Link href="/login">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group w-full sm:w-auto text-lg h-14 px-8 border-2 border-border/50 hover:border-primary/50 transition-all duration-300 hover:bg-primary/5"
+                >
+                  <CheckCircle2 className="mr-2 h-5 w-5" />
+                  Login
+                </Button>
+              </Link>
             </div>
 
             {/* Social Proof */}
@@ -714,7 +716,7 @@ export default function Landing() {
                   </h2>
                   <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                     Join thousands of teams already using TaskFlow to stay organized and productive.
-                    Start your free trial today.
+                    Start organizing your tasks today.
                   </p>
                 </div>
                 
@@ -724,13 +726,13 @@ export default function Landing() {
                       size="lg" 
                       className="group w-full sm:w-auto text-lg h-14 px-8 bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105"
                     >
-                      Start Free Trial
+                      Get Started
                       <Rocket className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
                   </Link>
 
                   <div className="text-sm text-muted-foreground">
-                    No credit card required • 14-day free trial • Cancel anytime
+                    Join thousands of productive teams
                   </div>
                 </div>
               </CardContent>

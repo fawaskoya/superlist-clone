@@ -64,14 +64,14 @@ export function Navbar() {
                 data-testid="button-sidebar-toggle"
                 className="h-9 w-9 rounded-lg hover:bg-accent/50 transition-colors duration-200 group"
               />
-              <div className="flex items-center gap-2 group">
+              <div className="flex items-center gap-1 sm:gap-2 group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-xl p-2">
-                    <CheckSquare className="h-5 w-5 text-white" />
+                  <div className="relative bg-gradient-to-br from-primary to-purple-600 rounded-lg p-1.5 sm:p-2">
+                    <CheckSquare className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
                   {t('appName')}
                 </span>
               </div>
@@ -121,26 +121,9 @@ export function Navbar() {
               <ThemeToggle />
             </div>
 
-            {/* Mobile theme toggle in user menu */}
+            {/* Mobile theme toggle */}
             <div className="sm:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-lg hover:bg-gradient-to-br hover:from-primary/10 hover:to-purple-500/10 transition-all duration-300 group hover:scale-105"
-                  >
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-300"></div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuLabel className="text-center">Theme</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <div className="p-2">
-                    <ThemeToggle />
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ThemeToggle />
             </div>
             <div className="hidden md:inline-flex items-center">
               <LanguageSwitcher />

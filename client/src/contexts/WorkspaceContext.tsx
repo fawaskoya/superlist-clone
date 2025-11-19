@@ -28,9 +28,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
   const [previousUserId, setPreviousUserId] = useState<string | null>(null);
 
-  const { data: workspaces = [], isLoading } = useQuery<WorkspaceWithRole[]>({
+  const { data: workspaces = [], isLoading, error } = useQuery<WorkspaceWithRole[]>({
     queryKey: ['/api/workspaces'],
     enabled: !!user, // Only fetch when user is authenticated
+    retry: 1, // Retry once on failure
+    onError: (err) => {
+      console.error('Failed to load workspaces:', err);
+    },
   });
 
   // Reset workspace selection when user changes (login/logout/switch user)

@@ -24,6 +24,11 @@ import { Badge } from '@/components/ui/badge';
 import { TaskActivityTimeline } from './TaskActivityTimeline';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileAttachments } from './FileAttachments';
+import { VoiceRecorder } from './VoiceRecorder';
+import { VoiceNotes } from './VoiceNotes';
+import { RecurrenceSelector } from './RecurrenceSelector';
+import { TimeTracker } from './TimeTracker';
+import { OrganizationAssigneeSelector } from './OrganizationAssigneeSelector';
 import type { Task, TaskStatus, TaskPriority, TaskComment, InsertTask, List } from '@shared/schema';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -51,6 +56,9 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
   const [dueDate, setDueDate] = useState('');
   const [assignedToId, setAssignedToId] = useState<string | null>(null);
   const [selectedListId, setSelectedListId] = useState<string | null>(listId);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceRule, setRecurrenceRule] = useState<string | undefined>();
+  const [recurrenceEnd, setRecurrenceEnd] = useState<string | undefined>();
   const [newComment, setNewComment] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
   const [aiSummary, setAiSummary] = useState('');
@@ -88,6 +96,9 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
       setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '');
       setAssignedToId((task as any).assignedToId || null);
       setSelectedListId(task.listId);
+      setIsRecurring(task.isRecurring || false);
+      setRecurrenceRule(task.recurrenceRule || undefined);
+      setRecurrenceEnd(task.recurrenceEnd ? format(new Date(task.recurrenceEnd), 'yyyy-MM-dd') : undefined);
     }
   }, [task]);
 
@@ -452,33 +463,38 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
           </div>
 
           <div className="space-y-2">
+            <RecurrenceSelector
+              value={{
+                isRecurring,
+                recurrenceRule,
+                recurrenceEnd,
+              }}
+              onChange={(value) => {
+                setIsRecurring(value.isRecurring);
+                setRecurrenceRule(value.recurrenceRule);
+                setRecurrenceEnd(value.recurrenceEnd);
+                handleUpdate('isRecurring', value.isRecurring);
+                if (value.recurrenceRule !== undefined) {
+                  handleUpdate('recurrenceRule', value.recurrenceRule);
+                }
+                if (value.recurrenceEnd !== undefined) {
+                  handleUpdate('recurrenceEnd', value.recurrenceEnd);
+                }
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label>{t('task.assignee')}</Label>
-            <Select
-              value={assignedToId || 'unassigned'}
-              onValueChange={(value) => {
-                const newAssignee = value === 'unassigned' ? null : value;
+            <OrganizationAssigneeSelector
+              currentAssigneeId={assignedToId}
+              workspaceMembers={members || []}
+              onAssigneeChange={(userId) => {
+                const newAssignee = userId === 'unassigned' ? null : userId;
                 setAssignedToId(newAssignee);
                 handleUpdate('assignedToId', newAssignee);
               }}
-            >
-              <SelectTrigger data-testid="select-assignee" className="relative z-10">
-                <SelectValue placeholder={t('task.assigneePlaceholder')} />
-              </SelectTrigger>
-              <SelectContent className="z-[9999]" position="popper" sideOffset={5}>
-                <SelectItem value="unassigned" data-testid="select-item-assignee-unassigned">
-                  {t('task.unassigned')}
-                </SelectItem>
-                {members?.map((member) => (
-                  <SelectItem
-                    key={member.userId}
-                    value={member.user.id}
-                    data-testid={`select-item-assignee-${member.user.id}`}
-                  >
-                    {member.user.name} ({member.user.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <Separator />
@@ -542,6 +558,35 @@ export function TaskDetailsDrawer({ task, onClose, listId }: TaskDetailsDrawerPr
             <Button onClick={handleAddComment} size="sm" className="w-full">
               {t('common.create')}
             </Button>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label>Voice Notes</Label>
+            {task && (
+              <>
+                <VoiceRecorder
+                  taskId={task.id}
+                  onRecordingComplete={() => {
+                    // Refresh voice notes and task activities
+                    queryClient.invalidateQueries({
+                      queryKey: ['/api/tasks', task.id, 'voice-notes']
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ['/api/tasks', task.id, 'activities']
+                    });
+                  }}
+                />
+                <VoiceNotes taskId={task.id} />
+              </>
+            )}
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <TimeTracker taskId={task.id} />
           </div>
 
           <Separator />

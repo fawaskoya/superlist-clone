@@ -15,6 +15,7 @@ interface FileAttachment {
   size: number;
   uploadedById: string;
   createdAt: string;
+  thumbnailUrl?: string;
   uploadedBy: {
     id: string;
     name: string;
@@ -145,7 +146,15 @@ export function FileAttachments({ taskId }: FileAttachmentsProps) {
               data-testid={`attachment-${attachment.id}`}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                {attachment.mimeType.startsWith('image/') && attachment.thumbnailUrl ? (
+                  <img
+                    src={attachment.thumbnailUrl}
+                    alt={attachment.originalName}
+                    className="h-10 w-10 object-cover rounded border flex-shrink-0"
+                  />
+                ) : (
+                  <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium truncate" title={attachment.originalName}>
                     {attachment.originalName}

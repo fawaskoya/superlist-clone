@@ -47,11 +47,11 @@ export async function apiRequest<T = any>(
 ): Promise<T> {
   const token = localStorage.getItem('accessToken');
   const headers: Record<string, string> = {};
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   if (data) {
     headers['Content-Type'] = 'application/json';
   }
@@ -80,7 +80,39 @@ export const getQueryFn: <T>(options: {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(queryKey.join("/") as string, {
+    // Build URL from query key - handle both string arrays and mixed types
+    let pathParts: string[] = [];
+    let queryParams: Record<string, string> = {};
+
+    queryKey.forEach((part, index) => {
+      if (part === null || part === undefined) return;
+
+      if (typeof part === 'object') {
+        // This is a query parameters object
+        queryParams = { ...queryParams, ...part };
+      } else {
+        // This is a path part
+        pathParts.push(String(part));
+      }
+    });
+
+    let url = pathParts
+      .join("/")
+      .replace(/\/+/g, "/") // Remove duplicate slashes
+      .replace(/^\/+/, "/"); // Ensure it starts with /
+
+    // Add query parameters if any
+    if (Object.keys(queryParams).length > 0) {
+      const searchParams = new URLSearchParams();
+      Object.entries(queryParams).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          searchParams.append(key, String(value));
+        }
+      });
+      url += `?${searchParams.toString()}`;
+    }
+
+    const res = await fetch(url, {
       headers,
       credentials: "include",
     });
@@ -100,7 +132,8 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      retry: false,
+      retry: 1, // Retry once on failure
+      retryDelay: 1000, // Wait 1 second before retry
     },
     mutations: {
       retry: false,

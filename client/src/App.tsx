@@ -9,6 +9,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext';
 import { WebSocketProvider } from '@/contexts/WebSocketContext';
+import { CallNotificationManager } from '@/components/CallNotificationManager';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { queryClient } from './lib/queryClient';
 import Landing from '@/pages/Landing';
 import LoginPage from '@/pages/LoginPage';
@@ -19,6 +21,11 @@ import ListPage from '@/pages/ListPage';
 import TodayPage from '@/pages/TodayPage';
 import UpcomingPage from '@/pages/UpcomingPage';
 import AssignedPage from '@/pages/AssignedPage';
+import { MyDayPage } from '@/pages/MyDayPage';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
+import { ChatPage } from '@/pages/ChatPage';
+import { AdminPage } from '@/pages/AdminPage';
+import { CalendarPage } from '@/pages/CalendarPage';
 import AcceptInvitation from '@/pages/AcceptInvitation';
 import WorkspaceSettingsPage from '@/pages/WorkspaceSettingsPage';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -55,7 +62,7 @@ function AppContent() {
 
   // Check if current path is a private route
   // NOTE: When adding new private routes, make sure to add them to this list
-  const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list', '/settings'];
+    const privatePaths = ['/dashboard', '/tasks', '/today', '/upcoming', '/assigned', '/list', '/settings', '/my-day', '/analytics', '/chat', '/admin', '/calendar'];
   const isPrivateRoute = privatePaths.some(path => location.startsWith(path));
 
   // Show invitation page without app layout (cleaner UX)
@@ -70,41 +77,51 @@ function AppContent() {
 
   // If user is authenticated, show the app with persistent layout
   if (user) {
+    // Admin users get redirected to admin dashboard
+    const isAdmin = user.isAdmin;
+    const defaultRoute = isAdmin ? "/admin" : "/dashboard";
+
     return (
-      <WorkspaceProvider>
-        <WebSocketProvider>
-          <SidebarProvider style={sidebarStyle}>
-            <AnimatedBackground />
-            <div className="flex h-screen w-full relative z-10">
-              <AppSidebar />
-              <div className="flex flex-col flex-1 min-w-0">
-                <Navbar />
-                <main className="flex-1 overflow-auto scrollbar-thin px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                  <Switch>
-                    <Route path="/">
-                      <Redirect to="/dashboard" />
-                    </Route>
-                    <Route path="/login">
-                      <Redirect to="/dashboard" />
-                    </Route>
-                    <Route path="/register">
-                      <Redirect to="/dashboard" />
-                    </Route>
-                    <Route path="/dashboard" component={DashboardPage} />
-                    <Route path="/tasks" component={TasksPage} />
-                    <Route path="/list/:id" component={ListPage} />
-                    <Route path="/today" component={TodayPage} />
-                    <Route path="/upcoming" component={UpcomingPage} />
-                    <Route path="/assigned" component={AssignedPage} />
-                    <Route path="/settings" component={WorkspaceSettingsPage} />
-                    <Route component={NotFound} />
-                  </Switch>
-                </main>
-              </div>
-            </div>
-          </SidebarProvider>
-        </WebSocketProvider>
-      </WorkspaceProvider>
+        <WorkspaceProvider>
+              <WebSocketProvider>
+                <SidebarProvider style={sidebarStyle}>
+                  <AnimatedBackground />
+                  <div className="flex h-screen w-full relative z-10">
+                    <AppSidebar />
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <Navbar />
+                      <CallNotificationManager />
+                      <main className="flex-1 overflow-auto scrollbar-thin px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                        <Switch>
+                          <Route path="/">
+                            <Redirect to={defaultRoute} />
+                          </Route>
+                          <Route path="/login">
+                            <Redirect to={defaultRoute} />
+                          </Route>
+                          <Route path="/register">
+                            <Redirect to={defaultRoute} />
+                          </Route>
+                          <Route path="/dashboard" component={DashboardPage} />
+                          <Route path="/tasks" component={TasksPage} />
+                          <Route path="/list/:id" component={ListPage} />
+                          <Route path="/today" component={TodayPage} />
+                          <Route path="/upcoming" component={UpcomingPage} />
+                          <Route path="/assigned" component={AssignedPage} />
+                          <Route path="/my-day" component={MyDayPage} />
+                          <Route path="/analytics" component={AnalyticsPage} />
+                          <Route path="/chat" component={ChatPage} />
+                          <Route path="/calendar" component={CalendarPage} />
+                          <Route path="/admin" component={AdminPage} />
+                          <Route path="/settings" component={WorkspaceSettingsPage} />
+                          <Route component={NotFound} />
+                        </Switch>
+                      </main>
+                    </div>
+                  </div>
+                </SidebarProvider>
+              </WebSocketProvider>
+            </WorkspaceProvider>
     );
   }
 
@@ -128,16 +145,18 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <LanguageProvider>
-            <TooltipProvider>
-              <Toaster />
-              <AppContent />
-            </TooltipProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <AuthProvider>
+            <LanguageProvider>
+              <TooltipProvider>
+                <Toaster />
+                <AppContent />
+              </TooltipProvider>
+            </LanguageProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }

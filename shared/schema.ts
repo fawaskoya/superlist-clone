@@ -28,6 +28,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  organizationId?: string;
+  organization?: Organization;
+  isAdmin?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +48,24 @@ export interface Workspace {
   name: string;
   slug: string;
   ownerId: string;
+  organizationId?: string;
+  organization?: Organization;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Organization schemas
+export const insertOrganizationSchema = z.object({
+  domain: z.string().min(1),
+  name: z.string().min(1),
+});
+
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+
+export interface Organization {
+  id: string;
+  domain: string;
+  name: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,6 +100,9 @@ export const insertTaskSchema = z.object({
   assignedToId: z.string().optional(),
   parentId: z.string().optional(),
   listId: z.string().optional().nullable(),
+  isRecurring: z.boolean().default(false),
+  recurrenceRule: z.string().optional(),
+  recurrenceEnd: z.string().optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -89,6 +113,9 @@ export const updateTaskSchema = z.object({
   dueDate: z.string().optional().nullable(),
   assignedToId: z.string().optional().nullable(),
   listId: z.string().optional().nullable(),
+  isRecurring: z.boolean().optional(),
+  recurrenceRule: z.string().optional(),
+  recurrenceEnd: z.string().optional().nullable(),
 });
 
 export type InsertTask = z.infer<typeof insertTaskSchema>;
@@ -107,6 +134,10 @@ export interface Task {
   createdById: string;
   parentId: string | null;
   orderIndex: number;
+  isRecurring: boolean;
+  recurrenceRule: string | null;
+  recurrenceEnd: Date | null;
+  originalTaskId: string | null;
   createdAt: Date;
   updatedAt: Date;
   list?: List | null;

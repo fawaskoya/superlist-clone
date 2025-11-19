@@ -145,15 +145,15 @@ export function InboxTaskList() {
 
             {/* Enhanced input field */}
             <div className="flex-1 w-full relative group">
-              <Input
+          <Input
                 placeholder="Add a task..."
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={handleAddTask}
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            onKeyDown={handleAddTask}
                 className="border-0 shadow-none focus-visible:ring-0 px-0 py-3 text-base placeholder:text-muted-foreground/80 bg-transparent font-medium focus:placeholder:text-primary transition-colors"
-                data-testid="input-add-task"
+            data-testid="input-add-task"
                 data-inbox-add-task
-              />
+          />
               {/* Animated underline */}
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-purple-600 group-focus-within:w-full transition-all duration-300" />
 
@@ -167,15 +167,15 @@ export function InboxTaskList() {
             </div>
 
             {/* Beautiful Add button matching homepage style */}
-            <Button
-              size="lg"
-              onClick={handleAddTaskClick}
-              disabled={!newTaskTitle.trim() || createMutation.isPending}
+          <Button
+            size="lg"
+            onClick={handleAddTaskClick}
+            disabled={!newTaskTitle.trim() || createMutation.isPending}
               className={`bg-gradient-to-r from-primary via-purple-600 to-pink-500 hover:from-primary/90 hover:via-purple-500 hover:to-pink-400 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 px-6 py-3 h-auto font-semibold rounded-xl ${
                 newTaskTitle.trim() ? 'opacity-100' : 'opacity-60'
               }`}
-              data-testid="button-add-task"
-            >
+            data-testid="button-add-task"
+          >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -187,7 +187,7 @@ export function InboxTaskList() {
                   <span>Add Task</span>
                 </div>
               )}
-            </Button>
+          </Button>
           </div>
         </div>
       </Card>
@@ -207,7 +207,7 @@ export function InboxTaskList() {
                   >
                     <TaskItem task={task} onSelect={setSelectedTask} />
                   </div>
-                ))}
+              ))}
               </div>
             </SortableContext>
           </DndContext>

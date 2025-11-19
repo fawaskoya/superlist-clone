@@ -14,13 +14,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { CheckSquare } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { CheckSquare, Sparkles } from 'lucide-react';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -52,7 +52,6 @@ export default function RegisterPage() {
         data
       );
       login(response.user, response.accessToken, response.refreshToken);
-      // Redirect to the specified path or dashboard
       setLocation(redirect);
     } catch (error: any) {
       toast({
@@ -66,30 +65,52 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Navigation Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-colors" data-testid="link-home">
-            <CheckSquare className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-lg">{t('appName')}</span>
-          </Link>
-          
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <LanguageSwitcher />
-          </div>
+    <div className="min-h-screen w-full lg:grid lg:grid-cols-2 overflow-hidden">
+      {/* Left Side - Creative/Brand */}
+      <div className="relative hidden lg:flex flex-col justify-between p-10 bg-zinc-900 text-white dark:border-r overflow-hidden">
+        <div className="absolute inset-0 z-0">
+           <AnimatedBackground />
         </div>
-      </header>
+        
+        <div className="relative z-10 flex items-center gap-2 text-lg font-medium">
+          <div className="bg-primary rounded-lg p-1">
+            <CheckSquare className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span className="text-xl font-bold tracking-tight">TaskFlow</span>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-semibold">{t('appName')}</CardTitle>
-          <CardDescription>{t('auth.register')}</CardDescription>
-        </CardHeader>
-        <CardContent>
+        <div className="relative z-10 max-w-md">
+          <Sparkles className="h-12 w-12 text-yellow-400/80 mb-4" />
+          <blockquote className="space-y-2">
+            <p className="text-2xl font-medium leading-relaxed">
+              "Join thousands of productive teams building the future with TaskFlow."
+            </p>
+            <p className="text-zinc-400 text-lg pt-2">
+              Get started for free. No credit card required.
+            </p>
+          </blockquote>
+        </div>
+        
+        <div className="relative z-10 text-sm text-zinc-400">
+          © 2025 TaskFlow Inc.
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="relative flex items-center justify-center p-8 bg-background">
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+           <LanguageSwitcher />
+           <ThemeToggle />
+        </div>
+
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-3xl font-bold tracking-tighter">Create an account</h1>
+            <p className="text-muted-foreground">
+              Enter your details below to create your account
+            </p>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -100,7 +121,8 @@ export default function RegisterPage() {
                     <FormLabel>{t('auth.name')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t('auth.name')}
+                        placeholder="John Doe"
+                        className="h-11"
                         {...field}
                         data-testid="input-name"
                       />
@@ -118,7 +140,8 @@ export default function RegisterPage() {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder={t('auth.email')}
+                        placeholder="name@example.com"
+                        className="h-11"
                         {...field}
                         data-testid="input-email"
                       />
@@ -136,7 +159,8 @@ export default function RegisterPage() {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder={t('auth.password')}
+                        placeholder="••••••••"
+                        className="h-11"
                         {...field}
                         data-testid="input-password"
                       />
@@ -147,32 +171,32 @@ export default function RegisterPage() {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-11 font-medium bg-primary hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20"
                 disabled={isLoading}
                 data-testid="button-register"
               >
-                {isLoading ? t('common.loading') : t('auth.registerButton')}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t('common.loading')}
+                  </span>
+                ) : (
+                  t('auth.registerButton')
+                )}
               </Button>
             </form>
           </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-2 text-sm text-center">
-          <p className="text-muted-foreground">
-            {t('auth.alreadyHaveAccount')}{' '}
-            <button
-              onClick={() => {
-                const searchParams = new URLSearchParams(window.location.search);
-                const redirect = searchParams.get('redirect') || '/login';
-                setLocation(`/login?redirect=${encodeURIComponent(redirect)}`);
-              }}
-              className="text-primary hover:underline"
-              data-testid="link-login"
+
+          <div className="px-8 text-center text-sm text-muted-foreground">
+             {t('auth.alreadyHaveAccount')}{' '}
+            <Link 
+              href={`/login${window.location.search}`} 
+              className="underline underline-offset-4 hover:text-primary font-medium transition-colors"
             >
               {t('auth.loginHere')}
-            </button>
-          </p>
-        </CardFooter>
-        </Card>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

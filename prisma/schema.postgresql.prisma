@@ -16,9 +16,12 @@ model User {
   email        String   @unique
   passwordHash String
   name         String
+  organizationId String?
+  isAdmin      Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  organization         Organization?       @relation(fields: [organizationId], references: [id])
   ownedWorkspaces      Workspace[]
   workspaceMemberships WorkspaceMember[]
   createdLists         List[]
@@ -28,22 +31,36 @@ model User {
   notifications        Notification[]
   activities           TaskActivity[]
   uploadedAttachments  FileAttachment[]
+  voiceNotes           VoiceNote[]
+  myDayTasks           MyDayTask[]
+  createdTemplates     TaskTemplate[]
+  timeEntries          TimeEntry[]
+  channelMemberships   ChannelMember[]
+  messages             Message[]
+  messageReactions     MessageReaction[]
+  presence             UserPresence?
+  createdEvents        Event[]
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  slug           String
+  ownerId        String
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  owner       User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  members     WorkspaceMember[]
-  invitations WorkspaceInvitation[]
-  lists       List[]
-  tags        Tag[]
-  tasks       Task[]
+  owner        User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  organization Organization?         @relation(fields: [organizationId], references: [id])
+  members      WorkspaceMember[]
+  invitations  WorkspaceInvitation[]
+  lists        List[]
+  tags         Tag[]
+  tasks        Task[]
+  templates    TaskTemplate[]
+  channels     Channel[]
+  events       Event[]
 
   @@unique([ownerId, slug])
 }
@@ -108,6 +125,7 @@ model List {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy User      @relation(fields: [createdById], references: [id])
   tasks     Task[]
+  channels  Channel[]
 }
 
 enum TaskStatus {
@@ -123,31 +141,40 @@ enum TaskPriority {
 }
 
 model Task {
-  id           String       @id @default(cuid())
-  listId       String?
-  title        String
-  description  String?
-  status       TaskStatus   @default(TODO)
-  priority     TaskPriority @default(MEDIUM)
-  dueDate      DateTime?
-  assignedToId String?
-  createdById  String
-  parentId     String?
-  orderIndex   Float        @default(0)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  workspaceId  String
+  id              String       @id @default(cuid())
+  listId          String?
+  title           String
+  description     String?
+  status          TaskStatus   @default(TODO)
+  priority        TaskPriority @default(MEDIUM)
+  dueDate         DateTime?
+  assignedToId    String?
+  createdById     String
+  parentId        String?
+  orderIndex      Float        @default(0)
+  isRecurring     Boolean      @default(false)
+  recurrenceRule  String?
+  recurrenceEnd   DateTime?
+  originalTaskId  String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  workspaceId     String
 
   list       List?         @relation(fields: [listId], references: [id], onDelete: Cascade)
   workspace  Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   assignedTo User?         @relation("AssignedTasks", fields: [assignedToId], references: [id])
   createdBy  User          @relation(fields: [createdById], references: [id])
-  parent     Task?         @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks    Task[]           @relation("TaskSubtasks")
-  comments    TaskComment[]
-  tags        TaskTag[]
-  activities  TaskActivity[]
-  attachments FileAttachment[]
+  parent          Task?         @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks         Task[]           @relation("TaskSubtasks")
+  originalTask     Task?         @relation("RecurringTasks", fields: [originalTaskId], references: [id], onDelete: Cascade)
+  recurringTasks   Task[]           @relation("RecurringTasks")
+  myDayUsers       MyDayTask[]
+  timeEntries      TimeEntry[]
+  comments         TaskComment[]
+  tags             TaskTag[]
+  activities       TaskActivity[]
+  attachments      FileAttachment[]
+  voiceNotes       VoiceNote[]
 }
 
 model TaskComment {
@@ -213,6 +240,8 @@ enum ActivityType {
   TAG_REMOVED
   FILE_ATTACHED
   FILE_REMOVED
+  VOICE_NOTE_ADDED
+  VOICE_NOTE_REMOVED
 }
 
 model TaskActivity {
@@ -245,5 +274,197 @@ model FileAttachment {
   uploadedBy User @relation(fields: [uploadedById], references: [id])
 
   @@index([taskId])
+}
+
+model VoiceNote {
+  id           String   @id @default(cuid())
+  taskId       String
+  audioPath    String
+  transcription String?
+  duration     Int
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  @@index([taskId])
+}
+
+model MyDayTask {
+  id        String   @id @default(cuid())
+  userId    String
+  taskId    String
+  addedAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, taskId])
+  @@index([userId, addedAt])
+}
+
+model TaskTemplate {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  defaultPriority TaskPriority @default(MEDIUM)
+  checklistItems String? // JSON array of checklist items
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+
+  @@unique([workspaceId, name])
+}
+
+model TimeEntry {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?     // seconds
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([taskId, userId])
+  @@index([userId, startTime])
+}
+
+enum ChannelType {
+  LIST_CHANNEL
+  DIRECT_MESSAGE
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  VOICE
+  SYSTEM
+}
+
+model Channel {
+  id          String      @id @default(cuid())
+  workspaceId String
+  name        String
+  type        ChannelType
+  listId      String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  list      List?           @relation(fields: [listId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  members   ChannelMember[]
+
+  @@index([workspaceId])
+  @@index([listId])
+}
+
+model ChannelMember {
+  id        String   @id @default(cuid())
+  channelId String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  channelId String
+  authorId  String
+  content   String
+  type      MessageType @default(TEXT)
+  metadata  String?     // JSON: mentions, file info, etc.
+  createdAt DateTime    @default(now())
+
+  channel  Channel          @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author   User             @relation(fields: [authorId], references: [id])
+  reactions MessageReaction[]
+
+  @@index([channelId, createdAt])
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+enum PresenceStatus {
+  ONLINE
+  AWAY
+  BUSY
+  OFFLINE
+}
+
+model UserPresence {
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  status        PresenceStatus @default(OFFLINE)
+  customMessage String?
+  lastSeen      DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum EventType {
+  MEETING
+  EVENT
+  REMINDER
+  APPOINTMENT
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  type        EventType  @default(EVENT)
+  startTime   DateTime
+  endTime     DateTime?
+  allDay      Boolean    @default(false)
+  location    String?
+  attendees   String     // JSON array of user IDs
+  workspaceId String
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy  User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([startTime])
+  @@index([createdById])
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  domain      String   @unique // e.g., "company.com"
+  name        String   // e.g., "Company Inc."
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  workspaces  Workspace[]
+
+  @@index([domain])
 }
 

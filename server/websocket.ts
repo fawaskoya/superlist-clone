@@ -5,10 +5,11 @@ import jwt from 'jsonwebtoken';
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
   workspaceIds?: Set<string>;
+  channelIds?: Set<string>;
 }
 
 interface WSMessage {
-  type: 'subscribe' | 'unsubscribe' | 'task:created' | 'task:updated' | 'task:deleted' | 'list:created' | 'list:updated' | 'list:deleted' | 'workspace:updated';
+  type: 'subscribe' | 'unsubscribe' | 'subscribe_channel' | 'unsubscribe_channel' | 'task:created' | 'task:updated' | 'task:deleted' | 'list:created' | 'list:updated' | 'list:deleted' | 'workspace:updated' | 'message:created' | 'channel:updated' | 'call:initiate' | 'call:answer' | 'call:ice-candidate' | 'call:end' | 'call:incoming';
   payload: any;
 }
 
@@ -34,7 +35,8 @@ function log(message: string, level: 'info' | 'error' | 'warn' = 'info') {
 
 class WebSocketManager {
   private wss: WebSocketServer | null = null;
-  private clients: Map<string, Set<AuthenticatedWebSocket>> = new Map();
+  private clients: Map<string, Set<AuthenticatedWebSocket>> = new Map(); // workspaceId -> clients
+  private channelClients: Map<string, Set<AuthenticatedWebSocket>> = new Map(); // channelId -> clients
   private userClients: Map<string, Set<AuthenticatedWebSocket>> = new Map();
 
   initialize(server: Server) {
@@ -64,6 +66,7 @@ class WebSocketManager {
 
         ws.userId = decoded.userId;
         ws.workspaceIds = new Set();
+        ws.channelIds = new Set();
 
         // Track user connection
         if (!this.userClients.has(ws.userId)) {
@@ -166,6 +169,52 @@ class WebSocketManager {
           this.clients.get(wsId)?.delete(ws);
           log(`User ${ws.userId} unsubscribed from workspace ${wsId}`);
           break;
+        case 'subscribe_channel':
+          const channelId = message.payload?.channelId;
+          if (!channelId) {
+            log(`Subscribe channel message missing channelId from userId=${ws.userId}`, 'warn');
+            return;
+          }
+          if (!ws.userId) {
+            log('Subscribe channel message received from unauthenticated client', 'warn');
+            return;
+          }
+          ws.channelIds?.add(channelId);
+          if (!this.channelClients.has(channelId)) {
+            this.channelClients.set(channelId, new Set());
+          }
+          this.channelClients.get(channelId)?.add(ws);
+          log(`User ${ws.userId} subscribed to channel ${channelId}`);
+          break;
+        case 'unsubscribe_channel':
+          const chId = message.payload?.channelId;
+          if (!chId) {
+            log(`Unsubscribe channel message missing channelId from userId=${ws.userId}`, 'warn');
+            return;
+          }
+          if (!ws.userId) {
+            log('Unsubscribe channel message received from unauthenticated client', 'warn');
+            return;
+          }
+          ws.channelIds?.delete(chId);
+          this.channelClients.get(chId)?.delete(ws);
+          log(`User ${ws.userId} unsubscribed from channel ${chId}`);
+          break;
+
+        // Call signaling
+        case 'call:initiate':
+          this.handleCallInitiate(ws, message.payload);
+          break;
+        case 'call:answer':
+          this.handleCallAnswer(ws, message.payload);
+          break;
+        case 'call:ice-candidate':
+          this.handleCallIceCandidate(ws, message.payload);
+          break;
+        case 'call:end':
+          this.handleCallEnd(ws, message.payload);
+          break;
+
         default:
           log(`Unknown message type: ${message.type} from userId=${ws.userId}`, 'warn');
         }
@@ -198,6 +247,58 @@ class WebSocketManager {
     } catch (error) {
       log(`Error broadcasting message: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     }
+  }
+
+  broadcastToChannel(channelId: string, message: WSMessage, excludeUserId?: string) {
+    try {
+      const clients = this.channelClients.get(channelId);
+      if (!clients || clients.size === 0) {
+        log(`No clients subscribed to channel ${channelId}`, 'info');
+        return;
+      }
+
+      const messageStr = JSON.stringify(message);
+      let sentCount = 0;
+      clients.forEach(client => {
+        try {
+          if (client.readyState === WebSocket.OPEN && client.userId !== excludeUserId) {
+            client.send(messageStr);
+            sentCount++;
+          }
+        } catch (error) {
+          log(`Error sending message to client ${client.userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+        }
+      });
+      log(`Broadcasted ${message.type} to ${sentCount} client(s) in channel ${channelId}`);
+    } catch (error) {
+      log(`Error broadcasting message to channel: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    }
+  }
+
+  broadcastPresenceUpdate(userId: string, presence: any) {
+    // Broadcast to all connected clients (could be filtered by workspace in future)
+    const message: WSMessage = {
+      type: 'presence:updated',
+      payload: presence,
+    };
+
+    let sentCount = 0;
+    this.userClients.forEach((clients, clientUserId) => {
+      if (clientUserId !== userId) { // Don't send to self
+        clients.forEach(client => {
+          try {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify(message));
+              sentCount++;
+            }
+          } catch (error) {
+            log(`Error sending presence update to client ${clientUserId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+          }
+        });
+      }
+    });
+
+    log(`Broadcasted presence update for user ${userId} to ${sentCount} client(s)`);
   }
 
   broadcastTaskCreated(workspaceId: string, task: any, userId?: string) {
@@ -273,6 +374,125 @@ class WebSocketManager {
       log(`Broadcasted to ${sentCount} client(s) for user ${userId}`);
     } catch (error) {
       log(`Error broadcasting to user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    }
+  }
+
+  // Call signaling handlers
+  private handleCallInitiate(ws: AuthenticatedWebSocket, payload: any) {
+    try {
+      const { callId, callerId, calleeId, callType, offer, channelId, isGroupCall } = payload;
+
+      if (!callId || !callerId || !calleeId || !offer) {
+        log('Invalid call:initiate payload', 'warn');
+        return;
+      }
+
+      // Validate that the caller is authenticated
+      if (ws.userId !== callerId) {
+        log(`Call initiate: caller ${callerId} doesn't match authenticated user ${ws.userId}`, 'warn');
+        return;
+      }
+
+      log(`Call initiated: ${callerId} -> ${calleeId}, callId: ${callId}, groupCall: ${isGroupCall}`);
+
+      // For group calls, calleeId might be an array of user IDs
+      const calleeIds = Array.isArray(calleeId) ? calleeId : [calleeId];
+
+      // Send incoming call notification to all callees
+      calleeIds.forEach(targetUserId => {
+        if (targetUserId !== callerId) { // Don't send to self
+          this.broadcastToUser(targetUserId, {
+            type: 'call:incoming',
+            payload: {
+              callId,
+              callerId,
+              calleeId: targetUserId, // Send individual callee ID for response
+              callType,
+              offer,
+              channelId,
+              isGroupCall,
+              caller: { id: callerId, name: 'Caller', email: 'caller@example.com' }, // You'd fetch real user data here
+            },
+          });
+        }
+      });
+
+    } catch (error) {
+      log(`Error handling call initiate: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    }
+  }
+
+  private handleCallAnswer(ws: AuthenticatedWebSocket, payload: any) {
+    try {
+      const { callId, answer, targetUserId } = payload;
+
+      if (!callId || !answer || !targetUserId) {
+        log('Invalid call:answer payload', 'warn');
+        return;
+      }
+
+      log(`Call answered: callId ${callId}, answerer: ${ws.userId}, target: ${targetUserId}`);
+
+      // Send answer to the caller
+      this.broadcastToUser(targetUserId, {
+        type: 'call:answer',
+        payload: {
+          callId,
+          answer,
+        },
+      });
+
+    } catch (error) {
+      log(`Error handling call answer: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    }
+  }
+
+  private handleCallIceCandidate(ws: AuthenticatedWebSocket, payload: any) {
+    try {
+      const { callId, candidate, targetUserId } = payload;
+
+      if (!callId || !candidate || !targetUserId) {
+        log('Invalid call:ice-candidate payload', 'warn');
+        return;
+      }
+
+      log(`ICE candidate: callId ${callId}, from ${ws.userId} to ${targetUserId}`);
+
+      // Forward ICE candidate to target user
+      this.broadcastToUser(targetUserId, {
+        type: 'call:ice-candidate',
+        payload: {
+          callId,
+          candidate,
+        },
+      });
+
+    } catch (error) {
+      log(`Error handling ICE candidate: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+    }
+  }
+
+  private handleCallEnd(ws: AuthenticatedWebSocket, payload: any) {
+    try {
+      const { callId, targetUserId } = payload;
+
+      if (!callId || !targetUserId) {
+        log('Invalid call:end payload', 'warn');
+        return;
+      }
+
+      log(`Call ended: callId ${callId}, by ${ws.userId}, notifying ${targetUserId}`);
+
+      // Notify the other party that the call has ended
+      this.broadcastToUser(targetUserId, {
+        type: 'call:end',
+        payload: {
+          callId,
+        },
+      });
+
+    } catch (error) {
+      log(`Error handling call end: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     }
   }
 }

@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Flag, User, GripVertical } from 'lucide-react';
+import { Calendar, Flag, User, GripVertical, Repeat, Sun } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import type { Task, TaskPriority, TaskStatus } from '@shared/schema';
 import { format, isPast, isToday } from 'date-fns';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useSortable } from '@dnd-kit/sortable';
+import { useToast } from '@/hooks/use-toast';
 import { CSS } from '@dnd-kit/utilities';
 import { useWorkspace } from '@/contexts/WorkspaceContext';
 
@@ -19,6 +21,7 @@ interface TaskItemProps {
 
 export function TaskItem({ task, onSelect }: TaskItemProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { currentWorkspace } = useWorkspace();
   const [isHovered, setIsHovered] = useState(false);
 
@@ -99,6 +102,23 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
     }
   };
 
+  const addToMyDayMutation = useMutation({
+    mutationFn: () => apiRequest('POST', `/api/my-day/${task.id}`),
+    onSuccess: () => {
+      toast({
+        title: 'Added to My Day',
+        description: 'Task has been added to your My Day',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to add task to My Day',
+      });
+    },
+  });
+
   const priorityStyles = getPriorityStyles();
 
   return (
@@ -175,6 +195,15 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
               <span>{format(new Date(task.dueDate), 'MMM d')}</span>
             </Badge>
           )}
+          {task.isRecurring && (
+            <Badge
+              variant="secondary"
+              className="h-5 text-xs gap-1 px-2 py-0.5 font-medium bg-green-100/80 text-green-700 border-green-200/50 dark:bg-green-950/50 dark:text-green-300 dark:border-green-800/50"
+            >
+              <Repeat className="h-3 w-3" />
+              <span>Recurring</span>
+            </Badge>
+          )}
           {task.assignedTo && (
               <Badge
                 variant="secondary"
@@ -185,6 +214,20 @@ export function TaskItem({ task, onSelect }: TaskItemProps) {
             </Badge>
           )}
         </div>
+
+        {/* Add to My Day button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            addToMyDayMutation.mutate();
+          }}
+          disabled={addToMyDayMutation.isPending}
+          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-primary/10 hover:text-primary"
+        >
+          <Sun className="h-4 w-4" />
+        </Button>
       </div>
 
       {task.assignedTo && (

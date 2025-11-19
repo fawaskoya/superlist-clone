@@ -7,6 +7,7 @@ interface AuthContextType {
   token: string | null;
   login: (user: User, token: string, refreshToken: string) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -16,6 +17,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+
+  const refreshUser = async () => {
+    if (!token) return;
+
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem('accessToken');
@@ -31,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newUser: User, accessToken: string, refreshToken: string) => {
     // CRITICAL: Clear all caches before setting new user to prevent data leakage
     queryClient.clear();
-    
+
     setUser(newUser);
     setToken(accessToken);
     localStorage.setItem('accessToken', accessToken);
@@ -59,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
